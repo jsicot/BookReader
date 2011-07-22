@@ -263,13 +263,13 @@ br.buildInfoDiv = function(jInfoDiv) {
     );
 
     jInfoDiv.find('.BRfloatMeta').append([
-                    '<h3>Autre(s) Format(s)</h3>',
+                    '<h3>Other Formats</h3>',
                     '<ul class="links">',
                         '<li><?php echo item_PDF($item); ?></li>',
 						//'<span>|</span></li>',
           
                     '</ul>',
-                    '<p class="moreInfo"><a href="'+ this.bookUrl + '">More info</a>  </p>'].join('\n'));
+                    '<p class="moreInfo"><a href="'+ this.bookUrl + '">More information</a>  </p>'].join('\n'));
                     
     jInfoDiv.find('.BRfloatFoot').append([
                 '<span>|</span>',                

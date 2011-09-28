@@ -11,6 +11,7 @@ add_plugin_hook('config', 'bookreader_config');
 add_plugin_hook('define_routes', 'bookreader_define_routes');
 add_plugin_hook('public_append_to_items_show', 'br_append_to_item');
 
+require_once HELPERS;
 require_once BOOKREADER_PLUGIN_DIR . DIRECTORY_SEPARATOR . 'helpers' . DIRECTORY_SEPARATOR . 'bookreaderFunctions.php';
 
 //installation du plugin dans omeka

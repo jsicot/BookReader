@@ -240,7 +240,7 @@ br.ui = '<?php echo ui_booreader_item(); ?>';
 br.bookTitle= '<?php echo $title; ?>';
 br.bookUrl  = "<?php echo item_uri(); ?>";
 br.logoURL = "<?php echo WEB_ROOT; ?>";
-br.siteName = "<? echo settings('site_title');?>";
+br.siteName = "<?php echo settings('site_title');?>";
 
 // Override the path used to find UI images
 br.imagesBaseURL = '<?php echo booreader_img_dir(); ?>';
@@ -273,7 +273,7 @@ br.buildInfoDiv = function(jInfoDiv) {
                     
     jInfoDiv.find('.BRfloatFoot').append([
                 '<span>|</span>',                
-                '<a href="mailto:<? echo settings('administrator_email');?>" class="problem">Report a problem</a>',
+                '<a href="mailto:<?php echo settings('administrator_email');?>" class="problem">Report a problem</a>',
     ].join('\n'));
                 
     if (domain == 'archive.org') {
@@ -284,7 +284,7 @@ br.buildInfoDiv = function(jInfoDiv) {
     
     jInfoDiv.find('.BRfloatTitle a').attr({'href': this.bookUrl, 'alt': this.bookTitle}).text(this.bookTitle);
     var bookPath = (window.location + '').replace('#','%23');
-    jInfoDiv.find('a.problem').attr('href','mailto:<? echo settings('administrator_email');?>?subject=' + bookPath);
+    jInfoDiv.find('a.problem').attr('href','mailto:<?php echo settings('administrator_email');?>?subject=' + bookPath);
 
 }
 

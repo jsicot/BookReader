@@ -2705,7 +2705,7 @@ BookReader.prototype.search = function(term) {
     $('#textSrch').blur(); //cause mobile safari to hide the keyboard     
     
     var url = 'http://'+this.server.replace(/:.+/, ''); //remove the port and userdir
-    url    += '/fulltext/inside.php?item_id='+this.bookId;
+    url    += '/fulltext/?item_id='+this.bookId;
     url    += '&doc='+this.subPrefix;   //TODO: test with subitem
     url    += '&path='+this.bookPath.replace(new RegExp('/'+this.subPrefix+'$'), ''); //remove subPrefix from end of path
     url    += '&q='+escape(term);
@@ -2722,7 +2722,7 @@ BookReader.prototype.search = function(term) {
 // BRSearchCallback()
 //______________________________________________________________________________
 BookReader.prototype.BRSearchCallback = function(results) {
-    //console.log('got ' + results.matches.length + ' results');
+  //console.log('got ' + results.matches.length + ' results');
     br.removeSearchResults();
     br.searchResults = results; 
     //console.log(br.searchResults);
@@ -3602,7 +3602,7 @@ BookReader.prototype.initToolbar = function(mode, ui) {
     $("#BookReader").append(
           "<div id='BRtoolbar'>"
         +   "<span id='BRtoolbarbuttons'>"
-       	+     "<form action='javascript:br.search($(\"#textSrch\").val());' id='booksearch'><input type='search' id='textSrch' name='textSrch' val='' placeholder='Search inside'/><button type='submit' id='btnSrch' name='btnSrch'>GO</button></form>"
+       	+     "<form action='javascript:br.search($(\"#textSrch\").val());' id='booksearch'><input type='search' id='textSrch' name='textSrch' val='' placeholder='Rechercher à l&#146;intérieur'/><button type='submit' id='btnSrch' name='btnSrch'>GO</button></form>"
 	+     "<button class='BRicon play'></button>"
         +     "<button class='BRicon pause'></button>"
         +     "<button class='BRicon info'></button>"

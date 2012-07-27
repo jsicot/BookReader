@@ -60,12 +60,13 @@ br.getPageHeight = function(index) {
 		while(loop_files_for_item($item)) 
 		{
 			$file = get_current_file();
+			error_log("Fichier : ".$file->original_filename);
 			if ($file->hasThumbnail()) 
 			{
 				if (preg_match($supportedFormatRegEx, $file->archive_filename)) {
 				$key = $file->archive_filename;
 				$listing[$key]=$file->original_filename;//Création du tableau avec les images de l'item			
-				
+				error_log("THUMB");
 				}
 			}
 			$i++;
@@ -76,9 +77,10 @@ br.getPageHeight = function(index) {
 		$heights = array();
 		$imgName = array();
 		$j=0;
-		foreach($listing as $image) 
+		foreach($listing as $key => $image) 
 		{
-			$key = array_search($image, $listing);
+			// SMA : Modif 201207, pas besoin d'un array_search si on utilise key => juste au dessus
+//			$key = array_search($image, $listing);
 			$pathImg = FULLSIZE_DIR."/".$key;
 			list($width, $height, $type, $attr) = getimagesize($pathImg);
 			$widths[]=$width; //array of images width
@@ -93,6 +95,11 @@ br.pageW =  [<?php echo implode(",",$widths);	?> ];
 br.pageH =  [ <?php echo implode(",",$heights);	?>  ];
 br.leafMap = [<?php echo implode(",",$imgNum);	?>  ];
 br.pageNums = [<?php echo implode(",",$imgName); ?> ];
+br.server = "riesling.u-bordeaux3.fr/book-reader/index/fulltext";
+br.bookPath = "http://riesling.u-bordeaux3.fr/";
+br.bookId  = <?php echo item("ID"); ?>;
+br.subPrefix = <?php echo item("ID"); ?>;
+
 <?php echo titleLeaf(); ?>
 
 br.numLeafs = br.pageW.length;
@@ -240,7 +247,7 @@ br.ui = '<?php echo ui_booreader_item(); ?>';
 br.bookTitle= '<?php echo $title; ?>';
 br.bookUrl  = "<?php echo item_uri(); ?>";
 br.logoURL = "<?php echo WEB_ROOT; ?>";
-br.siteName = "<? echo settings('site_title');?>";
+br.siteName = "<?php echo settings('site_title');?>";
 
 // Override the path used to find UI images
 br.imagesBaseURL = '<?php echo booreader_img_dir(); ?>';
@@ -273,7 +280,7 @@ br.buildInfoDiv = function(jInfoDiv) {
                     
     jInfoDiv.find('.BRfloatFoot').append([
                 '<span>|</span>',                
-                '<a href="mailto:<? echo settings('administrator_email');?>" class="problem">Report a problem</a>',
+                '<a href="mailto:<?php echo settings('administrator_email');?>" class="problem">Report a problem</a>',
     ].join('\n'));
                 
     if (domain == 'archive.org') {
@@ -284,7 +291,7 @@ br.buildInfoDiv = function(jInfoDiv) {
     
     jInfoDiv.find('.BRfloatTitle a').attr({'href': this.bookUrl, 'alt': this.bookTitle}).text(this.bookTitle);
     var bookPath = (window.location + '').replace('#','%23');
-    jInfoDiv.find('a.problem').attr('href','mailto:<? echo settings('administrator_email');?>?subject=' + bookPath);
+    jInfoDiv.find('a.problem').attr('href','mailto:<?php echo settings('administrator_email');?>?subject=' + bookPath);
 
 }
 
@@ -315,11 +322,18 @@ br.getEmbedCode = function(frameWidth, frameHeight, viewParams) {
 
 // Let's go!
 br.init();
-
 // read-aloud and search need backend compenents and are not supported in the demo
 $('#BRtoolbar').find('.read').hide();
-$('#textSrch').hide();
-$('#btnSrch').hide();
+
+<?php
+	// Si jamais la recherche n'est pas disponible (pas de fichier XML), on va masquer les éléments permettant
+	// de la lancer
+	if (!brSearchAvailable(get_current_item()))
+	{
+		print "$('#textSrch').hide();\n";
+		print "$('#btnSrch').hide();\n";
+	}
+?>
 </script>
 
 </body>

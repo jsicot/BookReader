@@ -9,7 +9,7 @@ add_plugin_hook('uninstall', 'bookreader_uninstall');
 add_plugin_hook('config_form', 'bookreader_config_form');
 add_plugin_hook('config', 'bookreader_config');
 add_plugin_hook('define_routes', 'bookreader_define_routes');
-add_plugin_hook('public_append_to_items_show', 'br_append_to_item');
+add_plugin_hook('public_append_to_items_show', 'bookreader_append_to_item');
 
 require_once HELPERS;
 require_once BOOKREADER_PLUGIN_DIR . DIRECTORY_SEPARATOR . 'helpers' . DIRECTORY_SEPARATOR . 'bookreaderFunctions.php';
@@ -72,17 +72,45 @@ function bookreader_define_routes($router)
 
 }
 
-function br_append_to_item() {
-	
-	if ($item == null) 
-	{
-		$item = get_current_item();//si null, récupère l'item actuellement consulté
-	}
-	
-	$iditem = $item->id;
-	$html = "<div><iframe src='". WEB_ROOT ."/viewer/show/". $iditem ."?ui=embed#mode/". BOOKREADER_MODE_PAGE ."up' width='". BOOKREADER_DEFAULT_WIDTH ."' height='". BOOKREADER_DEFAULT_HEIGHT ."' frameborder='0' ></iframe></div>";
-	
-	echo $html;
-	}
-	
+/* Two parameters for this function : 
+ * $page : allow setting the page to be shown when including the iframe
+ * $allfuncs : allow user to include an iframe with all functions (Zoom / Search ....). Can be used to include 
+ * a better viewer into items/views.php without requiring user to use the full viewer
+ */
+function bookreader_append_to_item($page = null, $allfuncs = false) {
+
+if ($item == null) 
+{
+	$item = get_current_item();//si null, récupère l'item actuellement consulté
+}
+
+$iditem = $item->id;
+
+$url = WEB_ROOT . "/viewer/show/" . $iditem;
+if (!$allfuncs)
+{
+	$url .= "?ui=embed";
+}
+$url .= "#";
+if ($page)
+{
+	$url .= "page/n".$page."/";
+}
+
+$url .= "mode/". BOOKREADER_MODE_PAGE ."up";
+
+$html = "<div><iframe src='$url' width='". BOOKREADER_DEFAULT_WIDTH ."' height='". BOOKREADER_DEFAULT_HEIGHT ."' frameborder='0' ></iframe></div>";	
+echo $html;
+return;
+if ($page)
+{
+	// Si on a passé un numéro de page en paramètre, on va afficher directement cette page (utilisation de la table des matières par exemple)
+	$html = "<div><iframe src='". WEB_ROOT ."/viewer/show/". $iditem ."?ui=embed#page/n".$page."/mode/". BOOKREADER_MODE_PAGE ."up' width='". BOOKREADER_DEFAULT_WIDTH ."' height='". BOOKREADER_DEFAULT_HEIGHT ."' frameborder='0' ></iframe></div>";	
+}
+else
+{
+	$html = "<div><iframe src='". WEB_ROOT ."/viewer/show/". $iditem ."?ui=embed#mode/". BOOKREADER_MODE_PAGE ."up' width='". BOOKREADER_DEFAULT_WIDTH ."' height='". BOOKREADER_DEFAULT_HEIGHT ."' frameborder='0' ></iframe></div>";	
+}
+echo $html;
+}
 

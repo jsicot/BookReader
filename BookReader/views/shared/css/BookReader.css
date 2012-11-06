@@ -192,6 +192,9 @@ a {
     color: #333;
     height: 100%;
     line-height: 38px;
+    font-size: 15px;
+    display: block;
+    overflow: hidden;
 }
 #BRreturn span {
     font-size: 11px;

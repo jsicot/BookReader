@@ -324,10 +324,10 @@ br.getEmbedCode = function(frameWidth, frameHeight, viewParams) {
 br.init();
 // read-aloud and search need backend compenents and are not supported in the demo
 $('#BRtoolbar').find('.read').hide();
-
+$('#BRreturn').html($('#BRreturn').text());
 <?php
 	// Si jamais la recherche n'est pas disponible (pas de fichier XML), on va masquer les éléments permettant
-	// de la lancer
+	// de la lancer (SMA 201210)
 	if (!brSearchAvailable(get_current_item()))
 	{
 		print "$('#textSrch').hide();\n";

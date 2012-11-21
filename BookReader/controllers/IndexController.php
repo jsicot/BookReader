@@ -162,6 +162,7 @@ class BookReader_IndexController extends Omeka_Controller_Action
 		{
 			$num_img="0";
 		}
+
 		$num_img = ($num_img-1);
 		$id = $this->getRequest()->getParam('id');
 		set_current_item(get_item_by_id($id));
@@ -229,7 +230,7 @@ class BookReader_IndexController extends Omeka_Controller_Action
 		
 		$image=$listing[$num_img];
 		$db = get_db();
-		$query = $db->select()->from(array($db->Files), 'archive_filename')->where('original_filename = ?', $image);
+		$query = $db->select()->from(array($db->Files), 'archive_filename')->where('original_filename = ?', $image)->where('item_id = ?', $id);
 		$image = $db->fetchOne($query); 
 		//$image=findImgPath ($image);
 		$image = $files."/".$image;

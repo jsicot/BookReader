@@ -111,7 +111,7 @@ function BookReader() {
 
     // Object to hold parameters related to 1up mode
     this.onePage = {
-        autofit: 'height'                                     // valid values are height, width, none
+        autofit: 'width'                                     // valid values are height, width, none
     };
     
     // Object to hold parameters related to 2up mode
@@ -960,7 +960,6 @@ BookReader.prototype.zoom1up = function(direction) {
         // Already at this level
         return;
     }
-    
     this.reduce = reduceFactor.reduce; // $$$ incorporate into function
     this.onePage.autofit = reduceFactor.autofit;
         
@@ -1200,9 +1199,7 @@ BookReader.prototype.quantizeReduce = function(reduce, reductionFactors) {
 // reductionFactors should be array of sorted reduction factors
 // e.g. [ {reduce: 0.25, autofit: null}, {reduce: 0.3, autofit: 'width'}, {reduce: 1, autofit: null} ]
 BookReader.prototype.nextReduce = function( currentReduce, direction, reductionFactors ) {
-
     // XXX add 'closest', to replace quantize function
-    
     if (direction == 'in') {
         var newReduceIndex = 0;
     
@@ -1224,9 +1221,11 @@ BookReader.prototype.nextReduce = function( currentReduce, direction, reductionF
         }
         return reductionFactors[newReduceIndex];
     }
-    
+
+
     // Asked for specific autofit mode
     for (var i = 0; i < reductionFactors.length; i++) {
+
         if (reductionFactors[i].autofit == direction) {
             return reductionFactors[i];
         }
@@ -1846,11 +1845,13 @@ BookReader.prototype.twoPageIsZoomedIn = function() {
 
 BookReader.prototype.onePageGetAutofitWidth = function() {
     var widthPadding = 20;
+    return (this.getMedianPageSize().width + 0.0) / (880 - widthPadding * 2);
     return (this.getMedianPageSize().width + 0.0) / ($('#BRcontainer').attr('clientWidth') - widthPadding * 2);
 }
 
 BookReader.prototype.onePageGetAutofitHeight = function() {
-    return (this.getMedianPageSize().height + 0.0) / ($('#BRcontainer').attr('clientHeight') - this.padding * 2); // make sure a little of adjacent pages show
+	return (this.getMedianPageSize().height + 0.0) / (720 - this.padding * 2); // make sure a little of adjacent pages show
+	return (this.getMedianPageSize().height + 0.0) / ($('#BRcontainer').attr('clientHeight') - this.padding * 2); // make sure a little of adjacent pages show
 }
 
 // Returns where the top of the page with given index should be in one page view

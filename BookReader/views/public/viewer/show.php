@@ -60,13 +60,11 @@ br.getPageHeight = function(index) {
 		while(loop_files_for_item($item)) 
 		{
 			$file = get_current_file();
-			error_log("Fichier : ".$file->original_filename);
 			if ($file->hasThumbnail()) 
 			{
 				if (preg_match($supportedFormatRegEx, $file->archive_filename)) {
 				$key = $file->archive_filename;
 				$listing[$key]=$file->original_filename;//Création du tableau avec les images de l'item			
-				error_log("THUMB");
 				}
 			}
 			$i++;
@@ -115,7 +113,8 @@ br.getPageNum = function(index) {
 
 
 // getOpenLibraryRecord
-br.getOpenLibraryRecord = function(callback) {
+// SMA : Remove this function to prevent a 404 error (not sure if debuging is OK but it seems to work now
+/*br.getOpenLibraryRecord = function(callback) {
 // Try looking up by ocaid first, then by source_record
 var self = this; // closure
 var jsonURL = self.olHost + '/query.json?type=/type/edition&*=&ocaid=' + self.bookId;
@@ -140,7 +139,7 @@ dataType: 'jsonp'
 },
 dataType: 'jsonp'
 });
-}
+}*/
 	
 
 	

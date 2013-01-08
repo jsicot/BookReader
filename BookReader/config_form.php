@@ -29,4 +29,3 @@
 		<input type="text" class="textinput"  name="bookreader_default_height" size="3" value="<?php echo get_option('bookreader_default_height'); ?>" id="bookreader_default_height" />
 	</div>
 </div>
-

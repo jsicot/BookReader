@@ -12,6 +12,21 @@ function htmlkarakter($string)
   
 }
 
+function BrSearchAvailable ($item)
+{
+	set_current_item($item);
+	$xml_file = false;
+	while (loop_files_for_item())
+	{
+		$file = get_current_file();
+		if (preg_match("/\.xml$/", $file->original_filename))
+		{
+			$xml_file = escapeshellarg(FILES_DIR . "/" . $file->archive_filename);
+		}
+	}
+	return $xml_file;
+}
+
 function findArchiveName ($image){
 	$db = get_db();
 	$query = $db->select()->from(array($db->Files), 'archive_filename')->where('original_filename = ?', $image);

@@ -65,7 +65,6 @@ br.getPageHeight = function(index) {
 				if (preg_match($supportedFormatRegEx, $file->archive_filename)) {
 				$key = $file->archive_filename;
 				$listing[$key]=$file->original_filename;//Création du tableau avec les images de l'item			
-				
 				}
 			}
 			$i++;
@@ -76,9 +75,10 @@ br.getPageHeight = function(index) {
 		$heights = array();
 		$imgName = array();
 		$j=0;
-		foreach($listing as $image) 
+		foreach($listing as $key => $image) 
 		{
-			$key = array_search($image, $listing);
+			// SMA : Modif 201207, pas besoin d'un array_search si on utilise key => juste au dessus
+//			$key = array_search($image, $listing);
 			$pathImg = FULLSIZE_DIR."/".$key;
 			list($width, $height, $type, $attr) = getimagesize($pathImg);
 			$widths[]=$width; //array of images width
@@ -93,6 +93,11 @@ br.pageW =  [<?php echo implode(",",$widths);	?> ];
 br.pageH =  [ <?php echo implode(",",$heights);	?>  ];
 br.leafMap = [<?php echo implode(",",$imgNum);	?>  ];
 br.pageNums = [<?php echo implode(",",$imgName); ?> ];
+br.server = "riesling.u-bordeaux3.fr/book-reader/index/fulltext";
+br.bookPath = "http://riesling.u-bordeaux3.fr/";
+br.bookId  = <?php echo item("ID"); ?>;
+br.subPrefix = <?php echo item("ID"); ?>;
+
 <?php echo titleLeaf(); ?>
 
 br.numLeafs = br.pageW.length;
@@ -108,7 +113,8 @@ br.getPageNum = function(index) {
 
 
 // getOpenLibraryRecord
-br.getOpenLibraryRecord = function(callback) {
+// SMA : Remove this function to prevent a 404 error (not sure if debuging is OK but it seems to work now
+/*br.getOpenLibraryRecord = function(callback) {
 // Try looking up by ocaid first, then by source_record
 var self = this; // closure
 var jsonURL = self.olHost + '/query.json?type=/type/edition&*=&ocaid=' + self.bookId;
@@ -133,7 +139,7 @@ dataType: 'jsonp'
 },
 dataType: 'jsonp'
 });
-}
+}*/
 	
 
 	
@@ -185,7 +191,7 @@ br.getPageURI = function(index, reduce, rotate) {
     // reduce and rotate are ignored in this simple implementation, but we
     // could e.g. look at reduce and load images from a different directory
     // or pass the information to an image server
-    var leafStr = '000';            
+    var leafStr = '0000';            
     var imgStr = (index+1).toString();
     var re = new RegExp("0{"+imgStr.length+"}$");
     var url = '<?php echo WEB_ROOT; ?>/book-reader/index/image-proxy/?image='+leafStr.replace(re, imgStr) + '&id=<?php echo $id; ?>&scale='+reduce ;
@@ -315,11 +321,18 @@ br.getEmbedCode = function(frameWidth, frameHeight, viewParams) {
 
 // Let's go!
 br.init();
-
 // read-aloud and search need backend compenents and are not supported in the demo
 $('#BRtoolbar').find('.read').hide();
-$('#textSrch').hide();
-$('#btnSrch').hide();
+$('#BRreturn').html($('#BRreturn').text());
+<?php
+	// Si jamais la recherche n'est pas disponible (pas de fichier XML), on va masquer les éléments permettant
+	// de la lancer (SMA 201210)
+	if (!brSearchAvailable(get_current_item()))
+	{
+		print "$('#textSrch').hide();\n";
+		print "$('#btnSrch').hide();\n";
+	}
+?>
 </script>
 
 </body>

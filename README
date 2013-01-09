@@ -41,7 +41,7 @@ To embed viewer on the item/show page, you need to use the bookreader_append_to_
 Optional plugins
 ===========
 - Extract ocr (https://github.com/symac/Plugin-Extractocr) allows fulltext searching inside a flip book
-- PDF Toc (https://github.com/symac/Plugin-PdfToc) retrieves table of contents from pdf file associated to an item
+- PDF Toc (http://omeka.org/add-ons/plugins/pdf-toc/) retrieves table of contents from pdf file associated to an item
 
 ----
 

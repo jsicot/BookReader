@@ -16,7 +16,8 @@ Requirements
 ===========
 The extract ocr and pdfToc plugins are highly recommended.
 
-Installation : 
+Installation
+===========
 - Upload the BookReader plugin folder into your plugins folder on the server;
 - Activate it from the admin → Settings → Plugins page
 - Click the Configure link to add the following

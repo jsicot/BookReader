@@ -1,0 +1,108 @@
+/*
+ * Custom overrides for BookReader Demo.
+ */
+
+/* Hide print and embed functionality */
+#BRtoolbar .embed, .print {
+    display: none;
+}
+
+#BRtoolbar {
+	-webkit-box-shadow:none !important;
+}
+
+.BRfloatHead {
+		 color: #000;
+}
+
+#BRembedreturn {
+    /* Center text */
+    font-size: 14px;
+    line-height: 40px;
+    height: 40px;
+    
+    font-family: "Lucida Grande","Arial",sans-serif;
+}
+
+#BRembedreturn a {
+    font-size: 14px;
+    color: #fff;
+}
+
+/* Table of Contents */
+
+#ToCmenu {
+  position: fixed;
+  max-width:50%;
+  background-color : #E2DCC5;
+  z-index : 99;
+  overflow-x: hidden;
+  overflow-y: auto !important;
+  font-size : 12px;
+  font-family : arial,sans-serif;
+}
+#ToCmenu h2, #ToCmenu p {
+  margin : 10px;
+}
+#ToCmenu ul {
+  padding-left : 0;
+}
+#ToCmenu li {
+  list-style : none;
+  padding-right : 20px
+}
+#ToCmenu li:hover, .scrollToggle:hover + li {
+  background-color : #000;
+}
+#ToCmenu a {
+  color : #000;
+  text-decoration : none;
+  width : 100%;
+  display : block;
+}
+#ToCmenu li:hover a, #ToCmenu .scrollToggle:hover+li a {
+  color : #FFF;
+  /* font-weight: bold; */
+}
+#ToCbutton {
+  width: 30px;
+  height: 40px;
+  background-color: #E2DCC5;
+  cursor: pointer;
+  position: absolute;
+  z-index : 100;
+  background-position : 4px 8px;
+  background-repeat: no-repeat;
+  -moz-border-radius-topright: 8px;
+  -webkit-border-top-right-radius: 8px;
+  -moz-border-radius-bottomright: 8px;
+  -webkit-border-bottom-right-radius: 8px;
+}
+#ToCbutton.open {
+  background-image: url("../images/nav_control-lt.png");
+}
+#ToCbutton.close {
+  background-image: url("../images/nav_control-rt.png");
+}
+#ToCmenu .scrollToggle {
+  width : 12px;
+  height : auto;
+  color : transparent;
+  background-repeat : no-repeat;
+  background-position : center center;
+  text-align : center;
+  float : left;
+  padding : 0;
+}
+#ToCmenu .right-arrow {
+  background-image : url("../images/right_arrow.png");
+}
+#ToCmenu .right-arrow:hover, #ToCmenu .right-arrow.hover {
+  background-image : url("../images/right_arrow_wt.png");
+}
+#ToCmenu .down-arrow {
+  background-image : url("../images/down_arrow.png");
+}
+#ToCmenu .down-arrow:hover, #ToCmenu .down-arrow.hover {
+  background-image : url("../images/down_arrow_wt.png");
+}

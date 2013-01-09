@@ -1,31 +1,52 @@
+<?php 
+	$id = id_booreader_item(); //retrieve item id
+	set_current_item(get_item_by_id($id));
+?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-	<?php 
-	$id = id_booreader_item(); //retrieve item id
-	set_current_item(get_item_by_id($id));
+<meta name="viewport" content="width=device-width, maximum-scale=1.0" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+<link rel="shortcut icon" href="<?php echo BOOKREADER_FAVICON_URL; ?>" type="image/x-icon" />
+<?php 	
 	$title = item('Dublin Core', 'Title'); //dc title
 	$title.= " - ".item('Dublin Core', 'Creator');
 	$title = htmlkarakter(item('Dublin Core', 'Title')); 
 	$title = utf8_decode($title);
 	?>	
     <title><?php echo $title; ?></title>
+
 	 <link rel="stylesheet" href="<?php echo css('BookReader'); ?>" />
-   	 <link rel="stylesheet" href="<?php echo css('BookReaderBibnum'); ?>" />
+   	 <link rel="stylesheet" href="<?php echo css('BookReaderCustom'); ?>" />
 	<?php echo js('jquery-1.4.2.min'); ?>
 	<?php echo js('jquery-ui-1.8.5.custom.min'); ?>
 	<?php echo js('dragscrollable'); ?>
 	<?php echo js('jquery.colorbox-min'); ?>
 	<?php echo js('jquery.ui.ipad'); ?>
 	<?php echo js('jquery.bt.min'); ?>
-	<?php echo js('BookReader'); ?> 
+	<?php echo js('BookReader'); ?>
+	<?php echo js('ToCmenu'); ?> 
 	
+<style>
+	#BRtoolbar,#ToCmenu,div#BRnav, #ToCbutton,#BRnavCntlBtm,.BRfloatHead, div#BRfiller, div#BRzoomer button, .BRnavCntl {
+		background-color: <?php echo BOOKREADER_TOOLBAR_COLOR; ?> !important;
+	}
+	
+	#cboxContent {
+		border: 10px solid <?php echo BOOKREADER_TOOLBAR_COLOR; ?> !important;
+	}
+	
+	a.logo {
+    background: url("<?php echo BOOKREADER_LOGO_URL; ?>") no-repeat scroll 0 0 transparent !important;
+    }
+</style>
 </head>
+
 <body style="background-color: #65645f;">
 <div></div>      
 <div id="BookReader">
-	
        <br/>
     <noscript>
     <p>
@@ -33,6 +54,7 @@
     </p>
     </noscript>
 </div>
+
 <script type="text/javascript">
 // 
 // This file shows the minimum you need to provide to BookReader to display a book
@@ -93,8 +115,9 @@ br.pageW =  [<?php echo implode(",",$widths);	?> ];
 br.pageH =  [ <?php echo implode(",",$heights);	?>  ];
 br.leafMap = [<?php echo implode(",",$imgNum);	?>  ];
 br.pageNums = [<?php echo implode(",",$imgName); ?> ];
-br.server = "riesling.u-bordeaux3.fr/book-reader/index/fulltext";
-br.bookPath = "http://riesling.u-bordeaux3.fr/";
+<?php $server = preg_replace('#^https?://#', '', WEB_ROOT); ?>
+br.server = "<?php echo $server; ?>/book-reader/index/fulltext";
+br.bookPath = "<?php echo WEB_ROOT; ?>";
 br.bookId  = <?php echo item("ID"); ?>;
 br.subPrefix = <?php echo item("ID"); ?>;
 
@@ -110,38 +133,6 @@ br.getPageNum = function(index) {
         return 'n' + index;
     }
 }
-
-
-// getOpenLibraryRecord
-// SMA : Remove this function to prevent a 404 error (not sure if debuging is OK but it seems to work now
-/*br.getOpenLibraryRecord = function(callback) {
-// Try looking up by ocaid first, then by source_record
-var self = this; // closure
-var jsonURL = self.olHost + '/query.json?type=/type/edition&*=&ocaid=' + self.bookId;
-$.ajax({
-url: jsonURL,
-success: function(data) {
-if (data && data.length > 0) {
-callback(self, data[0]);
-} else {
-// try sourceid
-jsonURL = self.olHost + '/query.json?type=/type/edition&*=&source_records=ia:' + self.bookId;
-$.ajax({
-url: jsonURL,
-success: function(data) {
-if (data && data.length > 0) {
-callback(self, data[0]);
-}
-},
-dataType: 'jsonp'
-});
-}
-},
-dataType: 'jsonp'
-});
-}*/
-	
-
 	
 	
 // Single images in the Internet Archive scandata.xml metadata are (somewhat incorrectly)
@@ -272,14 +263,12 @@ br.buildInfoDiv = function(jInfoDiv) {
                     '<h3>Other Formats</h3>',
                     '<ul class="links">',
                         '<li><?php echo item_PDF($item); ?></li>',
-						//'<span>|</span></li>',
-          
                     '</ul>',
                     '<p class="moreInfo"><a href="'+ this.bookUrl + '">More information</a>  </p>'].join('\n'));
                     
     jInfoDiv.find('.BRfloatFoot').append([
                 '<span>|</span>',                
-                '<a href="mailto:<?php echo settings('administrator_email');?>" class="problem">Report a problem</a>',
+                '<a href="mailto:<?php echo settings('administrator_email');?>" class="problem">Report a problem</a>'
     ].join('\n'));
                 
     if (domain == 'archive.org') {
@@ -321,7 +310,6 @@ br.getEmbedCode = function(frameWidth, frameHeight, viewParams) {
 
 // Let's go!
 br.init();
-// read-aloud and search need backend compenents and are not supported in the demo
 $('#BRtoolbar').find('.read').hide();
 $('#BRreturn').html($('#BRreturn').text());
 <?php
@@ -335,5 +323,18 @@ $('#BRreturn').html($('#BRreturn').text());
 ?>
 </script>
 
+<?php
+//Table of Contents if exist, plugin PdfToc required
+if (function_exists('PdfTocPublicShow')):
+	$toc = PdfTocPublicShow(get_item_by_id($id));
+	if(strlen($toc) > 8) {	  
+		echo "<div id='ToCbutton' title='Show/hide toc bar' class='open'></div>\n".
+			 "<div id='ToCmenu'>\n".
+			 "<h2>Table of Contents</h2>\n";
+		echo $toc . "\n";
+		echo "</div>";		 
+	}	
+endif;
+?>
 </body>
 </html>

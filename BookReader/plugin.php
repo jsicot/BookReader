@@ -4,6 +4,9 @@ define('BOOKREADER_PLUGIN_VERSION', get_plugin_ini('bookreader', 'version'));
 define('BOOKREADER_MODE_PAGE', get_option('bookreader_mode_page'));
 define('BOOKREADER_DEFAULT_WIDTH', get_option('bookreader_default_width'));
 define('BOOKREADER_DEFAULT_HEIGHT', get_option('bookreader_default_height'));
+define('BOOKREADER_LOGO_URL', get_option('bookreader_logo_url'));
+define('BOOKREADER_FAVICON_URL', get_option('bookreader_favicon_url'));
+define('BOOKREADER_TOOLBAR_COLOR', get_option('bookreader_toolbar_color'));
 add_plugin_hook('install', 'bookreader_install');
 add_plugin_hook('uninstall', 'bookreader_uninstall');
 add_plugin_hook('config_form', 'bookreader_config_form');
@@ -20,8 +23,10 @@ function bookreader_install()
 	set_option('bookreader_plugin_version', BOOKREADER_PLUGIN_VERSION);	
 	set_option('bookreader_mode_page', '1');
 	set_option('bookreader_default_width', '620'); 
-	set_option('bookreader_default_height', '500');   
-	                                                                                                                  
+	set_option('bookreader_default_height', '500');
+	set_option('bookreader_logo_url', WEB_PLUGIN . DIRECTORY_SEPARATOR . 'BookReader/views/shared/images/logo_icon.png'); 
+	set_option('bookreader_favicon_url', WEB_THEME . DIRECTORY_SEPARATOR . 'your_theme/images/favicon.ico');
+	set_option('bookreader_toolbar_color', '#e2dcc5'); 	                                                                                                                  
 }
 
 //désinstallation du plugin
@@ -30,6 +35,9 @@ function bookreader_uninstall()
 	delete_option('bookreader_mode_page');
 	delete_option('bookreader_default_width');
 	delete_option('bookreader_default_height');
+	delete_option('bookreader_logo_url');
+	delete_option('bookreader_favicon_url');
+	delete_option('bookreader_toolbar_color');
 }
 
 /**
@@ -40,7 +48,9 @@ function bookreader_config_form()
 	$bookreader_mode_page = get_option('bookreader_mode_page');
 	$bookreader_default_width = get_option('bookreader_default_width');
 	$bookreader_default_height = get_option('bookreader_default_height');
-
+	$bookreader_logo_url = get_option('bookreader_logo_url');
+	$bookreader_favicon_url = get_option('bookreader_favicon_url');
+	$bookreader_toolbar_color = get_option('bookreader_toolbar_color');
 	include 'config_form.php';
 }
 
@@ -52,6 +62,9 @@ function bookreader_config()
 	set_option('bookreader_mode_page', $_POST['bookreader_mode_page']);
 	set_option('bookreader_default_width', $_POST['bookreader_default_width']);
 	set_option('bookreader_default_height', $_POST['bookreader_default_height']);
+	set_option('bookreader_logo_url', $_POST['bookreader_logo_url']);
+	set_option('bookreader_favicon_url', $_POST['bookreader_favicon_url']);
+	set_option('bookreader_toolbar_color', $_POST['bookreader_toolbar_color']);
 }
 
 
@@ -64,7 +77,7 @@ function bookreader_define_routes($router)
 	        'viewer/:action/:id', 
 	        array(
 	            'controller'   => 'viewer',
-		    'module'       => 'book-reader',	              
+	            'module'       => 'book-reader',	              
 	            'id'           => '/d+'
 	        )
 	    )
@@ -78,39 +91,34 @@ function bookreader_define_routes($router)
  * a better viewer into items/views.php without requiring user to use the full viewer
  */
 function bookreader_append_to_item($page = null, $allfuncs = false) {
+	if ($item == null) {
+		$item = get_current_item();//si null, récupère l'item actuellement consulté
+	}
+	
+	$iditem = $item->id;
+	$url = WEB_ROOT . "/viewer/show/" . $iditem;
 
-if ($item == null) 
-{
-	$item = get_current_item();//si null, récupère l'item actuellement consulté
-}
+	if (!$allfuncs) {
+		$url .= "?ui=embed";
+	}
+	
+	$url .= "#";
+	
+	if ($page){
+		$url .= "page/n".$page."/";
+	}
 
-$iditem = $item->id;
-
-$url = WEB_ROOT . "/viewer/show/" . $iditem;
-if (!$allfuncs)
-{
-	$url .= "?ui=embed";
+	$url .= "mode/". BOOKREADER_MODE_PAGE ."up";
+	$html = "<div><iframe src='$url' width='". BOOKREADER_DEFAULT_WIDTH ."' height='". BOOKREADER_DEFAULT_HEIGHT ."' frameborder='0' ></iframe></div>";	
+	echo $html;
+	return;
+	
+	if ($page){
+		// Si on a passé un numéro de page en paramètre, on va afficher directement cette page (utilisation de la table des matières par exemple)
+		$html = "<div><iframe src='". WEB_ROOT ."/viewer/show/". $iditem ."?ui=embed#page/n".$page."/mode/". BOOKREADER_MODE_PAGE ."up' width='". BOOKREADER_DEFAULT_WIDTH ."' height='". BOOKREADER_DEFAULT_HEIGHT ."' frameborder='0' ></iframe></div>";	
+	}
+	else {
+		$html = "<div><iframe src='". WEB_ROOT ."/viewer/show/". $iditem ."?ui=embed#mode/". BOOKREADER_MODE_PAGE ."up' width='". BOOKREADER_DEFAULT_WIDTH ."' height='". BOOKREADER_DEFAULT_HEIGHT ."' frameborder='0' ></iframe></div>";	
+	}
+	echo $html;
 }
-$url .= "#";
-if ($page)
-{
-	$url .= "page/n".$page."/";
-}
-
-$url .= "mode/". BOOKREADER_MODE_PAGE ."up";
-
-$html = "<div><iframe src='$url' width='". BOOKREADER_DEFAULT_WIDTH ."' height='". BOOKREADER_DEFAULT_HEIGHT ."' frameborder='0' ></iframe></div>";	
-echo $html;
-return;
-if ($page)
-{
-	// Si on a passé un numéro de page en paramètre, on va afficher directement cette page (utilisation de la table des matières par exemple)
-	$html = "<div><iframe src='". WEB_ROOT ."/viewer/show/". $iditem ."?ui=embed#page/n".$page."/mode/". BOOKREADER_MODE_PAGE ."up' width='". BOOKREADER_DEFAULT_WIDTH ."' height='". BOOKREADER_DEFAULT_HEIGHT ."' frameborder='0' ></iframe></div>";	
-}
-else
-{
-	$html = "<div><iframe src='". WEB_ROOT ."/viewer/show/". $iditem ."?ui=embed#mode/". BOOKREADER_MODE_PAGE ."up' width='". BOOKREADER_DEFAULT_WIDTH ."' height='". BOOKREADER_DEFAULT_HEIGHT ."' frameborder='0' ></iframe></div>";	
-}
-echo $html;
-}
-

@@ -18,7 +18,6 @@ This file is part of BookReader.
     
     The BookReader source is hosted at http://github.com/openlibrary/bookreader/
 
-    archive.org cvs $Revision: 1.2 $ $Date: 2009-06-22 18:42:51 $
 */
 
 // BookReader()
@@ -111,7 +110,7 @@ function BookReader() {
 
     // Object to hold parameters related to 1up mode
     this.onePage = {
-        autofit: 'width'                                     // valid values are height, width, none
+        autofit: 'height'                                     // valid values are height, width, none
     };
     
     // Object to hold parameters related to 2up mode
@@ -144,6 +143,7 @@ function BookReader() {
     return this;
 };
 
+(function ($) {
 // init()
 //______________________________________________________________________________
 BookReader.prototype.init = function() {
@@ -152,7 +152,16 @@ BookReader.prototype.init = function() {
     this.pageScale = this.reduce; // preserve current reduce
     
     // Find start index and mode if set in location hash
-    var params = this.paramsFromFragment(window.location.hash);
+    var params = {};
+    if (window.location.hash) {
+        // params explicitly set in URL
+        params = this.paramsFromFragment(window.location.hash);
+    } else {
+        // params not explicitly set, use defaults if we have them
+        if ('defaults' in this) {
+            params = this.paramsFromFragment(this.defaults);
+        }
+    }
     
     // Sanitize/process parameters
 
@@ -960,6 +969,7 @@ BookReader.prototype.zoom1up = function(direction) {
         // Already at this level
         return;
     }
+    
     this.reduce = reduceFactor.reduce; // $$$ incorporate into function
     this.onePage.autofit = reduceFactor.autofit;
         
@@ -1199,7 +1209,9 @@ BookReader.prototype.quantizeReduce = function(reduce, reductionFactors) {
 // reductionFactors should be array of sorted reduction factors
 // e.g. [ {reduce: 0.25, autofit: null}, {reduce: 0.3, autofit: 'width'}, {reduce: 1, autofit: null} ]
 BookReader.prototype.nextReduce = function( currentReduce, direction, reductionFactors ) {
+
     // XXX add 'closest', to replace quantize function
+    
     if (direction == 'in') {
         var newReduceIndex = 0;
     
@@ -1221,11 +1233,9 @@ BookReader.prototype.nextReduce = function( currentReduce, direction, reductionF
         }
         return reductionFactors[newReduceIndex];
     }
-
-
+    
     // Asked for specific autofit mode
     for (var i = 0; i < reductionFactors.length; i++) {
-
         if (reductionFactors[i].autofit == direction) {
             return reductionFactors[i];
         }
@@ -1245,7 +1255,21 @@ BookReader.prototype._reduceSort = function(a, b) {
 // Attempts to jump to page.  Returns true if page could be found, false otherwise.
 BookReader.prototype.jumpToPage = function(pageNum) {
 
-    var pageIndex = this.getPageIndex(pageNum);
+    var pageIndex;
+    
+    // Check for special "leaf"
+    var re = new RegExp('^leaf(\\d+)');
+    leafMatch = re.exec(pageNum);
+    if (leafMatch) {
+        console.log(leafMatch[1]);
+        pageIndex = this.leafNumToIndex(parseInt(leafMatch[1],10));
+        if (pageIndex === null) {
+            pageIndex = undefined; // to match return type of getPageIndex
+        }
+        
+    } else {
+        pageIndex = this.getPageIndex(pageNum);
+    }
 
     if ('undefined' != typeof(pageIndex)) {
         var leafTop = 0;
@@ -1646,7 +1670,7 @@ BookReader.prototype.prepareTwoPagePopUp = function() {
     $(this.leafEdgeR).bind('mousemove', this, function(e) {
 
         var jumpIndex = e.data.jumpIndexForRightEdgePageX(e.pageX);
-        $(e.data.twoPagePopUp).text('Voir la ' + e.data.getPageName(jumpIndex));
+        $(e.data.twoPagePopUp).text('View ' + e.data.getPageName(jumpIndex));
         
         // $$$ TODO: Make sure popup is positioned so that it is in view
         // (https://bugs.edge.launchpad.net/gnubook/+bug/327456)        
@@ -1845,13 +1869,11 @@ BookReader.prototype.twoPageIsZoomedIn = function() {
 
 BookReader.prototype.onePageGetAutofitWidth = function() {
     var widthPadding = 20;
-    return (this.getMedianPageSize().width + 0.0) / (880 - widthPadding * 2);
     return (this.getMedianPageSize().width + 0.0) / ($('#BRcontainer').attr('clientWidth') - widthPadding * 2);
 }
 
 BookReader.prototype.onePageGetAutofitHeight = function() {
-	return (this.getMedianPageSize().height + 0.0) / (720 - this.padding * 2); // make sure a little of adjacent pages show
-	return (this.getMedianPageSize().height + 0.0) / ($('#BRcontainer').attr('clientHeight') - this.padding * 2); // make sure a little of adjacent pages show
+    return (this.getMedianPageSize().height + 0.0) / ($('#BRcontainer').attr('clientHeight') - this.padding * 2); // make sure a little of adjacent pages show
 }
 
 // Returns where the top of the page with given index should be in one page view
@@ -2706,7 +2728,7 @@ BookReader.prototype.search = function(term) {
     $('#textSrch').blur(); //cause mobile safari to hide the keyboard     
     
     var url = 'http://'+this.server.replace(/:.+/, ''); //remove the port and userdir
-    url    += '/fulltext/?item_id='+this.bookId;
+    url    += '/fulltext/inside.php?item_id='+this.bookId;
     url    += '&doc='+this.subPrefix;   //TODO: test with subitem
     url    += '&path='+this.bookPath.replace(new RegExp('/'+this.subPrefix+'$'), ''); //remove subPrefix from end of path
     url    += '&q='+escape(term);
@@ -2723,7 +2745,7 @@ BookReader.prototype.search = function(term) {
 // BRSearchCallback()
 //______________________________________________________________________________
 BookReader.prototype.BRSearchCallback = function(results) {
-  //console.log('got ' + results.matches.length + ' results');
+    //console.log('got ' + results.matches.length + ' results');
     br.removeSearchResults();
     br.searchResults = results; 
     //console.log(br.searchResults);
@@ -3058,7 +3080,7 @@ BookReader.prototype.showEmbedCode = function() {
         fontSize: '12px',
         color:    '#333',
         zIndex:   300,
-        border: '10px solid #222',
+        border: '10px solid #615132',
         backgroundColor: "#fff",
         MozBorderRadius: '8px',
         MozBoxShadow: '0 0 6px #000',
@@ -3344,7 +3366,6 @@ BookReader.prototype.initNavbar = function() {
     
     //append icon to handle
     var handleHelper = $('#BRpager .ui-slider-handle')
-    // $$$mang update logic for setting the page number label -- use page numbers if available
     .append('<div id="pagenum"><span class="currentpage"></span></div>');
     //.wrap('<div class="ui-handle-helper-parent"></div>').parent(); // XXXmang is this used for hiding the tooltip?
     
@@ -3384,7 +3405,7 @@ BookReader.prototype.updateNavPageNum = function(index) {
     var pageNum = this.getPageNum(index);
     var pageStr;
     if (pageNum[0] == 'n') { // funny index
-        pageStr = index + ' / ' + this.numLeafs;
+        pageStr = index + 1 + ' / ' + this.numLeafs; // Accessible index starts at 0 (alas) so we add 1 to make human
     } else {
         pageStr = 'Page ' + pageNum;
     }
@@ -3425,11 +3446,11 @@ BookReader.prototype.addSearchResult = function(queryString, pageIndex) {
         cssStyles: {
             padding: '12px 14px',
             backgroundColor: '#fff',
-            border: '4px solid #607e95',
+            border: '4px solid #e2dcc5',
             fontFamily: '"Lucida Grande","Arial",sans-serif',
             fontSize: '13px',
             //lineHeight: '18px',
-            color: '#222'
+            color: '#615132'
         },
         shrinkToFit: false,
         width: '230px',
@@ -3490,7 +3511,7 @@ BookReader.prototype.addChapter = function(chapterTitle, pageNumber, pageIndex) 
         cssStyles: {
             padding: '12px 14px',
             backgroundColor: '#000',
-            border: '1px solid #fff',
+            border: '4px solid #e2dcc5',
             //borderBottom: 'none',
             fontFamily: '"Arial", sans-serif',
             fontSize: '12px',
@@ -3560,8 +3581,7 @@ BookReader.prototype.updateTOC = function(tocEntries) {
  *   }
  */
 BookReader.prototype.addChapterFromEntry = function(tocEntryObject) {
-    
-	var pageIndex = this.getPageIndex(tocEntryObject['pagenum']);
+    var pageIndex = this.getPageIndex(tocEntryObject['pagenum']);
     // Only add if we know where it is
     if (pageIndex) {
         this.addChapter(tocEntryObject['title'], tocEntryObject['pagenum'], pageIndex);
@@ -3603,8 +3623,8 @@ BookReader.prototype.initToolbar = function(mode, ui) {
     $("#BookReader").append(
           "<div id='BRtoolbar'>"
         +   "<span id='BRtoolbarbuttons'>"
-       	+     "<form action='javascript:br.search($(\"#textSrch\").val());' id='booksearch'><input type='search' id='textSrch' name='textSrch' val='' placeholder='Rechercher à l&#146;intérieur'/><button type='submit' id='btnSrch' name='btnSrch'>GO</button></form>"
-	+     "<button class='BRicon play'></button>"
+        +     "<form action='javascript:br.search($(\"#textSrch\").val());' id='booksearch'><input type='search' id='textSrch' name='textSrch' val='' placeholder='Search inside'/><button type='submit' id='btnSrch' name='btnSrch'>GO</button></form>"
+        +     "<button class='BRicon play'></button>"
         +     "<button class='BRicon pause'></button>"
         +     "<button class='BRicon info'></button>"
         +     "<button class='BRicon share'></button>"
@@ -3687,7 +3707,7 @@ BookReader.prototype.initToolbar = function(mode, ui) {
 BookReader.prototype.blankInfoDiv = function() {
     return $([
         '<div class="BRfloat" id="BRinfo">',
-            '<div class="BRfloatHead">About the document',
+            '<div class="BRfloatHead">About this book',
                 '<a class="floatShut" href="javascript:;" onclick="$.fn.colorbox.close();"><span class="shift">Close</span></a>',
             '</div>',
             '<div class="BRfloatBody">',
@@ -3700,7 +3720,7 @@ BookReader.prototype.blankInfoDiv = function() {
                 '</div>',
             '</div>',
             '<div class="BRfloatFoot">',
-                '<a href="http://openlibrary.org/dev/docs/bookreader">About BookReader</a>',
+                '<a href="http://openlibrary.org/dev/docs/bookreader">About the BookReader</a>',
             '</div>',
         '</div>'].join('\n')
     );
@@ -3710,7 +3730,7 @@ BookReader.prototype.blankShareDiv = function() {
     return $([
         '<div class="BRfloat" id="BRshare">',
             '<div class="BRfloatHead">',
-                'Partager',
+                'Share',
                 '<a class="floatShut" href="javascript:;" onclick="$.fn.colorbox.close();"><span class="shift">Close</span></a>',
             '</div>',
         '</div>'].join('\n')
@@ -4275,7 +4295,7 @@ BookReader.prototype.updateFromParams = function(params) {
             this.jumpToPage(params.page);
         }
     }
-    
+
     // $$$ process /region
     // $$$ process /highlight
 }
@@ -4616,19 +4636,19 @@ BookReader.prototype.gotOpenLibraryRecord = function(self, olObject) {
         }
 
         // $$$mang cleanup
-        //self.bookUrl = self.olHost + olObject.key;
-        //self.bookTitle = olObject['title'];
-        //$('#BRreturn a').attr( {'href': self.bookUrl, 'title': "Voir ce document" } );
-        //$('#BRreturn a').text(self.bookTitle);
+        self.bookUrl = self.olHost + olObject.key;
+        self.bookTitle = olObject['title'];
+        $('#BRreturn a').attr( {'href': self.bookUrl, 'title': "Go to this book's page on Open Library" } );
+        $('#BRreturn a').text(self.bookTitle);
         
-        //$('#BRinfo').remove();
-        //$('#BRshare').after(self.blankInfoDiv());
-        //self.buildInfoDiv($('#BRinfo'));
+        $('#BRinfo').remove();
+        $('#BRshare').after(self.blankInfoDiv());
+        self.buildInfoDiv($('#BRinfo'));
         
         // Check for borrowed book
-        //if (self.olAuth) {
-            //var returnUrl = self.olHost + olObject.key + '/do_return/borrow';
-           // var borrowUrl = self.olHost + olObject.key + '/borrow';
+        if (self.olAuth) {
+            var returnUrl = self.olHost + olObject.key + '/do_return/borrow';
+            var borrowUrl = self.olHost + olObject.key + '/borrow';
             
             /*
             $('<a/>')
@@ -4641,17 +4661,17 @@ BookReader.prototype.gotOpenLibraryRecord = function(self, olObject) {
                 .appendTo('#BRreturn');
             */
             
-            //$('<form id="BRreturnform" action="' + returnUrl + '" method="post"><input type="submit" value="Return book" onclick="olAuth.deleteCookies();"/><input type="hidden" name="action" value="return" /></form>')
-               // .appendTo('#BRreturn');
+            $('<form id="BRreturnform" action="' + returnUrl + '" method="post"><input type="submit" value="Return book" onclick="olAuth.deleteCookies();"/><input type="hidden" name="action" value="return" /></form>')
+                .appendTo('#BRreturn');
 
-        //} else {
-            //$('<a/>').attr( { 'href': self.bookUrl, 'title': 'Go to this book\'s page on Open Library' } )
-                //.text('On openlibrary.org')
-                //.appendTo('#BRreturn');
-       // }
+        } else {
+            $('<a/>').attr( { 'href': self.bookUrl, 'title': 'Go to this book\'s page on Open Library' } )
+                .text('On openlibrary.org')
+                .appendTo('#BRreturn');
+        }
         
-        //$('#BRreturn').css({ 'line-height': '19px'} );
-        //$('#BRreturn a').css( {'height': '18px' } );
+        $('#BRreturn').css({ 'line-height': '19px'} );
+        $('#BRreturn a').css( {'height': '18px' } );
 
         
     }
@@ -4796,15 +4816,17 @@ BookReader.prototype.ttsStartCB = function (data) {
     
     this.showProgressPopup('Loading audio...');
     
-    ///// whileloading: broken on safari
-    ///// onload fires on safari, but *after* the sound starts playing..
+    ///// Many soundManger2 callbacks are broken when using HTML5 audio.
+    ///// whileloading: broken on safari, worked in FF4, but broken on FireFox 5
+    ///// onload: fires on safari, but *after* the sound starts playing, and does not fire in FF or IE9
+    ///// onbufferchange: fires in FF5 using HTML5 audio, but not in safari using flash audio
+    ///// whileplaying: fires everywhere
     this.ttsPosition = -1;    
     var snd = soundManager.createSound({
      id: 'chunk'+this.ttsIndex+'-0',
-     //url: 'http://home.us.archive.org/~rkumar/arctic.ogg',
      url: 'http://'+this.server+'/BookReader/BookReaderGetTTS.php?string=' + escape(data[0][0]) + '&format=.'+this.ttsFormat, //the .ogg is to trick SoundManager2 to use the HTML5 audio player
-     whileloading: function(){if (this.bytesLoaded == this.bytesTotal) this.br.removeProgressPopup();}, //onload never fires in FF...
-     onload: function(){this.br.removeProgressPopup();} //whileloading never fires in safari...
+     onload: function(){this.br.removeProgressPopup();}, //fires in safari...
+     onbufferchange: function(){if (false == this.isBuffering) this.br.removeProgressPopup();} //fires in FF and IE9
     });    
     snd.br = this;
     snd.load();
@@ -5166,11 +5188,11 @@ BookReader.prototype.buildShareDiv = function(jShareDiv)
                     '</label>',
                     '<label class="sub">',
                         '<input type="checkbox" name="thispage" value="thispage"/>',
-                        'Open to this page? ',
+                        'Open to this page?',
                     '</label>',
                 '</fieldset>',
                 '<textarea cols="30" rows="4" name="iframe" class="BRframeEmbed"></textarea>',
-                '<p class="meta"><strong>NOTE:</strong>We\'ve tested EMBED on blogspot.com blogs as well as self-hosted Wordpress blogs. This feature will NOT work on wordpress.com blogs.</p>',
+                '<p class="meta"><strong>NOTE:</strong> We\'ve tested EMBED on blogspot.com blogs as well as self-hosted Wordpress blogs. This feature will NOT work on wordpress.com blogs.</p>',
             '</fieldset>',
             '<fieldset class="center">',
                 '<button type="button" onclick="$.fn.colorbox.close();">Finished</button>',
@@ -5215,7 +5237,7 @@ BookReader.prototype.initUIStrings = function()
     // the toolbar and nav bar easier
         
     // Setup tooltips -- later we could load these from a file for i18n
-    var titles = { '.logo': this.siteName, // $$$ update after getting OL record
+    var titles = { '.logo': 'Go to Archive.org', // $$$ update after getting OL record
                    '.zoom_in': 'Zoom in',
                    '.zoom_out': 'Zoom out',
                    '.onepg': 'One-page view',
@@ -5254,3 +5276,4 @@ BookReader.prototype.initUIStrings = function()
         }
     }
 }
+})(jQuery);

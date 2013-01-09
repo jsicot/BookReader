@@ -9,6 +9,7 @@ class BookReader_IndexController extends Omeka_Controller_Action
 		$doc = $this->getRequest()->getParam('doc');
 		$path = $this->getRequest()->getParam('path');
 		$q = $this->getRequest()->getParam('q');
+		$q = utf8_encode($q);
 		$callback = $this->getRequest()->getParam('callback');
 		
 
@@ -167,7 +168,7 @@ class BookReader_IndexController extends Omeka_Controller_Action
 		$id = $this->getRequest()->getParam('id');
 		set_current_item(get_item_by_id($id));
 		
-		if ($scale < 1)
+		if ($scale < 1.1)
 		{
 			// De 0 à 1
 			$files=WEB_FILES ;// répertoire des images originales

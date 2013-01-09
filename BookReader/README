@@ -1,20 +1,23 @@
 BookReader plugin for Omeka
-Demo : 
+===========
 
+Demo
+===========
 - http://bibnum.univ-rennes2.fr/items/show/566 (embedded version)
 - http://bibnum.univ-rennes2.fr/viewer/show/566 (full screen)
 
-
-Description : 
-
+Description
+===========
 This plugin add Internet Archive BookReader (http://openlibrary.org/dev/docs/bookreader) into Omeka.
 The Internet Archive BookReader is used to view books from the Internet Archive online and can also be used to view other books.
 BookReader plugin for Omeka allows you to create online flip book from image files constituting an item.
 
-Requirements :
+Requirements
+===========
 The extract ocr and pdfToc plugins are highly recommended.
 
-Installation : 
+Installation
+===========
 - Upload the BookReader plugin folder into your plugins folder on the server;
 - Activate it from the admin → Settings → Plugins page
 - Click the Configure link to add the following
@@ -25,8 +28,8 @@ Installation :
 	-  The WIDTH of the inline frame (Embedded Simple Viewer)
 	- The HEIGHT of the inline frame (Embedded Simple Viewer)
 
-Using the BookReader Plugin :
-
+Using the BookReader Plugin
+===========
 - Create an item
 - Add some image files to this item
 - Add PDF file to this item (PDF file should be consist of the same images uploaded in previous step)
@@ -35,8 +38,8 @@ To embed viewer on the item/show page, you need to use the bookreader_append_to_
 
 <?php echo bookreader_append_to_item();?>
 
-Optional plugins :
-
+Optional plugins
+===========
 - Extract ocr (https://github.com/symac/Plugin-Extractocr) allows fulltext searching inside a flip book
 - PDF Toc (https://github.com/symac/Plugin-PdfToc) retrieves table of contents from pdf file associated to an item
 

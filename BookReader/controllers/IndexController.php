@@ -181,7 +181,7 @@ class BookReader_IndexController extends Omeka_Controller_Action
 		else if ($scale < 6)
 		{
 			// De 2 à 6
-			$files=WEB_THUMBNAILS ;// répertoire des images diff web
+			$files=WEB_FULLSIZE ;// répertoire des images diff web
 		}
 		else if ($scale < 16)
 		{

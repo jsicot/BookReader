@@ -1,73 +1,73 @@
 var barHeight;
 $(document).ready(function() {
 if ($('#ToCmenu').size() > 0) {
-	 barHeight = $('#BRtoolbar').height() + $('#BRnav').height();
-	 $('#ToCmenu').css({
-			height : $('#BookReader').height()-barHeight,
-			top : barHeight/2
-	 });
-	 $(window).resize();
-	 $('#ToCmenu ul').each(function() {
-			if ($(this).parent().attr('id') != 'ToCmenu') {
-				   var ul = $(this);
-				   var button = $('<a display="block" class="scrollToggle right-arrow" href="">-</a>');
-				   ul.hide();
-				   ul.prev().before(button);
-				   button.css({
-						  marginLeft : ($(this).parents('ul').size()-1)*20+4
-				   });
-				   button.next().hover(function() {
-						  button.addClass('hover');
-				   },function() {
-						  button.removeClass('hover');
-				   });
-				   button.click(function() {
-						  if (button.hasClass('right-arrow')) {
-								 button.removeClass('right-arrow').addClass('down-arrow');
-						  } else {
-								 button.removeClass('down-arrow').addClass('right-arrow');
-						  }
-						  ul.slideToggle(400,function() {
-								 $('#ToCbutton').css({
-										left : $('#ToCmenu').width(),
-										top : $('#ToCmenu').position()['top']
-								 });
-						  });
-						  $('#ToCbutton').css({
-								 left : $('#ToCmenu').width(),
-								 top : $('#ToCmenu').position()['top']
-						  }); 
-						  return false;
-				   });
-			}
-	 });
-	 $('#ToCmenu li').each(function() {
-			$(this).css({
-				   paddingLeft : $(this).parents('ul').size()*20,
-				   fontSize : (16-$(this).parents('ul').size()*2)+'px'
-			});
-	 });
-	 $('#ToCbutton').css({
-			left : $('#ToCmenu').width(),
-			top : $('#ToCmenu').position()['top']
-	 });
-	 $(window).resize(function() {
-			if ($('#BRnavCntlBtm').hasClass('BRup')) {
-				   $('#ToCmenu').css({
-						  height : $('#BookReader').height(),
-						  top : 0
-				   });
-			} else {
-				   $('#ToCmenu').css({
-						  height : $('#BookReader').height()-barHeight,
-						  top : barHeight/2
-				   });	
-			}
-			$('#ToCbutton').css({
-				   left : $('#ToCmenu').position()['left']+$('#ToCmenu').width(),
-				   top : $('#ToCmenu').position()['top']
-			});
-	 });
+     barHeight = $('#BRtoolbar').height() + $('#BRnav').height();
+     $('#ToCmenu').css({
+            height : $('#BookReader').height()-barHeight,
+            top : barHeight/2
+     });
+     $(window).resize();
+     $('#ToCmenu ul').each(function() {
+            if ($(this).parent().attr('id') != 'ToCmenu') {
+                   var ul = $(this);
+                   var button = $('<a display="block" class="scrollToggle right-arrow" href="">-</a>');
+                   ul.hide();
+                   ul.prev().before(button);
+                   button.css({
+                          marginLeft : ($(this).parents('ul').size()-1)*20+4
+                   });
+                   button.next().hover(function() {
+                          button.addClass('hover');
+                   },function() {
+                          button.removeClass('hover');
+                   });
+                   button.click(function() {
+                          if (button.hasClass('right-arrow')) {
+                                 button.removeClass('right-arrow').addClass('down-arrow');
+                          } else {
+                                 button.removeClass('down-arrow').addClass('right-arrow');
+                          }
+                          ul.slideToggle(400,function() {
+                                 $('#ToCbutton').css({
+                                        left : $('#ToCmenu').width(),
+                                        top : $('#ToCmenu').position()['top']
+                                 });
+                          });
+                          $('#ToCbutton').css({
+                                 left : $('#ToCmenu').width(),
+                                 top : $('#ToCmenu').position()['top']
+                          });
+                          return false;
+                   });
+            }
+     });
+     $('#ToCmenu li').each(function() {
+            $(this).css({
+                   paddingLeft : $(this).parents('ul').size()*20,
+                   fontSize : (16-$(this).parents('ul').size()*2)+'px'
+            });
+     });
+     $('#ToCbutton').css({
+            left : $('#ToCmenu').width(),
+            top : $('#ToCmenu').position()['top']
+     });
+     $(window).resize(function() {
+            if ($('#BRnavCntlBtm').hasClass('BRup')) {
+                   $('#ToCmenu').css({
+                          height : $('#BookReader').height(),
+                          top : 0
+                   });
+            } else {
+                   $('#ToCmenu').css({
+                          height : $('#BookReader').height()-barHeight,
+                          top : barHeight/2
+                   });
+            }
+            $('#ToCbutton').css({
+                   left : $('#ToCmenu').position()['left']+$('#ToCmenu').width(),
+                   top : $('#ToCmenu').position()['top']
+            });
+     });
      $('#BRnavCntlBtm').click(function() {
           if ($(this).hasClass('BRup')) {
                  $('#ToCmenu').animate({
@@ -83,7 +83,7 @@ if ($('#ToCmenu').size() > 0) {
                         complete : function() {
                                $('#ToCmenu').css('overflow-y','auto');
                         }
-                 });		
+                 });
           } else {
                  $('#ToCmenu').animate({
                         height : $('#BookReader').height()-barHeight,
@@ -98,9 +98,9 @@ if ($('#ToCmenu').size() > 0) {
                         complete : function() {
                                $('#ToCmenu').css('overflow-y','auto');
                         }
-                 });	
+                 });
           }
-          
+
      });
      $('#ToCbutton').click(function() {
           if ($(this).hasClass('open')) {
@@ -135,7 +135,7 @@ if ($('#ToCmenu').size() > 0) {
                         },
                         queue : false
                  });
-                 $('#ToCmenu').animate({opacity:1})	
+                 $('#ToCmenu').animate({opacity:1})
           }
      });
    $('#ToCbutton').mouseover(function(){

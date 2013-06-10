@@ -12,6 +12,13 @@
     </div>
 </div>
 
+<div class="field">
+    <label for="bookreader_toolbar_color"><?php echo __('Hex color for viewer toolbar'); ?></label>
+    <div class="inputs">
+        <input type="text" class="textinput" name="bookreader_toolbar_color" size="7" value="<?php echo get_option('bookreader_toolbar_color'); ?>" id="bookreader_toolbar_color" />
+    </div>
+</div>
+
 <fieldset id="fieldset-embed"><legend><?php echo __('Embed mode'); ?></legend>
     <div class="field">
         <label for="bookreader_embed_enable">

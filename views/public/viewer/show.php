@@ -23,7 +23,8 @@
     <meta name="viewport" content="width=device-width, maximum-scale=1.0" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
-    <link rel="shortcut icon" href="<?php echo get_option('bookreader_favicon_url'); ?>" type="image/x-icon" />
+    <link rel="apple-touch-icon" href="<?php echo item_cover('link'); ?>" />
+    <link rel="shortcut icon" href="http://bibnum.univ-rennes2.fr/themes/breiz/images/favicon.ico" />
     <title><?php echo $title; ?></title>
     <link rel="stylesheet" href="<?php echo $sharedDir . '/css/BookReader.css'; ?>" />
     <link rel="stylesheet" href="<?php echo  $sharedDir . '/css/BookReaderCustom.css'; ?>" />
@@ -214,7 +215,7 @@
 
         // $$$ cover looks weird before it loads
         jInfoDiv.find('.BRfloatCover').append([
-            '<div style="height: 140px; min-width: 80px; padding: 0; margin: 0;"><?php echo link_to_item(item_cover()); ?></div>'
+            '<div style="height: 140px; min-width: 80px; padding: 0; margin: 0;"><?php echo link_to_item(item_cover("img")); ?></div>'
         ].join(''));
 
         jInfoDiv.find('.BRfloatMeta').append([

@@ -38,6 +38,7 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
     protected $_options = array(
         'bookreader_logo_url' => 'BookReader/views/shared/images/logo_icon.png',
         'bookreader_favicon_url' => 'your_theme/images/favicon.ico',
+        'bookreader_toolbar_color' => '#E2DCC5',
         'bookreader_embed_enable' => true,
         'bookreader_mode_page' => '1',
         'bookreader_embed_functions' => '0',
@@ -53,7 +54,7 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
     {
         $this->_options['bookreader_logo_url'] = WEB_PLUGIN . DIRECTORY_SEPARATOR . $this->_options['bookreader_logo_url'];
         $this->_options['bookreader_favicon_url'] = WEB_THEME . DIRECTORY_SEPARATOR . $this->_options['bookreader_favicon_url'];
-
+	$this->_options['bookreader_toolbar_color'] = $this->_options['bookreader_toolbar_color'];
         self::_installOptions();
     }
 
@@ -86,6 +87,7 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
 
         set_option('bookreader_logo_url', $post['bookreader_logo_url']);
         set_option('bookreader_favicon_url', $post['bookreader_favicon_url']);
+        set_option('bookreader_toolbar_color', $post['bookreader_toolbar_color']);
         set_option('bookreader_embed_enable', (boolean) $post['bookreader_embed_enable']);
         set_option('bookreader_mode_page', (($post['bookreader_mode_page'] == '1') ? '1' : '2'));
         set_option('bookreader_embed_functions', (($post['bookreader_embed_functions'] == '1') ? '1' : '0'));
@@ -129,7 +131,6 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
         if ($request->getControllerName() == 'items' && $request->getActionName() == 'show') {
             queue_css_file('BookReader');
             queue_css_file('BookReaderCustom');
-
             queue_js_file('jquery-1.4.2.min');
             queue_js_file('jquery-ui-1.8.5.custom.min');
             queue_js_file('dragscrollable');

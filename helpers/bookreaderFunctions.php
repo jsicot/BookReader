@@ -229,8 +229,12 @@ function cmp($a, $b)
  * @return string
  *   Html code of the image of the cover of the item.
  */
-function item_cover($props = array(), $index = 0, $item = null)
+function item_cover($mode)
 {
+   $props = array();
+   $index = 0; 
+   $item = null;
+
     if ($item == null) {
         $item = get_current_record('item');
     }
@@ -248,11 +252,15 @@ function item_cover($props = array(), $index = 0, $item = null)
         $width = @$props['width'];
         $height = @$props['height'];
 
-        $re1 = '.*?';
-        $re2 = '(titre)';
-        $re3 = '(\\d+)';
-        if ($c = preg_match_all ('/' . $re1 . $re2 . $re3 . '/is', $original_filename, $matches)) {
+        $regex = '.*?(titre|title)(\\d+)';
+
+        if ($c = preg_match_all ('/' . $regex . '/is', $original_filename, $matches)) {
+         if ($mode == 'img') {	
             $img = '<img src="' . WEB_FILES . '/thumbnails/' . $filename . '" ' . _tag_attributes($props) . ' width="auto" height="120" />';
+          }
+         else if ($mode == 'link') {	
+            $img = WEB_FILES . '/thumbnails/' . $filename ;
+          }
         }
     }
 

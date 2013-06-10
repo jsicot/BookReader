@@ -291,30 +291,33 @@ function item_PDF($item = null)
     // Récupération du fichier xml à traiter en fonction de l'id de l'item
 
     // Extensions supportées
-    $SupportedFormats = array(
-        'pdf' => 'Portable Document Format File',
+    $pdfMimeTypes = array(
+        'application/pdf',
+        'application/x-pdf',
+        'application/acrobat',
+        'text/x-pdf',
+        'text/pdf',
+        'applications/vnd.pdf',
     );
-
-    // Set the regular expression to match selected/supported formats.
-    $supportedFormatRegEx = '/\.'.implode('|', array_keys($SupportedFormats)).'$/';
 
     // Iterate through the item's files.
     $html = '';
     set_loop_records('files', $item->getFiles());
     foreach (loop('files') as $key => $file) {
         // Embed only those files that end with the selected/supported formats.
-        if (preg_match($supportedFormatRegEx, strtolower($file->filename))) {
+        if (in_array($file->mime_type, $pdfMimeTypes)) {
             // Set the document's absolute URL.
             // Note: file_download_uri($file) does not work here. It results
             // in the iPaper error: "Unable to reach provided URL."
             //$documentUrl = WEB_FILES . '/' . $file->filename;
             //$documentUrl = file_download_uri($file);
             $sizefile = formatFileSize($file->size);
-            //$type = $file->mime_browser;
+            $extension = pathinfo($file->filename, PATHINFO_EXTENSION);
+            $fileURL = WEB_FILES . '/original/' . $file->filename;
             $html .= '<div style="clear:both; padding:2px;">';
-            $html .= '<a href="' . file_download_uri($file) . '" class="download-file">' . $file->original_filename. '</a>';
-            $html .= '&nbsp; (' . $sizefile . ')';
-            $html .= '</div>' . PHP_EOL;
+            $html .= '<a href="' . $fileURL . '" class="download-file">' . $file->original_filename. '</a>';
+            $html .= '&nbsp; ('.$extension.' / ' . $sizefile . ')';
+            $html .= '</div>';
         }
     }
 

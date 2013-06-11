@@ -24,7 +24,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
     <link rel="apple-touch-icon" href="<?php echo item_cover('link'); ?>" />
-    <link rel="shortcut icon" href="http://bibnum.univ-rennes2.fr/themes/breiz/images/favicon.ico" />
+    <link rel="shortcut icon" href="<?php echo get_option('bookreader_favicon_url'); ?>" />
     <title><?php echo $title; ?></title>
     <link rel="stylesheet" href="<?php echo $sharedDir . '/css/BookReader.css'; ?>" />
     <link rel="stylesheet" href="<?php echo  $sharedDir . '/css/BookReaderCustom.css'; ?>" />
@@ -284,15 +284,12 @@
 
     <?php
     //Table of Contents if exist, plugin PdfToc required
-    if (function_exists('PdfTocPublicShow')):
-        $toc = PdfTocPublicShow(get_record_by_id('item', $id));
-        if(strlen($toc) > 8) : ?>
-        <div id='ToCbutton' title='<?php echo __('Show/hide toc bar'); ?>' class='open'></div>
-        <div id='ToCmenu'>
-            <h2><?php echo __('Table of Contents'); ?></h2>
-            <?php echo $toc; ?>
-        </div>
-        <?php endif;
-    endif; ?>
+    
+    echo fire_plugin_hook('toc_for_bookreader', array(
+        'view' => $this,
+        'item' => $item,
+    ));
+    
+?>
     </body>
 </html>

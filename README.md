@@ -132,5 +132,3 @@ BookReader Omeka plugin:
 [jsicot]: https://github.com/jsicot "Julien Sicot"
 [Université Rennes 2]: http://bibnum.univ-rennes2.fr
 [Mines ParisTech]: http://bib.mines-paristech.fr "Mines ParisTech / ENSMP"
-
-

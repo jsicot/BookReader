@@ -150,7 +150,7 @@ function bookreader_images_data($item = null)
         'gif' => 'Graphics Interchange Format',
     );
     // Set the regular expression to match selected/supported formats.
-    $supportedFormatRegEx = '/\.'.implode('|', array_keys($supportedFormats)).'$/';
+    $supportedFormatRegEx = '/\.' . implode('|', array_keys($supportedFormats)) . '$/';
 
     set_loop_records('files', $item->getFiles());
     foreach (loop('files') as $file) {
@@ -169,7 +169,7 @@ function bookreader_images_data($item = null)
     $heights = array();
     $j = 1;
     foreach($list as $key => $image) {
-        $pathImg = FILES_DIR . DIRECTORY_SEPARATOR . 'fullsize' . DIRECTORY_SEPARATOR . $key;
+        $pathImg = FILES_DIR . DIRECTORY_SEPARATOR . 'fullsize' . DIRECTORY_SEPARATOR . getDerivativeFilename($key);
         list($width, $height, $type, $attr) = getimagesize($pathImg);
         $nums[] = $j;
         $labels[] = label_pg($image); //array of images label
@@ -393,4 +393,20 @@ function formatFileSize($size)
             return (int) $size . ' ' . $unit;
         }
     }
+}
+
+/**
+ * Get the derivative filename from a filename and an extension.
+ *
+ * @param string $filename
+ * @param string $extension
+ *
+ * @return string
+ *   Filename with the new extension.
+ */
+function getDerivativeFilename($filename, $extension = null)
+{
+    $base = pathinfo($filename, PATHINFO_EXTENSION) ? substr($filename, 0, strrpos($filename, '.')) : $filename;
+    $extension = is_null($extension) ? File::DERIVATIVE_EXT : $extension;
+    return $base . '.' . $extension;
 }

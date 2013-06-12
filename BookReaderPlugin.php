@@ -28,7 +28,7 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
         'config_form',
         'config',
         'define_routes',
-        'public_theme_header',
+        'public_head',
         'public_items_show',
     );
 
@@ -54,7 +54,7 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
         $this->_options['bookreader_logo_url'] = WEB_PLUGIN . DIRECTORY_SEPARATOR . $this->_options['bookreader_logo_url'];
         $this->_options['bookreader_favicon_url'] = WEB_THEME . DIRECTORY_SEPARATOR . $this->_options['bookreader_favicon_url'];
 
-        self::_installOptions();
+        $this->_installOptions();
     }
 
     /**
@@ -119,7 +119,7 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
     /**
      * Add css and js in the header of the theme.
      */
-    public function hookPublicThemeHeader($args)
+    public function hookPublicHead($args)
     {
         if (!get_option('bookreader_embed_enable')) {
             return;

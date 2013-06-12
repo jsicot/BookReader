@@ -12,7 +12,7 @@
  * @package BookReader
  */
 
-require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'helpers' . DIRECTORY_SEPARATOR . 'bookreaderFunctions.php';
+require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'helpers' . DIRECTORY_SEPARATOR . 'BookReaderFunctions.php';
 
 /**
  * BookReader plugin.
@@ -29,7 +29,7 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
         'config',
         'define_routes',
         'public_head',
-        'public_items_show',
+        'book_reader_items_show',
     );
 
     /**
@@ -38,7 +38,6 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
     protected $_options = array(
         'bookreader_logo_url' => 'BookReader/views/shared/images/logo_icon.png',
         'bookreader_favicon_url' => 'your_theme/images/favicon.ico',
-        'bookreader_embed_enable' => true,
         'bookreader_mode_page' => '1',
         'bookreader_embed_functions' => '0',
         'bookreader_width' => 620,
@@ -86,7 +85,6 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
 
         set_option('bookreader_logo_url', $post['bookreader_logo_url']);
         set_option('bookreader_favicon_url', $post['bookreader_favicon_url']);
-        set_option('bookreader_embed_enable', (boolean) $post['bookreader_embed_enable']);
         set_option('bookreader_mode_page', (($post['bookreader_mode_page'] == '1') ? '1' : '2'));
         set_option('bookreader_embed_functions', (($post['bookreader_embed_functions'] == '1') ? '1' : '0'));
         set_option('bookreader_width', (int) $post['bookreader_width']);
@@ -118,13 +116,11 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
 
     /**
      * Add css and js in the header of the theme.
+     *
+     * TODO Don't add css and javascript when BookReader is not used.
      */
     public function hookPublicHead($args)
     {
-        if (!get_option('bookreader_embed_enable')) {
-            return;
-        }
-
         $request = Zend_Controller_Front::getInstance()->getRequest();
         if ($request->getControllerName() == 'items' && $request->getActionName() == 'show') {
             queue_css_file('BookReader');
@@ -142,23 +138,19 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
     }
 
     /**
-     * Display viewer.
+     * Hook to display viewer.
      *
      * @param array $args
      *   Two specific arguments:
-     *   - (integer) page: set the page to be shown when including the iframe,
-     *   - (boolean) embed_functions: allow user to include an iframe with all
+     *   - (integer) 'page': set the page to be shown when including the iframe,
+     *   - (boolean) 'embed_functions': allow user to include an iframe with all
      *   functions (Zoom, Search...). Can be used to include a better viewer
      *   into items/views.php without requiring user to use the full viewer.
      *
      * @return void
      */
-    public function hookPublicItemsShow($args)
+    public function hookBookReaderItemsShow($args)
     {
-        if (!get_option('bookreader_embed_enable')) {
-            return;
-        }
-
         $view = $args['view'];
         $item = isset($args['item']) && !empty($args['item'])
             ? $args['item']

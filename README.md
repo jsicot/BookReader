@@ -34,16 +34,16 @@ If you want to embed it, add this code in the item/show.php file of your theme:
 
 ```
     <?php
-    fire_plugin_hook('public_items_show', array(
+    fire_plugin_hook('book_reader_items_show', array(
         'view' => $this,
         'item' => $item,
         'page' => '0',
         'embed_functions' => false,
     ));
+    ?>
 ```
 
-This hook is generally enabled by default in themes, but you can add options if
-wanted. If an option is not set, the parameters in the config page will be used.
+If an option is not set, the parameters in the config page will be used.
 Image number starts from '0' with default functions.
 
 

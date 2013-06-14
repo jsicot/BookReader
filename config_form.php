@@ -41,3 +41,10 @@
         </div>
     </div>
 </fieldset>
+
+<div class="field">
+    <label for="bookreader_toolbar_color"><?php echo __('Color of the toolbar (#e2dcc5)'); ?></label>
+    <div class="inputs">
+        <input type="text" class="textinput" name="bookreader_toolbar_color" size="3" value="<?php echo get_option('bookreader_toolbar_color'); ?>" id="bookreader_height" />
+    </div>
+</div>

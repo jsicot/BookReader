@@ -1,23 +1,24 @@
 <?php
     //retrieve item id
-    $id = id_bookreader_item();
+    $id = BookReader::bookreaderCurrItemId();
     $item = get_record_by_id('item', $id);
     set_current_record('item', $item);
 
     $title = metadata('item', array('Dublin Core', 'Title'));
-    $title .= ' - ' . metadata('item', array('Dublin Core', 'Creator'));
-    $title = htmlkarakter($title);
-    $title = utf8_decode($title);
+    if ($creator = metadata('item', array('Dublin Core', 'Creator'))) {
+        $title .= ' - ' . $creator;
+    }
+    $title = BookReader::htmlCharacter($title);
+
+    list($imgNums, $imgLabels, $imgWidths, $imgHeights) = BookReader::imagesData();
 
     $server = preg_replace('#^https?://#', '', WEB_ROOT);
     $serverFullText = $server . '/book-reader/index/fulltext';
-
-    list($imgNums, $imgLabels, $imgWidths, $imgHeights) = bookreader_images_data($item);
-
     $sharedDir = WEB_PLUGIN . '/BookReader/views/shared';
+    $imgDir = WEB_PLUGIN . '/BookReader/views/shared/images/';
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
+<html class="night" lang="fr">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name="viewport" content="width=device-width, maximum-scale=1.0" />
@@ -25,8 +26,10 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
     <link rel="shortcut icon" href="<?php echo get_option('bookreader_favicon_url'); ?>" type="image/x-icon" />
     <title><?php echo $title; ?></title>
+    <!-- Stylesheets -->
     <link rel="stylesheet" href="<?php echo $sharedDir . '/css/BookReader.css'; ?>" />
     <link rel="stylesheet" href="<?php echo  $sharedDir . '/css/BookReaderCustom.css'; ?>" />
+    <!-- JavaScripts -->
     <script type="text/javascript" src="<?php echo $sharedDir . '/javascripts/jquery-1.4.2.min.js'; ?>" charset="utf-8"></script>
     <script type="text/javascript" src="<?php echo $sharedDir . '/javascripts/jquery-ui-1.8.5.custom.min.js'; ?>" charset="utf-8"></script>
     <script type="text/javascript" src="<?php echo $sharedDir . '/javascripts/dragscrollable.js'; ?>" charset="utf-8"></script>
@@ -83,7 +86,7 @@
     br.bookId  = <?php echo $item->id; ?>;
     br.subPrefix = <?php echo $item->id; ?>;
 
-    <?php echo titleLeaf(); ?>
+    <?php echo BookReader::titleLeaf(); ?>
 
     br.numLeafs = br.pageW.length;
 
@@ -190,7 +193,7 @@
         return spreadIndices;
     }
 
-    br.ui = '<?php echo ui_bookreader_item(); ?>';
+    br.ui = '<?php echo BookReader::bookreaderCurrItemUI(); ?>';
 
     // Book title and the URL used for the book title link
     br.bookTitle= '<?php echo $title; ?>';
@@ -199,7 +202,7 @@
     br.siteName = "<?php echo option('site_title');?>";
 
     // Override the path used to find UI images
-    br.imagesBaseURL = '<?php echo bookreader_img_dir(); ?>';
+    br.imagesBaseURL = '<?php echo $imgDir; ?>';
 
     br.buildInfoDiv = function(jInfoDiv) {
         // $$$ it might make more sense to have a URL on openlibrary.org that returns this info
@@ -214,13 +217,13 @@
 
         // $$$ cover looks weird before it loads
         jInfoDiv.find('.BRfloatCover').append([
-            '<div style="height: 140px; min-width: 80px; padding: 0; margin: 0;"><?php echo link_to_item(item_cover()); ?></div>'
+            '<div style="height: 140px; min-width: 80px; padding: 0; margin: 0;"><?php echo link_to_item(BookReader::itemCover()); ?></div>'
         ].join(''));
 
         jInfoDiv.find('.BRfloatMeta').append([
             '<h3><?php __('Other Formats'); ?></h3>',
             '<ul class="links">',
-                '<li><?php echo item_PDF($item); ?></li>',
+                '<li><?php echo  BookReader::itemNonImages(); ?></li>',
             '</ul>',
             '<p class="moreInfo">',
                 '<a href="'+ this.bookUrl + '"><?php __('More information'); ?></a>',
@@ -249,7 +252,7 @@
     br.getEmbedURL = function(viewParams) {
         // We could generate a URL hash fragment here but for now we just leave at defaults
         //var url = 'http://' + window.location.host + '/stream/'+this.bookId;
-        var bookId = <?php echo id_bookreader_item(); ?>;
+        var bookId = <?php echo BookReader::bookreaderCurrItemId(); ?>;
         var url = '<?php echo WEB_ROOT; ?>/viewer/show/<?php echo $id; ?>';
         if (this.subPrefix != this.bookId) { // Only include if needed
             url += '/' + this.subPrefix;
@@ -275,7 +278,7 @@
     <?php
         // Si jamais la recherche n'est pas disponible (pas de fichier XML), on
         // va masquer les éléments permettant de la lancer (SMA 201210)
-        if (!brSearchAvailable(get_current_record('item'))): ?>
+        if (!BookReader::getDataForSearch()): ?>
     $('#textSrch').hide();
     $('#btnSrch').hide();
         <?php endif; ?>

@@ -37,7 +37,7 @@ class BookReader_IndexController extends Omeka_Controller_AbstractActionControll
             }
         }
         // Sorting by original filename if needed, or keep original attached order.
-        // uasort($list, 'cmp');
+        // uasort($list, 'compareStrings');
 
         $widths = array();
         $heights = array();

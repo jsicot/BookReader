@@ -163,7 +163,7 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
         $mode_page = get_option('bookreader_mode_page');
 
         // Build url of the page with iframe.
-        $url = WEB_ROOT . "/viewer/show/" . $item->id;
+        $url = WEB_ROOT . '/viewer/show/' . $item->id;
         $url .= $embed_functions ? '' : '?ui=embed';
         $url .= '#';
         $url .= empty($page) ? '' : 'page/n' . $page . '/';
@@ -172,6 +172,7 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
         $width = get_option('bookreader_width');
         $height = get_option('bookreader_height');
 
-        include_once 'views' . DIRECTORY_SEPARATOR . 'public'. DIRECTORY_SEPARATOR . 'bookreader-iframe.php';
+        $html = '<div><iframe src="' . $url . '" width="' . $width . '" height="' . $height . '" frameborder="0" ></iframe></div>';
+        echo $html;
     }
 }

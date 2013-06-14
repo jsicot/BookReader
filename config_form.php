@@ -63,14 +63,14 @@
     <div class="field">
         <label for="bookreader_width"><?php echo __('Width of the inline frame (Embedded Simple Viewer)'); ?></label>
         <div class="inputs">
-            <input type="text" class="textinput" name="bookreader_width" size="3" value="<?php echo get_option('bookreader_width'); ?>" id="bookreader_width" />
+            <input type="text" class="textinput" name="bookreader_width" size="5" value="<?php echo get_option('bookreader_width'); ?>" id="bookreader_width" />
         </div>
     </div>
 
     <div class="field">
         <label for="bookreader_height"><?php echo __('Height of the inline frame (Embedded Simple Viewer)'); ?></label>
         <div class="inputs">
-            <input type="text" class="textinput" name="bookreader_height" size="3" value="<?php echo get_option('bookreader_height'); ?>" id="bookreader_height" />
+            <input type="text" class="textinput" name="bookreader_height" size="5" value="<?php echo get_option('bookreader_height'); ?>" id="bookreader_height" />
         </div>
     </div>
 </fieldset>

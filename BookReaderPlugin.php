@@ -93,8 +93,8 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
         set_option('bookreader_sorting_mode', (boolean) $post['bookreader_sorting_mode']);
         set_option('bookreader_mode_page', (($post['bookreader_mode_page'] == '1') ? '1' : '2'));
         set_option('bookreader_embed_functions', (($post['bookreader_embed_functions'] == '1') ? '1' : '0'));
-        set_option('bookreader_width', (int) $post['bookreader_width']);
-        set_option('bookreader_height', (int) $post['bookreader_height']);
+        set_option('bookreader_width', $post['bookreader_width']);
+        set_option('bookreader_height', $post['bookreader_height']);
         set_option('bookreader_toolbar_color', $post['bookreader_toolbar_color']);
     }
 

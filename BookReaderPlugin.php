@@ -40,6 +40,7 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
         'bookreader_favicon_url' => 'your_theme/images/favicon.ico',
         'bookreader_toolbar_color' => '#E2DCC5',
         'bookreader_embed_enable' => true,
+        'bookreader_sorting_mode' => true,
         'bookreader_mode_page' => '1',
         'bookreader_embed_functions' => '0',
         'bookreader_width' => 620,
@@ -89,6 +90,7 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
         set_option('bookreader_favicon_url', $post['bookreader_favicon_url']);
         set_option('bookreader_toolbar_color', $post['bookreader_toolbar_color']);
         set_option('bookreader_embed_enable', (boolean) $post['bookreader_embed_enable']);
+        set_option('bookreader_sorting_mode', (boolean) $post['bookreader_sorting_mode']);
         set_option('bookreader_mode_page', (($post['bookreader_mode_page'] == '1') ? '1' : '2'));
         set_option('bookreader_embed_functions', (($post['bookreader_embed_functions'] == '1') ? '1' : '0'));
         set_option('bookreader_width', (int) $post['bookreader_width']);

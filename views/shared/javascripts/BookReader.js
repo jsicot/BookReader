@@ -2728,7 +2728,8 @@ BookReader.prototype.search = function(term) {
     $('#textSrch').blur(); //cause mobile safari to hide the keyboard     
     
     var url = 'http://'+this.server.replace(/:.+/, ''); //remove the port and userdir
-    url    += '/fulltext/inside.php?item_id='+this.bookId;
+    //url    += '/fulltext/inside.php?item_id='+this.bookId;
+	url    += '/fulltext/?item_id='+this.bookId; 
     url    += '&doc='+this.subPrefix;   //TODO: test with subitem
     url    += '&path='+this.bookPath.replace(new RegExp('/'+this.subPrefix+'$'), ''); //remove subPrefix from end of path
     url    += '&q='+escape(term);

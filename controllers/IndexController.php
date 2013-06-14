@@ -37,7 +37,10 @@ class BookReader_IndexController extends Omeka_Controller_AbstractActionControll
             }
         }
         // Sorting by original filename if needed, or keep original attached order.
-        // uasort($list, 'cmp');
+       	$sortOption = get_option('bookreader_sorting_mode');
+       	if($sortOption=='1'){
+        	uasort($list, 'cmp');
+        }
 
         $widths = array();
         $heights = array();
@@ -189,8 +192,11 @@ class BookReader_IndexController extends Omeka_Controller_AbstractActionControll
             $html .= '</div>' . PHP_EOL;
         }
         else {
-            // Sorting by original filename if needed, or keep original attached order.
-            // sort($list);
+              // Sorting by original filename if needed, or keep original attached order.
+       		$sortOption = get_option('bookreader_sorting_mode');
+       		if($sortOption=='1'){
+        		sort($list);
+       		 }
         }
 
         $image=$list[$num_img];
@@ -248,7 +254,10 @@ class BookReader_IndexController extends Omeka_Controller_AbstractActionControll
         }
         else {
             // Sorting by original filename if needed, or keep original attached order.
-            // sort($list);
+            $sortOption = get_option('bookreader_sorting_mode');
+       		if($sortOption=='1'){
+        		sort($list);
+       		 }
         }
 
         $image = $list[$num_img];

@@ -31,8 +31,21 @@
                 <?php echo __('If checked, the viewer will be available in embed mode in the "items/show/id" page and not only in full page in "viewer/show/id" page.'); ?>
             </p>
         </div>
-    </div>
+    </div>  
+    <div class="field">
+        <label for="bookreader_sorting_mode">
+            <?php echo __('Sorting by original filename ?'); ?>
+        </label>
+        <div class="inputs">
+        <?php echo get_view()->formCheckbox('bookreader_sorting_mode', TRUE,
+            array('checked' => (boolean) get_option('bookreader_sorting_mode'))); ?>
+            <p class="explanation">
+                <?php echo __('If checked, the viewer will sort images in viewer by original filename.'); ?>
+            </p>
+        </div>
+    </div>  
 
+    
     <div class="field">
         <label for="bookreader_mode_page"><?php echo __('Number of pages in Embed mode (1 or 2)'); ?></label>
         <div class="inputs">

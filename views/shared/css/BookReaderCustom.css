@@ -41,6 +41,7 @@
   overflow-y: auto !important;
   font-size : 12px;
   font-family : arial,sans-serif;
+  opacity:0.75;
 }
 #ToCmenu h2,
 #ToCmenu p {
@@ -81,6 +82,7 @@
   -webkit-border-top-right-radius: 8px;
   -moz-border-radius-bottomright: 8px;
   -webkit-border-bottom-right-radius: 8px;
+   opacity:0.75;
 }
 #ToCbutton.open {
   background-image: url("../images/nav_control-lt.png");

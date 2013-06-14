@@ -135,12 +135,12 @@ if ($('#ToCmenu').size() > 0) {
                         },
                         queue : false
                  });
-                 $('#ToCmenu').animate({opacity:1})
+                 $('#ToCmenu').animate({opacity:0.75})
           }
      });
    $('#ToCbutton').mouseover(function(){
         if ($(this).hasClass('close')) {
-            $('#ToCbutton').animate({opacity:1},{
+            $('#ToCbutton').animate({opacity:0.75},{
                duration : 500,
                queue : false
             });

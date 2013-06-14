@@ -24,6 +24,7 @@ Installation
     - Favicon URL for viewer (reader) pages
     - Hex color for toolbar viewer (reader)
     - Enable embed viewer in item/show page
+    - Sorting mode for the viewer (omeka default order or original filename order)
     - Number of pages in Embed mode (1 or 2)
     - Embed all functions (0 for none or 1 for all)
     - The width of the inline frame (Embedded Simple Viewer)

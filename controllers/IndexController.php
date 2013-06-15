@@ -28,7 +28,7 @@ class BookReader_IndexController extends Omeka_Controller_AbstractActionControll
         set_loop_records('files', $item->getFiles());
         foreach (loop('files') as $file) {
             if (strtolower(pathinfo($file->original_filename, PATHINFO_EXTENSION)) == 'xml') {
-                $xml_file = escapeshellarg(FILES_DIR . DIRECTORY_SEPARATOR . $file->filename);
+               $xml_file = escapeshellarg(FILES_DIR . DIRECTORY_SEPARATOR .'original'. DIRECTORY_SEPARATOR . $file->filename);
             }
             elseif ($file->hasThumbnail()) {
                 if (preg_match('/(jpg|jpeg|png|gif)/', $file->filename)) {
@@ -53,6 +53,8 @@ class BookReader_IndexController extends Omeka_Controller_AbstractActionControll
 
         // On a un fichier XML, on va aller l'interroger pour voir si on a des choses dedans
         if ($xml_file) {
+        
+        //echo "grep -P -i '<\/?page|$q' $xml_file ";
             $res = shell_exec("grep -P -i '<\/?page|$q' $xml_file");
             $res = preg_replace("/<page[^>]*>\n<\/page>\n/",'',$res);
 
@@ -66,7 +68,7 @@ class BookReader_IndexController extends Omeka_Controller_AbstractActionControll
 
             // On va parcourir toutes les lignes qui matchent
             while (preg_match('/<page number="(\d*)" [^>]*height="(\d*)" width="(\d*)">\n(.*)\n<\/page>(.*)$/siU', $res, $match)) {
-                $page_number = $match[1] - 1;
+                $page_number = $match[1];
                 $page_height = $match[2];
                 $page_width  = $match[3];
                 $zones = $match[4];
@@ -83,7 +85,7 @@ class BookReader_IndexController extends Omeka_Controller_AbstractActionControll
                         $zone_text = $match_ligne[6];
                         $zone_text = preg_replace("/<\/?[ib]>/", "", $zone_text);
 
-                        $zone_right = ($page_width - $zone_left - $zone_widht);
+                        $zone_right = ($page_width - $zone_left - $zone_width);
                         $zone_bottom = ($page_height - $zone_top - $zone_height);
 
                         // On crée la zone "globale"

@@ -29,7 +29,7 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
         'config',
         'define_routes',
         'public_head',
-        'book_reader_items_show',
+        'book_reader_item_show',
     );
 
     /**
@@ -43,6 +43,7 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
         'bookreader_width' => 620,
         'bookreader_height' => 500,
         'bookreader_toolbar_color' => '#e2dcc5',
+        'bookreader_custom_library' => 'BookReaderCustom.php',
     );
 
     /**
@@ -50,8 +51,9 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
      */
     public function hookInstall()
     {
-        $this->_options['bookreader_logo_url'] = WEB_PLUGIN . DIRECTORY_SEPARATOR . $this->_options['bookreader_logo_url'];
-        $this->_options['bookreader_favicon_url'] = WEB_THEME . DIRECTORY_SEPARATOR . $this->_options['bookreader_favicon_url'];
+        $this->_options['bookreader_logo_url'] = WEB_PLUGIN . '/' . $this->_options['bookreader_logo_url'];
+        $this->_options['bookreader_favicon_url'] = WEB_THEME . '/' . $this->_options['bookreader_favicon_url'];
+        $this->_options['bookreader_custom_library'] = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'libraries' . DIRECTORY_SEPARATOR . $this->_options['bookreader_custom_library'];
 
         $this->_installOptions();
     }
@@ -90,6 +92,7 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
         set_option('bookreader_width', (int) $post['bookreader_width']);
         set_option('bookreader_height', (int) $post['bookreader_height']);
         set_option('bookreader_toolbar_color', $post['bookreader_toolbar_color']);
+        set_option('bookreader_custom_library', realpath($post['bookreader_custom_library']));
     }
 
     /**
@@ -117,7 +120,7 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
     /**
      * Add css and js in the header of the theme.
      *
-     * TODO Don't add css and javascript when BookReader is not used.
+     * TODO Don't add css and javascript when BookReader is not used for an item.
      */
     public function hookPublicHead($args)
     {
@@ -149,7 +152,7 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
      *
      * @return void
      */
-    public function hookBookReaderItemsShow($args)
+    public function hookBookReaderItemShow($args)
     {
         $view = $args['view'];
         $item = isset($args['item']) && !empty($args['item'])

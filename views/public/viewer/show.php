@@ -86,7 +86,7 @@
     br.bookId  = <?php echo $item->id; ?>;
     br.subPrefix = <?php echo $item->id; ?>;
 
-    <?php echo BookReader::titleLeaf(); ?>
+    <?php echo BookReader::titleLeaf($item); ?>
 
     br.numLeafs = br.pageW.length;
 
@@ -223,7 +223,7 @@
         jInfoDiv.find('.BRfloatMeta').append([
             '<h3><?php __('Other Formats'); ?></h3>',
             '<ul class="links">',
-                '<li><?php echo  BookReader::itemNonImages(); ?></li>',
+                '<?php echo BookReader::linksToNonImages(); ?>',
             '</ul>',
             '<p class="moreInfo">',
                 '<a href="'+ this.bookUrl + '"><?php __('More information'); ?></a>',

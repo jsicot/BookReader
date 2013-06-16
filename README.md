@@ -34,7 +34,7 @@ If you want to embed it, add this code in the item/show.php file of your theme:
 
 ```
     <?php
-    fire_plugin_hook('book_reader_items_show', array(
+    fire_plugin_hook('book_reader_item_show', array(
         'view' => $this,
         'item' => $item,
         'page' => '0',

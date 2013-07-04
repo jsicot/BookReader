@@ -38,10 +38,12 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
     protected $_options = array(
         'bookreader_logo_url' => 'BookReader/views/shared/images/logo_icon.png',
         'bookreader_favicon_url' => 'your_theme/images/favicon.ico',
+        'bookreader_sorting_mode' => false,
         'bookreader_mode_page' => '1',
         'bookreader_embed_functions' => '0',
-        'bookreader_width' => 620,
-        'bookreader_height' => 500,
+        'bookreader_class' => '',
+        'bookreader_width' => '100%',
+        'bookreader_height' => '480',
         'bookreader_toolbar_color' => '#e2dcc5',
         'bookreader_custom_library' => 'BookReaderCustom.php',
     );
@@ -85,13 +87,15 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
     {
         $post = $args['post'];
 
-        set_option('bookreader_logo_url', $post['bookreader_logo_url']);
-        set_option('bookreader_favicon_url', $post['bookreader_favicon_url']);
+        set_option('bookreader_logo_url', trim($post['bookreader_logo_url']));
+        set_option('bookreader_favicon_url', trim($post['bookreader_favicon_url']));
+        set_option('bookreader_sorting_mode', (boolean) $post['bookreader_sorting_mode']);
         set_option('bookreader_mode_page', (($post['bookreader_mode_page'] == '1') ? '1' : '2'));
         set_option('bookreader_embed_functions', (($post['bookreader_embed_functions'] == '1') ? '1' : '0'));
-        set_option('bookreader_width', (int) $post['bookreader_width']);
-        set_option('bookreader_height', (int) $post['bookreader_height']);
-        set_option('bookreader_toolbar_color', $post['bookreader_toolbar_color']);
+        set_option('bookreader_class', trim($post['bookreader_class']));
+        set_option('bookreader_width', trim($post['bookreader_width']));
+        set_option('bookreader_height', trim($post['bookreader_height']));
+        set_option('bookreader_toolbar_color', trim($post['bookreader_toolbar_color']));
         set_option('bookreader_custom_library', realpath($post['bookreader_custom_library']));
     }
 
@@ -172,10 +176,20 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
         $url .= empty($page) ? '' : 'page/n' . $page . '/';
         $url .= 'mode/' . $mode_page . 'up';
 
+        $class = get_option('bookreader_class');
+        if (!empty($class)) {
+            $class = ' class="' . $class . '"';
+        }
         $width = get_option('bookreader_width');
+        if (!empty($width)) {
+            $width = ' width="' . $width . '"';
+        }
         $height = get_option('bookreader_height');
+        if (!empty($height)) {
+            $height = ' height="' . $height . '"';
+        }
 
-        $html = '<div><iframe src="' . $url . '" width="' . $width . '" height="' . $height . '" frameborder="0" ></iframe></div>';
+        $html = '<div><iframe src="' . $url . '"' . $class . $width . $height . ' frameborder="0"></iframe></div>';
         echo $html;
     }
 }

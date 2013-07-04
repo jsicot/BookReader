@@ -9,6 +9,7 @@
         $title .= ' - ' . $creator;
     }
     $title = BookReader::htmlCharacter($title);
+    $coverFile = BookReader::getCoverFile($item);
 
     list($imgNums, $imgLabels, $imgWidths, $imgHeights) = BookReader::imagesData();
 
@@ -24,6 +25,7 @@
     <meta name="viewport" content="width=device-width, maximum-scale=1.0" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <link rel="apple-touch-icon" href="<?php echo WEB_FILES . '/thumbnails/' . $coverFile->getDerivativeFilename(); ?>" />
     <link rel="shortcut icon" href="<?php echo get_option('bookreader_favicon_url'); ?>" type="image/x-icon" />
     <title><?php echo $title; ?></title>
     <!-- Stylesheets -->
@@ -284,17 +286,12 @@
         <?php endif; ?>
     </script>
 
-    <?php
-    //Table of Contents if exist, plugin PdfToc required
-    if (function_exists('PdfTocPublicShow')):
-        $toc = PdfTocPublicShow(get_record_by_id('item', $id));
-        if(strlen($toc) > 8) : ?>
-        <div id='ToCbutton' title='<?php echo __('Show/hide toc bar'); ?>' class='open'></div>
-        <div id='ToCmenu'>
-            <h2><?php echo __('Table of Contents'); ?></h2>
-            <?php echo $toc; ?>
-        </div>
-        <?php endif;
-    endif; ?>
+     <?php
+     // Table of Contents if exist, plugin PdfToc required.
+     echo fire_plugin_hook('toc_for_bookreader', array(
+         'view' => $this,
+         'item' => $item,
+     ));
+    ?>
     </body>
 </html>

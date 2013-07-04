@@ -12,6 +12,18 @@
     </div>
 </div>
 
+<div class="field">
+    <label for="bookreader_sorting_mode">
+        <?php echo __('Sorting by original filename ?'); ?>
+    </label>
+    <div class="inputs">
+        <?php echo get_view()->formCheckbox('bookreader_sorting_mode', TRUE, array('checked' => (boolean) get_option('bookreader_sorting_mode'))); ?>
+        <p class="explanation">
+            <?php echo __('If checked, the viewer will sort images in viewer alphabetically, by original filename.'); ?>
+        </p>
+    </div>
+</div>
+
 <fieldset id="fieldset-embed"><legend><?php echo __('Embed mode'); ?></legend>
     <div class="field">
         <label for="bookreader_mode_page"><?php echo __('Number of pages in embed mode (1 or 2)'); ?></label>
@@ -28,16 +40,23 @@
     </div>
 
     <div class="field">
+        <label for="bookreader_class"><?php echo __('Class to add to the inline frame in embed mode'); ?></label>
+        <div class="inputs">
+            <input type="text" class="textinput" name="bookreader_class" size="7" value="<?php echo get_option('bookreader_class'); ?>" id="bookreader_class" />
+        </div>
+    </div>
+
+    <div class="field">
         <label for="bookreader_width"><?php echo __('Width of the inline frame in embed mode'); ?></label>
         <div class="inputs">
-            <input type="text" class="textinput" name="bookreader_width" size="3" value="<?php echo get_option('bookreader_width'); ?>" id="bookreader_width" />
+            <input type="text" class="textinput" name="bookreader_width" size="5" value="<?php echo get_option('bookreader_width'); ?>" id="bookreader_width" />
         </div>
     </div>
 
     <div class="field">
         <label for="bookreader_height"><?php echo __('Height of the inline frame in embed mode'); ?></label>
         <div class="inputs">
-            <input type="text" class="textinput" name="bookreader_height" size="3" value="<?php echo get_option('bookreader_height'); ?>" id="bookreader_height" />
+            <input type="text" class="textinput" name="bookreader_height" size="5" value="<?php echo get_option('bookreader_height'); ?>" id="bookreader_height" />
         </div>
     </div>
 </fieldset>
@@ -45,7 +64,7 @@
 <div class="field">
     <label for="bookreader_toolbar_color"><?php echo __('Color of the toolbar (#e2dcc5)'); ?></label>
     <div class="inputs">
-        <input type="text" class="textinput" name="bookreader_toolbar_color" size="3" value="<?php echo get_option('bookreader_toolbar_color'); ?>" id="bookreader_height" />
+        <input type="text" class="textinput" name="bookreader_toolbar_color" size="7" value="<?php echo get_option('bookreader_toolbar_color'); ?>" id="bookreader_height" />
     </div>
 </div>
 

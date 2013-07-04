@@ -128,11 +128,12 @@ class BookReader
             //$documentUrl = WEB_FILES . '/' . $file->filename;
             //$documentUrl = file_download_uri($file);
             $sizefile = self::_formatFileSize($file->size);
+            $extension = pathinfo($file->original_filename, PATHINFO_EXTENSION);
             //$type = $file->mime_browser;
             $html .= '<li>';
             $html .= '<div style="clear:both; padding:2px;">';
             $html .= '<a href="' . $file->getWebPath() . '" class="download-file">' . $file->original_filename. '</a>';
-            $html .= '&nbsp; (' . $sizefile . ')';
+            $html .= '&nbsp; (' . $extension . ' / ' . $sizefile . ')';
             $html .= '</div>'; // Bug when PHP_EOL is added.
             $html .= '</li>';
         }
@@ -205,6 +206,21 @@ class BookReader
         }
 
         return $img;
+    }
+
+    /**
+     * Return the cover file of the item.
+     *
+     * @return file
+     *   Object file of the cover.
+     */
+    public static function getCoverFile($item = null)
+    {
+        if (is_null($item)) {
+            $item = get_current_record('item');
+        }
+
+        return BookReader_Custom::getCoverFile($item);
     }
 
     /**
@@ -315,8 +331,10 @@ class BookReader
             }
 
             // Sorting by original filename or keep attachment order.
-            // uasort($filesForBookreader[$item->id]['images'], array(BookReader, 'compareStrings'));
-            // uasort($filesForBookreader[$item->id]['non-images'], array(BookReader, 'compareStrings'));
+            if (get_option('bookreader_sorting_mode')) {
+                uasort($filesForBookreader[$item->id]['images'], array(BookReader, 'compareStrings'));
+                uasort($filesForBookreader[$item->id]['non-images'], array(BookReader, 'compareStrings'));
+            }
         }
 
         return $invert

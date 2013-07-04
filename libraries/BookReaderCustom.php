@@ -19,6 +19,8 @@ class BookReader_Custom
     /**
      * Get the page label from a string, generally the last word of a filename.
      *
+     * @todo Currently, the page label should be a number.
+     *
      * @return string
      *   Label of the page, or 'null' if none.
      */
@@ -31,6 +33,10 @@ class BookReader_Custom
         $txt = metadata($file, array('Dublin Core', 'Title'));
         if (!$txt) {
             $txt = 'null';
+        }
+        else {
+            $txt = substr($txt, strrpos($txt, ' '));
+            $txt = (int) $txt;
         }
 
         return $txt;
@@ -120,7 +126,9 @@ class BookReader_Custom
             }
         }
         // Sorting by original filename if needed, or keep original attached order.
-        // uasort($list, array(BookReader, 'compareStrings'));
+        if (get_option('bookreader_sorting_mode')) {
+            uasort($list, array(BookReader, 'compareStrings'));
+        }
 
         $widths = array();
         $heights = array();

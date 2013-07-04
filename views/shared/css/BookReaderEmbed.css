@@ -6,6 +6,7 @@
 #BRtoolbar .label,
 .pageform,
 .play,
+.embed,
 .one_page_mode,
 .two_page_mode,
 .thumbnail_mode,
@@ -31,5 +32,5 @@
 
 #BRembedreturn a {
   font-size: 14px;
-  color: #fff;
+  color: #036daa;
 }

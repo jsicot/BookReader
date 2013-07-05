@@ -1,0 +1,197 @@
+# Translation for the BookReader plugin for Omeka.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the Omeka package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: BookReader\n"
+"Report-Msgid-Bugs-To: https://github.com/Daniel-KM/BookReader/issues\n"
+"POT-Creation-Date: 2013-07-04 00:00+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: config_form.php:2
+msgid "Logo URL for toolbar viewer"
+msgstr ""
+
+#: config_form.php:9
+msgid "Favicon URL for viewer pages"
+msgstr ""
+
+#: config_form.php:17
+msgid "Sorting by original filename ?"
+msgstr ""
+
+#: config_form.php:22
+msgid "If checked, the viewer will sort images in viewer alphabetically, by original filename."
+msgstr ""
+
+#: config_form.php:27
+msgid "Embed mode"
+msgstr ""
+
+#: config_form.php:29
+msgid "Number of pages in embed mode (1 or 2)"
+msgstr ""
+
+#: config_form.php:36
+msgid "Enable all functions in embed mode (0 or 1)"
+msgstr ""
+
+#: config_form.php:43
+msgid "Class to add to the inline frame in embed mode"
+msgstr ""
+
+#: config_form.php:50
+msgid "Width of the inline frame in embed mode"
+msgstr ""
+
+#: config_form.php:57
+msgid "Height of the inline frame in embed mode"
+msgstr ""
+
+#: config_form.php:65
+msgid "Color of the toolbar (#e2dcc5)"
+msgstr ""
+
+#: config_form.php:72
+msgid "Path of the custom library"
+msgstr ""
+
+#: config_form.php:77
+msgid "Path of the custom library you use to get infos from your files."
+msgstr ""
+
+#: config_form.php:78
+msgid "Default directory is \"%s\"."
+msgstr ""
+
+#: helpers/BookReaderFunctions.php:354
+msgid "bytes"
+msgstr ""
+
+#: helpers/BookReaderFunctions.php:358
+msgid "KB"
+msgstr ""
+
+#: helpers/BookReaderFunctions.php:358
+msgid "MB"
+msgstr ""
+
+#: helpers/BookReaderFunctions.php:358
+msgid "GB"
+msgstr ""
+
+#: helpers/BookReaderFunctions.php:358
+msgid "TB"
+msgstr ""
+
+#: views/public/viewer/show.php:226
+msgid "Other Formats"
+msgstr ""
+
+#: views/public/viewer/show.php:231
+msgid "More information"
+msgstr ""
+
+#: views/public/viewer/show.php:237
+msgid "Report a problem"
+msgstr ""
+
+#: views/public/viewer/show.php:277
+msgid "Go to %s"
+msgstr ""
+
+#: views/public/viewer/show.php:278
+msgid "Zoom in"
+msgstr ""
+
+#: views/public/viewer/show.php:279
+msgid "Zoom out"
+msgstr ""
+
+#: views/public/viewer/show.php:280
+msgid "One-page view"
+msgstr ""
+
+#: views/public/viewer/show.php:281
+msgid "Two-page view"
+msgstr ""
+
+#: views/public/viewer/show.php:282
+msgid "Thumbnail view"
+msgstr ""
+
+#: views/public/viewer/show.php:283
+msgid "Print this page"
+msgstr ""
+
+#: views/public/viewer/show.php:284
+msgid "Embed BookReader"
+msgstr ""
+
+#: views/public/viewer/show.php:285
+msgid "Link to this document and page"
+msgstr ""
+
+#: views/public/viewer/show.php:289
+msgid "Bookmark this page"
+msgstr ""
+
+#: views/public/viewer/show.php:287
+msgid "Read this document aloud"
+msgstr ""
+
+#: views/public/viewer/show.php:288
+msgid "Share this document"
+msgstr ""
+
+#: views/public/viewer/show.php:289
+msgid "About this document"
+msgstr ""
+
+#: views/public/viewer/show.php:290
+msgid "Show fullscreen"
+msgstr ""
+
+#: views/public/viewer/show.php:291
+msgid "Flip left"
+msgstr ""
+
+#: views/public/viewer/show.php:292
+msgid "Flip right"
+msgstr ""
+
+#: views/public/viewer/show.php:293
+msgid "Page up"
+msgstr ""
+
+#: views/public/viewer/show.php:294
+msgid "Page down"
+msgstr ""
+
+#: views/public/viewer/show.php:295
+msgid "Play"
+msgstr ""
+
+#: views/public/viewer/show.php:296
+msgid "Pause"
+msgstr ""
+
+#: views/public/viewer/show.php:297
+msgid "Show/hide nav bar"
+msgstr ""
+
+#: views/public/viewer/show.php:299
+msgid "First page"
+msgstr ""
+
+#: views/public/viewer/show.php:300
+msgid "Last page"
+msgstr ""

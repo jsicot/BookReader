@@ -25,6 +25,7 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
     protected $_hooks = array(
         'install',
         'uninstall',
+        'initialize',
         'config_form',
         'config',
         'define_routes',
@@ -66,6 +67,14 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
     public function hookUninstall()
     {
         $this->_uninstallOptions();
+    }
+
+    /**
+     * Add the translations.
+     */
+    public function hookInitialize()
+    {
+        add_translation_source(dirname(__FILE__) . '/languages');
     }
 
     /**

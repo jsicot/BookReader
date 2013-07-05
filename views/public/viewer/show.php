@@ -273,6 +273,47 @@
         return "<iframe src='" + this.getEmbedURL(viewParams) + "' width='" + frameWidth + "' height='" + frameHeight + "' frameborder='0' ></iframe>";
     }
 
+    br.initUIStrings = function() {
+        var titles = { '.logo': '<?php echo __('Go to %s', option('site_title')); ?>', // $$$ update after getting OL record
+            '.zoom_in': '<?php echo __('Zoom in'); ?>',
+            '.zoom_out': '<?php echo __('Zoom out'); ?>',
+            '.onepg': '<?php echo __('One-page view'); ?>',
+            '.twopg': '<?php echo __('Two-page view'); ?>',
+            '.thumb': '<?php echo __('Thumbnail view'); ?>',
+            '.print': '<?php echo __('Print this page'); ?>',
+            '.embed': '<?php echo __('Embed BookReader'); ?>',
+            '.link': '<?php echo __('Link to this document and page'); ?>',
+            '.bookmark': '<?php echo __('Bookmark this page'); ?>',
+            '.read': '<?php echo __('Read this document aloud'); ?>',
+            '.share': '<?php echo __('Share this document'); ?>',
+            '.info': '<?php echo __('About this document'); ?>',
+            '.full': '<?php echo __('Show fullscreen'); ?>',
+            '.book_left': '<?php echo __('Flip left'); ?>',
+            '.book_right': '<?php echo __('Flip right'); ?>',
+            '.book_up': '<?php echo __('Page up'); ?>',
+            '.book_down': '<?php echo __('Page down'); ?>',
+            '.play': '<?php echo __('Play'); ?>',
+            '.pause': '<?php echo __('Pause'); ?>',
+            '.BRdn': '<?php echo __('Show/hide nav bar'); ?>', // Would have to keep updating on state change to have just "Hide nav bar"
+            '.BRup': '<?php echo __('Show/hide nav bar'); ?>',
+            '.book_top': '<?php echo __('First page'); ?>',
+            '.book_bottom': '<?php echo __('Last page'); ?>'
+        };
+        if ('rl' == this.pageProgression) {
+            titles['.book_leftmost'] = '<?php echo __('Last page'); ?>';
+            titles['.book_rightmost'] = '<?php echo __('First page'); ?>';
+        } else { // LTR
+            titles['.book_leftmost'] = '<?php echo __('First page'); ?>';
+            titles['.book_rightmost'] = '<?php echo __('Last page'); ?>';
+        }
+
+        for (var icon in titles) {
+            if (titles.hasOwnProperty(icon)) {
+                $('#BookReader').find(icon).attr('title', titles[icon]);
+            }
+        }
+    }
+
     // Let's go!
     br.init();
     $('#BRtoolbar').find('.read').hide();

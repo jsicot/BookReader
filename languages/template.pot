@@ -16,59 +16,74 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
+#: config_form.php:1
+msgid "General parameters"
+msgstr ""
+
 #: config_form.php:2
 msgid "Logo URL for toolbar viewer"
 msgstr ""
 
-#: config_form.php:9
+#: config_form.php:3
+msgid "Url to a custom css for BookReader"
+msgstr ""
+
+#: config_form.php:10
 msgid "Favicon URL for viewer pages"
 msgstr ""
 
-#: config_form.php:17
+#: config_form.php:29
 msgid "Sorting by original filename ?"
 msgstr ""
 
-#: config_form.php:22
-msgid "If checked, the viewer will sort images in viewer alphabetically, by original filename."
+#: config_form.php:34
+msgid ""
+"If checked, the viewer will sort images in viewer alphabetically, by "
+"original filename."
 msgstr ""
 
-#: config_form.php:27
+#: config_form.php:40
 msgid "Embed mode"
 msgstr ""
 
-#: config_form.php:29
+#: config_form.php:42
 msgid "Number of pages in embed mode (1 or 2)"
 msgstr ""
 
-#: config_form.php:36
+#: config_form.php:49
 msgid "Enable all functions in embed mode (0 or 1)"
 msgstr ""
 
-#: config_form.php:43
+#: config_form.php:56
 msgid "Class to add to the inline frame in embed mode"
 msgstr ""
 
-#: config_form.php:50
+#: config_form.php:63
 msgid "Width of the inline frame in embed mode"
 msgstr ""
 
-#: config_form.php:57
+#: config_form.php:70
 msgid "Height of the inline frame in embed mode"
 msgstr ""
 
 #: config_form.php:65
-msgid "Color of the toolbar (#e2dcc5)"
+msgid "Color of the background (#65645F)"
 msgstr ""
 
 #: config_form.php:72
+msgid "Color of the toolbar (#e2dcc5)"
+msgstr ""
+
+#: config_form.php:17
 msgid "Path of the custom library"
 msgstr ""
 
-#: config_form.php:77
-msgid "Path of the custom library you use to get infos from your files."
+#: config_form.php:22
+msgid "Custom functions are used to get infos from your files."
 msgstr ""
 
-#: config_form.php:78
+#: config_form.php:23
+#, php-format
 msgid "Default directory is \"%s\"."
 msgstr ""
 

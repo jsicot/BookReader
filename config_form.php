@@ -1,28 +1,41 @@
-<div class="field">
-    <label for="bookreader_logo_url"><?php echo __('Logo URL for toolbar viewer'); ?></label>
-    <div class="inputs">
-        <input type="text" class="textinput" name="bookreader_logo_url" size="65" value="<?php echo get_option('bookreader_logo_url'); ?>" id="bookreader_logo_url" />
+<fieldset id="fieldset-embed"><legend><?php echo __('General parameters'); ?></legend>
+    <div class="field">
+        <label for="bookreader_custom_css"><?php echo __('Url to a custom css for BookReader'); ?></label>
+        <div class="inputs">
+            <input type="text" class="textinput" name="bookreader_custom_css" size="7" value="<?php echo get_option('bookreader_custom_css'); ?>" id="bookreader_custom_css" />
+        </div>
     </div>
-</div>
 
-<div class="field">
-    <label for="bookreader_favicon_url"><?php echo __('Favicon URL for viewer pages'); ?></label>
-    <div class="inputs">
-        <input type="text" class="textinput" name="bookreader_favicon_url" size="65" value="<?php echo get_option('bookreader_favicon_url'); ?>" id="bookreader_favicon_url" />
+    <div class="field">
+        <label for="bookreader_favicon_url"><?php echo __('Favicon URL for viewer pages'); ?></label>
+        <div class="inputs">
+            <input type="text" class="textinput" name="bookreader_favicon_url" size="65" value="<?php echo get_option('bookreader_favicon_url'); ?>" id="bookreader_favicon_url" />
+        </div>
     </div>
-</div>
 
-<div class="field">
-    <label for="bookreader_sorting_mode">
-        <?php echo __('Sorting by original filename ?'); ?>
-    </label>
-    <div class="inputs">
-        <?php echo get_view()->formCheckbox('bookreader_sorting_mode', TRUE, array('checked' => (boolean) get_option('bookreader_sorting_mode'))); ?>
+    <div class="field">
+        <label for="bookreader_custom_library"><?php echo __('Path of the custom library'); ?></label>
+        <div class="inputs">
+            <input type="text" class="textinput" name="bookreader_custom_library" size="65" value="<?php echo get_option('bookreader_custom_library'); ?>" id="bookreader_custom_library" />
+        </div>
         <p class="explanation">
-            <?php echo __('If checked, the viewer will sort images in viewer alphabetically, by original filename.'); ?>
+            <?php echo __('Custom functions are used to get infos from your files.');
+            echo ' ' . __('Default directory is "%s".', dirname(__FILE__) . DIRECTORY_SEPARATOR . 'libraries' . DIRECTORY_SEPARATOR . 'BookReaderCustom.php'); ?>
         </p>
     </div>
-</div>
+
+    <div class="field">
+        <label for="bookreader_sorting_mode">
+            <?php echo __('Sorting by original filename ?'); ?>
+        </label>
+        <div class="inputs">
+            <?php echo get_view()->formCheckbox('bookreader_sorting_mode', TRUE, array('checked' => (boolean) get_option('bookreader_sorting_mode'))); ?>
+            <p class="explanation">
+                <?php echo __('If checked, the viewer will sort images in viewer alphabetically, by original filename.'); ?>
+            </p>
+        </div>
+    </div>
+</fieldset>
 
 <fieldset id="fieldset-embed"><legend><?php echo __('Embed mode'); ?></legend>
     <div class="field">
@@ -60,21 +73,3 @@
         </div>
     </div>
 </fieldset>
-
-<div class="field">
-    <label for="bookreader_toolbar_color"><?php echo __('Color of the toolbar (#e2dcc5)'); ?></label>
-    <div class="inputs">
-        <input type="text" class="textinput" name="bookreader_toolbar_color" size="7" value="<?php echo get_option('bookreader_toolbar_color'); ?>" id="bookreader_height" />
-    </div>
-</div>
-
-<div class="field">
-    <label for="bookreader_custom_library"><?php echo __('Path of the custom library'); ?></label>
-    <div class="inputs">
-        <input type="text" class="textinput" name="bookreader_custom_library" size="65" value="<?php echo get_option('bookreader_custom_library'); ?>" id="bookreader_custom_library" />
-    </div>
-    <p class="explanation">
-        <?php echo __('Path of the custom library you use to get infos from your files.');
-        echo ' ' . __('Default directory is "%s".', dirname(__FILE__) . DIRECTORY_SEPARATOR . 'libraries' . DIRECTORY_SEPARATOR . 'BookReaderCustom.php'); ?>
-    </p>
-</div>

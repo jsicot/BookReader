@@ -25,11 +25,11 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
     protected $_hooks = array(
         'install',
         'uninstall',
+        'upgrade',
         'initialize',
         'config_form',
         'config',
         'define_routes',
-        'public_head',
         'book_reader_item_show',
     );
 
@@ -37,16 +37,15 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
      * @var array Options and their default values.
      */
     protected $_options = array(
-        'bookreader_logo_url' => 'BookReader/views/shared/images/logo_icon.png',
+        'bookreader_custom_css' => 'views/shared/css/BookReaderCustom.css',
         'bookreader_favicon_url' => 'your_theme/images/favicon.ico',
+        'bookreader_custom_library' => 'BookReaderCustom.php',
         'bookreader_sorting_mode' => false,
         'bookreader_mode_page' => '1',
         'bookreader_embed_functions' => '0',
         'bookreader_class' => '',
         'bookreader_width' => '100%',
         'bookreader_height' => '480',
-        'bookreader_toolbar_color' => '#e2dcc5',
-        'bookreader_custom_library' => 'BookReaderCustom.php',
     );
 
     /**
@@ -54,7 +53,7 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
      */
     public function hookInstall()
     {
-        $this->_options['bookreader_logo_url'] = WEB_PLUGIN . '/' . $this->_options['bookreader_logo_url'];
+        $this->_options['bookreader_custom_css'] = WEB_PLUGIN . '/' . $this->_options['bookreader_custom_css'];
         $this->_options['bookreader_favicon_url'] = WEB_THEME . '/' . $this->_options['bookreader_favicon_url'];
         $this->_options['bookreader_custom_library'] = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'libraries' . DIRECTORY_SEPARATOR . $this->_options['bookreader_custom_library'];
 
@@ -67,6 +66,21 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
     public function hookUninstall()
     {
         $this->_uninstallOptions();
+    }
+
+    /**
+     * Upgrade the plugin.
+     */
+    public function hookUpgrade($args)
+    {
+        $oldVersion = $args['old_version'];
+        $newVersion = $args['new_version'];
+
+        if (version_compare($oldVersion, '2.1', '<=')) {
+            set_option('bookreader_custom_css', WEB_PLUGIN . '/' . $this->_options['bookreader_custom_css']);
+            delete_option('bookreader_logo_url');
+            delete_option('bookreader_toolbar_color');
+        }
     }
 
     /**
@@ -96,16 +110,15 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
     {
         $post = $args['post'];
 
-        set_option('bookreader_logo_url', trim($post['bookreader_logo_url']));
+        set_option('bookreader_custom_css', trim($post['bookreader_custom_css']));
         set_option('bookreader_favicon_url', trim($post['bookreader_favicon_url']));
+        set_option('bookreader_custom_library', realpath($post['bookreader_custom_library']));
         set_option('bookreader_sorting_mode', (boolean) $post['bookreader_sorting_mode']);
         set_option('bookreader_mode_page', (($post['bookreader_mode_page'] == '1') ? '1' : '2'));
         set_option('bookreader_embed_functions', (($post['bookreader_embed_functions'] == '1') ? '1' : '0'));
         set_option('bookreader_class', trim($post['bookreader_class']));
         set_option('bookreader_width', trim($post['bookreader_width']));
         set_option('bookreader_height', trim($post['bookreader_height']));
-        set_option('bookreader_toolbar_color', trim($post['bookreader_toolbar_color']));
-        set_option('bookreader_custom_library', realpath($post['bookreader_custom_library']));
     }
 
     /**
@@ -131,29 +144,6 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
     }
 
     /**
-     * Add css and js in the header of the theme.
-     *
-     * TODO Don't add css and javascript when BookReader is not used for an item.
-     */
-    public function hookPublicHead($args)
-    {
-        $request = Zend_Controller_Front::getInstance()->getRequest();
-        if ($request->getControllerName() == 'items' && $request->getActionName() == 'show') {
-            queue_css_file('BookReader');
-            queue_css_file('BookReaderCustom');
-
-            queue_js_file('jquery-1.4.2.min');
-            queue_js_file('jquery-ui-1.8.5.custom.min');
-            queue_js_file('dragscrollable');
-            queue_js_file('jquery.colorbox-min');
-            queue_js_file('jquery.ui.ipad');
-            queue_js_file('jquery.bt.min');
-            queue_js_file('BookReader');
-            queue_js_file('ToCmenu');
-        }
-    }
-
-    /**
      * Hook to display viewer.
      *
      * @param array $args
@@ -176,6 +166,7 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
         $embed_functions = isset($args['embed_functions'])
             ? $args['embed_functions']
             : get_option('bookreader_embed_functions');
+
         $mode_page = get_option('bookreader_mode_page');
 
         // Build url of the page with iframe.

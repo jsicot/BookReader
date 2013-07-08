@@ -79,7 +79,7 @@ function BookReader() {
 
     this.lastDisplayableIndex2up = null;
 
-    // Should be overriden (before init) by custom implmentations.
+    // Should be overriden (before init) by custom implementations.
     this.logoURL = 'http://www.archive.org';
 
     // Base URL for UI images - should be overriden (before init) by

@@ -13,13 +13,15 @@
 
     list($imgNums, $imgLabels, $imgWidths, $imgHeights) = BookReader::imagesData();
 
+    $ui = BookReader::bookreaderCurrItemUI();
+
     $server = preg_replace('#^https?://#', '', WEB_ROOT);
     $serverFullText = $server . '/book-reader/index/fulltext';
-    $sharedDir = WEB_PLUGIN . '/BookReader/views/shared';
+    $sharedUrl = WEB_PLUGIN . '/BookReader/views/shared';
     $imgDir = WEB_PLUGIN . '/BookReader/views/shared/images/';
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html class="night" lang="fr">
+<html <?php echo ($ui == 'embed') ? 'id="embedded" ' : ''; ?>lang="fr">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name="viewport" content="width=device-width, maximum-scale=1.0" />
@@ -29,30 +31,19 @@
     <link rel="shortcut icon" href="<?php echo get_option('bookreader_favicon_url'); ?>" type="image/x-icon" />
     <title><?php echo $title; ?></title>
     <!-- Stylesheets -->
-    <link rel="stylesheet" href="<?php echo $sharedDir . '/css/BookReader.css'; ?>" />
-    <link rel="stylesheet" href="<?php echo  $sharedDir . '/css/BookReaderCustom.css'; ?>" />
+    <link rel="stylesheet" href="<?php echo $sharedUrl . '/css/BookReader.css'; ?>" />
+    <link rel="stylesheet" href="<?php echo get_option('bookreader_custom_css'); ?>" />
     <!-- JavaScripts -->
-    <script type="text/javascript" src="<?php echo $sharedDir . '/javascripts/jquery-1.4.2.min.js'; ?>" charset="utf-8"></script>
-    <script type="text/javascript" src="<?php echo $sharedDir . '/javascripts/jquery-ui-1.8.5.custom.min.js'; ?>" charset="utf-8"></script>
-    <script type="text/javascript" src="<?php echo $sharedDir . '/javascripts/dragscrollable.js'; ?>" charset="utf-8"></script>
-    <script type="text/javascript" src="<?php echo $sharedDir . '/javascripts/jquery.colorbox-min.js'; ?>" charset="utf-8"></script>
-    <script type="text/javascript" src="<?php echo $sharedDir . '/javascripts/jquery.ui.ipad.js'; ?>" charset="utf-8"></script>
-    <script type="text/javascript" src="<?php echo $sharedDir . '/javascripts/jquery.bt.min.js'; ?>" charset="utf-8"></script>
-    <script type="text/javascript" src="<?php echo $sharedDir . '/javascripts/BookReader.js'; ?>" charset="utf-8"></script>
-    <script type="text/javascript" src="<?php echo $sharedDir . '/javascripts/ToCmenu.js'; ?>" charset="utf-8"></script>
-    <style>
-        #BRtoolbar,#ToCmenu,div#BRnav, #ToCbutton,#BRnavCntlBtm,.BRfloatHead, div#BRfiller, div#BRzoomer button, .BRnavCntl {
-            background-color: <?php echo get_option('bookreader_toolbar_color'); ?> !important;
-        }
-        #cboxContent {
-            border: 10px solid <?php echo get_option('bookreader_toolbar_color'); ?> !important;
-        }
-        a.logo {
-            background: url("<?php echo get_option('bookreader_logo_url'); ?>") no-repeat scroll 0 0 transparent !important;
-        }
-    </style>
+    <script type="text/javascript" src="<?php echo $sharedUrl . '/javascripts/jquery-1.4.2.min.js'; ?>" charset="utf-8"></script>
+    <script type="text/javascript" src="<?php echo $sharedUrl . '/javascripts/jquery-ui-1.8.5.custom.min.js'; ?>" charset="utf-8"></script>
+    <script type="text/javascript" src="<?php echo $sharedUrl . '/javascripts/dragscrollable.js'; ?>" charset="utf-8"></script>
+    <script type="text/javascript" src="<?php echo $sharedUrl . '/javascripts/jquery.colorbox-min.js'; ?>" charset="utf-8"></script>
+    <script type="text/javascript" src="<?php echo $sharedUrl . '/javascripts/jquery.ui.ipad.js'; ?>" charset="utf-8"></script>
+    <script type="text/javascript" src="<?php echo $sharedUrl . '/javascripts/jquery.bt.min.js'; ?>" charset="utf-8"></script>
+    <script type="text/javascript" src="<?php echo $sharedUrl . '/javascripts/BookReader.js'; ?>" charset="utf-8"></script>
+    <script type="text/javascript" src="<?php echo $sharedUrl . '/javascripts/ToCmenu.js'; ?>" charset="utf-8"></script>
 </head>
-<body style="background-color: #65645f;">
+<body>
     <div></div>
     <div id="BookReader">
         <br />

@@ -160,8 +160,13 @@ function bookreader_images_data($item = null)
             }
         }
     }
+    
     // Sorting by original filename if needed, or keep original attached order.
-    // uasort($list, 'cmp');
+       $sortOption = get_option('bookreader_sorting_mode');
+           	if($sortOption=='1'){
+        		uasort($list, 'cmp');
+		}
+
 
     $nums = array();
     $labels = array();
@@ -366,8 +371,14 @@ function titleLeaf($item = null)
         $i++;
     }
 
-    // Sorting by original filename if needed, or keep original attached order.
-    // sort($list);
+    
+       // Sorting by original filename if needed, or keep original attached order.
+       		$sortOption = get_option('bookreader_sorting_mode');
+       		if($sortOption=='1'){
+        		sort($list);
+       		 }
+
+    
 
     $titleLeaf = '';
     foreach ($list as $key => $value) {

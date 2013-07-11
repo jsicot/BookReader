@@ -3624,7 +3624,7 @@ BookReader.prototype.initToolbar = function(mode, ui) {
     $("#BookReader").append(
           "<div id='BRtoolbar'>"
         +   "<span id='BRtoolbarbuttons'>"
-        +     "<form action='javascript:br.search($(\"#textSrch\").val());' id='booksearch'><input type='search' id='textSrch' name='textSrch' val='' placeholder='Search inside'/><button type='submit' id='btnSrch' name='btnSrch'>GO</button></form>"
+        +     "<form action='javascript:br.search($(\"#textSrch\").val());' id='booksearch'><input type='search' id='textSrch' name='textSrch' val='' placeholder='Rechercher à l&#146;intérieur'/><button type='submit' id='btnSrch' name='btnSrch'>Ok</button></form>"
         +     "<button class='BRicon play'></button>"
         +     "<button class='BRicon pause'></button>"
         +     "<button class='BRicon info'></button>"
@@ -3633,7 +3633,7 @@ BookReader.prototype.initToolbar = function(mode, ui) {
         //+     "<button class='BRicon full'></button>"
         +   "</span>"
         +   "<span><a class='logo' href='" + this.logoURL + "'></a></span>"
-        +   "<span id='BRreturn'><a></a></span>"
+        +   "<span id='return'><a href='" + this.bookUrl + "'>" + this.bookTitle + "</a></span>"
         +   "<div id='BRnavCntlTop' class='BRnabrbuvCntl'></div>"
         + "</div>"
         /*
@@ -3656,7 +3656,11 @@ BookReader.prototype.initToolbar = function(mode, ui) {
        $('#BRtoolbarbuttons .share').hide();
     }
 
-    $('#BRreturn a').attr('href', this.bookUrl).text(this.bookTitle);
+    //$('#BRreturn a').attr('href', this.bookUrl).text(this.bookTitle);
+    $('#return').css({ 'line-height': '35px'} );
+    $('#return').css({ 'font-size': '15px'} );
+    $('#return a').css({ 'color': '#333'} );
+    $('#return a').css({ 'text-decoration': 'none'} );
 
     $('#BRtoolbar .BRnavCntl').addClass('BRup');
     $('#BRtoolbar .pause').hide();    
@@ -3708,8 +3712,8 @@ BookReader.prototype.initToolbar = function(mode, ui) {
 BookReader.prototype.blankInfoDiv = function() {
     return $([
         '<div class="BRfloat" id="BRinfo">',
-            '<div class="BRfloatHead">About this book',
-                '<a class="floatShut" href="javascript:;" onclick="$.fn.colorbox.close();"><span class="shift">Close</span></a>',
+            '<div class="BRfloatHead">À propos de ce document',
+                '<a class="floatShut" href="javascript:;" onclick="$.fn.colorbox.close();"><span class="shift">Fermer</span></a>',
             '</div>',
             '<div class="BRfloatBody">',
                 '<div class="BRfloatCover">',
@@ -3721,7 +3725,7 @@ BookReader.prototype.blankInfoDiv = function() {
                 '</div>',
             '</div>',
             '<div class="BRfloatFoot">',
-                '<a href="http://openlibrary.org/dev/docs/bookreader">About the BookReader</a>',
+                '<a href="http://openlibrary.org/dev/docs/bookreader">À propos de BookReader</a>',
             '</div>',
         '</div>'].join('\n')
     );
@@ -3732,7 +3736,7 @@ BookReader.prototype.blankShareDiv = function() {
         '<div class="BRfloat" id="BRshare">',
             '<div class="BRfloatHead">',
                 'Share',
-                '<a class="floatShut" href="javascript:;" onclick="$.fn.colorbox.close();"><span class="shift">Close</span></a>',
+                '<a class="floatShut" href="javascript:;" onclick="$.fn.colorbox.close();"><span class="shift">Fermer</span></a>',
             '</div>',
         '</div>'].join('\n')
     );
@@ -4639,8 +4643,8 @@ BookReader.prototype.gotOpenLibraryRecord = function(self, olObject) {
         // $$$mang cleanup
         self.bookUrl = self.olHost + olObject.key;
         self.bookTitle = olObject['title'];
-        $('#BRreturn a').attr( {'href': self.bookUrl, 'title': "Go to this book's page on Open Library" } );
-        $('#BRreturn a').text(self.bookTitle);
+        //$('#BRreturn a').attr( {'href': self.bookUrl, 'title': "Go to this book's page on Open Library" } );
+       // $('#BRreturn a').text(self.bookTitle);
         
         $('#BRinfo').remove();
         $('#BRshare').after(self.blankInfoDiv());
@@ -4673,6 +4677,7 @@ BookReader.prototype.gotOpenLibraryRecord = function(self, olObject) {
         
         $('#BRreturn').css({ 'line-height': '19px'} );
         $('#BRreturn a').css( {'height': '18px' } );
+        
 
         
     }

@@ -39,7 +39,8 @@ class BookReader
     }
 
     /**
-     * Get an array of all images of an item in order to display them with BookReader.
+     * Get an array of all images of an item in order to display them with
+     * BookReader.
      *
      * @return array
      *   Array of filenames associated to original filenames.
@@ -50,7 +51,8 @@ class BookReader
     }
 
     /**
-     * Get an array of all images of an item in order to display them with BookReader.
+     * Get an array of all images of an item in order to display them with
+     * BookReader.
      *
      * @return array
      *   Array of filenames associated to original filenames.
@@ -134,6 +136,22 @@ class BookReader
             $widths,
             $heights,
         );
+    }
+
+    /**
+     * Returns the derivative size to use for the current image, depending on
+     * the scale.
+     *
+     * @return string
+     *   Derivative name of the size.
+     */
+    public static function sendImage($scale, $item = null)
+    {
+        if (is_null($item)) {
+            $item = get_current_record('item');
+        }
+
+        return BookReader_Custom::sendImage($query, $item);
     }
 
     /**

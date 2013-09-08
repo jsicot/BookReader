@@ -66,6 +66,26 @@ class BookReader_Custom
     }
 
     /**
+     * Returns the derivative size to use for the current image, depending on
+     * the scale.
+     *
+     * @return string
+     *   Derivative name of the size.
+     */
+    public static function sendImage($scale, $item)
+    {
+        switch ($scale) {
+            case ($scale < 1): return 'original';
+            case ($scale < 2): return 'fullsize';
+            case ($scale < 4): return 'fullsize';
+            case ($scale < 8): return 'fullsize';
+            case ($scale < 16): return 'thumbnails';
+            case ($scale < 32): return 'thumbnails';
+        }
+        return 'fullsize';
+    }
+
+    /**
      * Check if there are data for search.
      *
      * @return boolean

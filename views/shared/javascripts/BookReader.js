@@ -4604,16 +4604,17 @@ BookReader.prototype._getPageURI = function(index, reduce, rotate) {
         // $$$ this probably won't work for thumbnail mode
         var ratio = this.getPageHeight(index) / this.twoPage.height;
         var scale;
+
         // $$$ we make an assumption here that the scales are available pow2 (like kakadu)
-        if (ratio < 2) {
+        if (ratio < 1) {
             scale = 1;
-        } else if (ratio < 4) {
+        } else if (ratio < 2) {
             scale = 2;
-        } else if (ratio < 8) {
+        } else if (ratio < 4) {
             scale = 4;
-        } else if (ratio < 16) {
+        } else if (ratio < 8) {
             scale = 8;
-        } else  if (ratio < 32) {
+        } else if (ratio < 16) {
             scale = 16;
         } else {
             scale = 32;

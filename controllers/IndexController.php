@@ -70,20 +70,15 @@ class BookReader_IndexController extends Omeka_Controller_AbstractActionControll
     }
 
     /**
-     * Returns image of the current image.
+     * Returns sized image for the current image.
      */
     public function imageProxyAction()
     {
         $scale = $this->getRequest()->getParam('scale');
+        $itemId = $this->getRequest()->getParam('id');
+        $item = get_record_by_id('item', $itemId);
 
-        switch ($scale) {
-            case ($scale < 1.1): $type = 'original'; break;
-            case ($scale < 1.4): $type = 'fullsize'; break;
-            case ($scale < 6): $type = 'fullsize'; break;
-            case ($scale < 16): $type = 'thumbnails'; break;
-            case ($scale < 32): $type = 'thumbnails'; break;
-            default: $type = 'fullsize'; break;
-        }
+        $type = BookReader::sendImage($scale, $item);
 
         $this->_sendImage($type);
     }
@@ -111,11 +106,9 @@ class BookReader_IndexController extends Omeka_Controller_AbstractActionControll
         else {
             $num_img = '0';
         }
-        $num_img = ($num_img - 1);
+        $num_img--;
 
-        // Création d'un tableau composé de l'ensemble des images de l'item consulté.
         $imagesFiles = BookReader::getImagesFiles($item);
-
         $image = FILES_DIR . DIRECTORY_SEPARATOR . $type . DIRECTORY_SEPARATOR . $imagesFiles[$num_img]->getDerivativeFilename();
         $image = file_get_contents($image);
 

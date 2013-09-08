@@ -3633,7 +3633,8 @@ BookReader.prototype.initToolbar = function(mode, ui) {
         //+     "<button class='BRicon full'></button>"
         +   "</span>"
         +   "<span><a class='logo' href='" + this.logoURL + "'></a></span>"
-        +   "<span id='BRreturn'><a></a></span>"
+        //+   "<span id='BRreturn'><a></a></span>"
+        +   "<span id='return'><a href='" + this.bookUrl + "'>" + this.bookTitle + "</a></span>"
         +   "<div id='BRnavCntlTop' class='BRnabrbuvCntl'></div>"
         + "</div>"
         /*
@@ -3657,6 +3658,11 @@ BookReader.prototype.initToolbar = function(mode, ui) {
     }
 
     $('#BRreturn a').attr('href', this.bookUrl).text(this.bookTitle);
+    //$('#BRreturn a').attr('href', this.bookUrl).text(this.bookTitle);
+    $('#return').css({ 'line-height': '35px'} );
+    $('#return').css({ 'font-size': '15px'} );
+    $('#return a').css({ 'color': '#333'} );
+    $('#return a').css({ 'text-decoration': 'none'} );
 
     $('#BRtoolbar .BRnavCntl').addClass('BRup');
     $('#BRtoolbar .pause').hide();
@@ -4640,8 +4646,8 @@ BookReader.prototype.gotOpenLibraryRecord = function(self, olObject) {
         // $$$mang cleanup
         self.bookUrl = self.olHost + olObject.key;
         self.bookTitle = olObject['title'];
-        $('#BRreturn a').attr( {'href': self.bookUrl, 'title': "Go to this book's page on Open Library" } );
-        $('#BRreturn a').text(self.bookTitle);
+        // $('#BRreturn a').attr( {'href': self.bookUrl, 'title': "Go to this book's page on Open Library" } );
+        // $('#BRreturn a').text(self.bookTitle);
 
         $('#BRinfo').remove();
         $('#BRshare').after(self.blankInfoDiv());

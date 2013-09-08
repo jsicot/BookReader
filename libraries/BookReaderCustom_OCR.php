@@ -169,7 +169,6 @@ class BookReader_Custom
         // Look for each page of the item.
         foreach ($imagesFiles as $keyFile => $file) {
             $textAuto = metadata($file, array('OCR', 'Texte auto'));
-
             if (!empty($textAuto)) {
                 // Look for all answers on this page.
                 // Warning: PREG_OFFSET_CAPTURE is not Unicode safe.
@@ -270,7 +269,9 @@ class BookReader_Custom
                 $fullAnswer = mb_substr($textAuto, $startPosition, $endPosition - $startPosition);
 
                 // Get the context of the answer.
-                $startContext = $startPosition - $beforeContext < 0 ? 0 : $startPosition - $beforeContext;
+                $startContext = ($startPosition - $beforeContext) < 0
+                    ? 0
+                    : $startPosition - $beforeContext;
                 $lengthContext = $beforeContext + $length + $afterContext;
                 $context = ($startContext === 0 ? '' : '...' )
                     . mb_substr($textAuto, $startContext, $lengthContext)

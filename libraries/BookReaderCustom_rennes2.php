@@ -10,6 +10,14 @@
  *
  * @note These functions are an example used by Université de Rennes 2 and have
  *   not been fully checked.
+ *
+ * @note La fonction de recherche ne fonctionne plus avec la dernière version
+ * du fait que la recherche est désormais distincte du surlignage.
+
+ * @internal Limites de la recherche :
+ * - La recherche se fait via grep ou regex, alors que c'est du xml.
+ * - La recherche est ligne par ligne et échoue si les mots sont sur
+ * plusieurs lignes.
  */
 
 /**
@@ -85,12 +93,13 @@ class BookReader_Custom
     }
 
     /**
-     * Return the xml file attached to an item, if any, to allow search inside.
+     * Check if there are data for search.
      *
-     * @return string|boolean
-     *   The path to the xml file or false.
+     * @return boolean
+     *   True if there are data for search, else false.
      */
-    public static function getDataForSearch($item) {
+    public static function hasDataForSearch($item)
+    {
         $xml_file = false;
 
         set_loop_records('files', $item->getFiles());
@@ -103,14 +112,14 @@ class BookReader_Custom
             }
         }
 
-        return $xml_file;
+        return (boolean) $xml_file;
     }
 
     /**
      * This function returns the answer to a query with coordinates of the
      * matching words.
      */
-    public static function fulltextAction()
+    public static function searchFulltext()
     {
         $item_id = $this->getRequest()->getParam('item_id');
         $doc = $this->getRequest()->getParam('doc');

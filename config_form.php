@@ -20,7 +20,7 @@
         </div>
         <p class="explanation">
             <?php echo __('Custom functions are used to get infos from your files.');
-            echo ' ' . __('Default directory is "%s".', dirname(__FILE__) . DIRECTORY_SEPARATOR . 'libraries' . DIRECTORY_SEPARATOR . 'BookReaderCustom.php'); ?>
+            echo ' ' . __('Default file is "%s".', dirname(__FILE__) . DIRECTORY_SEPARATOR . 'libraries' . DIRECTORY_SEPARATOR . 'BookReaderCustom.php'); ?>
         </p>
     </div>
 

@@ -72,12 +72,13 @@ class BookReader
     }
 
     /**
-     * Get an array of the number, label, witdh and height of image file of an item.
+     * Get an array of the number, label, witdh and height of each image file of
+     *  an item.
      *
      * @return array
      *   Array of the number, label, witdh and height of image file of an item.
      */
-    public static function imagesData($item = null)
+    public static function imagesData($item = null, $imageType = 'fullsize')
     {
         if (is_null($item)) {
             $item = get_current_record('item');
@@ -90,7 +91,7 @@ class BookReader
         $heights = array();
         $imagesFiles = self::getImagesFiles($item);
         foreach($imagesFiles as $file) {
-            $pathImg = FILES_DIR . DIRECTORY_SEPARATOR . 'fullsize' . DIRECTORY_SEPARATOR . $file->getDerivativeFilename();
+            $pathImg = FILES_DIR . DIRECTORY_SEPARATOR . $imageType . DIRECTORY_SEPARATOR . ($imageType == 'original' ? $file->filename : $file->getDerivativeFilename());
             list($width, $height, $type, $attr) = getimagesize($pathImg);
             $nums[] = ++$j;
             $labels[] = self::getLabelPage($file);
@@ -101,6 +102,35 @@ class BookReader
         return array(
             $nums,
             $labels,
+            $widths,
+            $heights,
+        );
+    }
+
+    /**
+     * Get an array of the witdhs and heights of each original image file of an
+     * item.
+     *
+     * @return array
+     *   Array of witdh and height of image file of an item.
+     */
+    public static function originalImagesSizes($item = null)
+    {
+        if (is_null($item)) {
+            $item = get_current_record('item');
+        }
+
+        $widths = array();
+        $heights = array();
+        $imagesFiles = self::getImagesFiles($item);
+        foreach($imagesFiles as $file) {
+            $pathImg = FILES_DIR . DIRECTORY_SEPARATOR . 'original' . DIRECTORY_SEPARATOR . $file->filename;
+            list($width, $height, $type, $attr) = getimagesize($pathImg);
+            $widths[] = $width;
+            $heights[] = $height;
+        }
+
+        return array(
             $widths,
             $heights,
         );
@@ -142,21 +172,55 @@ class BookReader
     }
 
     /**
-     * Return data where to search text, if any. Currently, only return path
-     * to an xml file.
+     * Check if there are data for search.
      *
-     * @todo Possibility to use data in database instead of xml.
-     *
-     * @return string|boolean
-     *   The path to the xml file or false.
+     * @return boolean
+     *   True if there are data for search, else false.
      */
-    public static function getDataForSearch($item = null)
+    public static function hasDataForSearch($item = null)
     {
         if (is_null($item)) {
             $item = get_current_record('item');
         }
 
-        return BookReader_Custom::getDataForSearch($item);
+        return BookReader_Custom::hasDataForSearch($item);
+    }
+
+    /**
+     * Returns answers to a query.
+     *
+     * @return array
+     *   Associative array of file ids as keys and an array values for each
+     *   result in the page (words and start position):
+     * array(
+     *   file_id = array(
+     *      array(
+     *        'answer' => answer, findable in original text,
+     *        'position' => position of the answer in original text,
+     *      ),
+     *   ),
+     * );
+     */
+    public static function searchFulltext($query, $item = null)
+    {
+        if (is_null($item)) {
+            $item = get_current_record('item');
+        }
+
+        return BookReader_Custom::searchFulltext($query, $item);
+    }
+
+    /**
+     * Prepares data to be highlighted via javascript.
+     *
+     * @see BookReader_IndexController::fulltextAction()
+     *
+     * @return array
+     *   Array of matches with coordinates.
+     */
+    public static function highlightFiles($texts)
+    {
+        return BookReader_Custom::highlightFiles($texts);
     }
 
     /**
@@ -357,7 +421,7 @@ class BookReader
         foreach (array(__('KB'), __('MB'), __('GB'), __('TB')) as $unit) {
             $size /= 1024.0;
             if ($size < 10) {
-                return sprintf("%.1f" . $unit, $size);
+                return sprintf("%.1f" . ' ' . $unit, $size);
             }
             if ($size < 1024) {
                 return (int) $size . ' ' . $unit;

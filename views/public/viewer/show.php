@@ -312,7 +312,7 @@
     <?php
         // Si jamais la recherche n'est pas disponible (pas de fichier XML), on
         // va masquer les éléments permettant de la lancer (SMA 201210)
-        if (!BookReader::getDataForSearch()): ?>
+        if (!BookReader::hasDataForSearch()): ?>
     $('#textSrch').hide();
     $('#btnSrch').hide();
         <?php endif; ?>

@@ -7,11 +7,66 @@
 class BookReader_IndexController extends Omeka_Controller_AbstractActionController
 {
     /**
-     * Returns the answer to a query with coordinates of the matching words.
+     * Returns the answer to a query in order to highlight it via javascript.
+     *
+     * A result can contain multiple words, multiple matches, multiple pars and
+     *  multiple boxes, for example when the answer is on two lines or pages.
+     *
+     * The resulted javascript/json is echoed and sent via Ajax.
+     *
+     * The structure of the json object is:
+     *     ->ia = item id
+     *     ->q = query
+     *      ->page_count = page count (useless)
+     *      ->body_length = body lenght (useless)
+     *      ->leaf0_missing = generally empty
+     *     ->matches = results as array of objects
+     *         ->text = few words to contextualize the result, used in nav bar
+     *         ->par = array of par zones (currently, only the [0] is used)
+     *             ->t = top limit of global zone
+     *             ->r = right limit of global zone
+     *             ->b = bottom limit of global zone
+     *             ->l = left limit of global zone
+     *             ->page = page number
+     *             ->boxes = array of coordinates of boxes to highlight
+     *                 ->r = right limit of word zone
+     *                 ->l = left limit of word zone
+     *                 ->b = bottom limit of word zone
+     *                 ->t = top limit of word zone
+     *                 ->page = page number
      */
-    public static function fulltextAction()
+    public function fulltextAction()
     {
-        return BookReader_Custom::fulltextAction();
+        $item_id = $this->getRequest()->getParam('item_id');
+        // TODO Check if doc is different than item_id.
+        $doc = $this->getRequest()->getParam('doc');
+        $query = $this->getRequest()->getParam('q');
+        $query = utf8_encode($query);
+        $callback = $this->getRequest()->getParam('callback');
+
+        $item = get_record_by_id('item', $item_id);
+
+        $output = array();
+
+        // Check if there are data for search.
+        if (BookReader::hasDataForSearch($item)) {
+            $output['ia'] = $doc;
+            $output['q'] = $query;
+            // TODO Check if these keys are really needed.
+            // $output['page_count'] = 200;
+            // $output['body_length'] = 140000;
+            // TODO Kezako ?
+            $output['leaf0_missing'] = false;
+
+            $answer = BookReader::searchFulltext($query, $item);
+            $output['matches'] = BookReader::highlightFiles($answer);
+        }
+
+        // Send answer.
+        $this->getResponse()->clearBody();
+        $this->getResponse()->setHeader('Content-Type', 'text/html');
+        $tab_json = json_encode($output);
+        echo $callback . '(' . $tab_json . ')';
     }
 
     /**
@@ -20,6 +75,7 @@ class BookReader_IndexController extends Omeka_Controller_AbstractActionControll
     public function imageProxyAction()
     {
         $scale = $this->getRequest()->getParam('scale');
+
         switch ($scale) {
             case ($scale < 1.1): $type = 'original'; break;
             case ($scale < 1.4): $type = 'fullsize'; break;

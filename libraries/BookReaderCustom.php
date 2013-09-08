@@ -44,8 +44,7 @@ class BookReader_Custom
 
     /**
      * Return the cover file of an item. Here, the cover is the first image.
-     *
-     * @todo Currently, return the first image file of an item. Use database instead.
+     * Here, the cover file is the first image file of an item.
      *
      * @return File|null
      */
@@ -57,8 +56,7 @@ class BookReader_Custom
 
     /**
      * Return the title leaf for javascript.
-     *
-     * @todo Currently, return the first image file of an item. Use database instead.
+     * Here, return the first leaf.
      *
      * @return string
      */
@@ -68,166 +66,189 @@ class BookReader_Custom
     }
 
     /**
-     * Return the xml file attached to an item, if any, to allow search inside.
+     * Check if there are data for search.
      *
-     * @todo Possibility to use data in database instead of xml.
-     *
-     * @return string|boolean
-     *   The path to the xml file or false.
+     * @return boolean
+     *   True if there are data for search, else false.
      */
-    public static function getDataForSearch($item) {
-        $xml_file = false;
-
-        set_loop_records('files', $item->getFiles());
-        if (has_loop_records('files')) {
-            foreach (loop('files') as $file) {
-                if (strtolower($file->getExtension()) == 'xml') {
-                    $xml_file = escapeshellarg(FILES_DIR . DIRECTORY_SEPARATOR . 'original' . DIRECTORY_SEPARATOR . $file->filename);
-                    break;
-                }
-            }
+    public static function hasDataForSearch($item)
+    {
+        $itemType = $item->getItemType();
+        if (empty($itemType) || $itemType->name !== 'Text') {
+            return false;
         }
 
-        return $xml_file;
+        $metadata = metadata($item, array('Item Type Metadata', 'Text'));
+
+        return !empty($metadata);
     }
 
     /**
-     * This function returns the answer to a query with coordinates of the
-     * matching words.
+     * Returns answers to a full text query.
      *
-     * Currently, it works only with xml files.
+     * This search is case insensitive and without punctuation. Diacritics are
+     * not converted.
      *
-     * @todo Search inside database.
+     * @see BookReader_Custom::_alnumString()
+     *
+     * @todo Use one query search or xml search or Zend_Search_Lucene.
+     *
+     * @return array
+     *   Associative array of file ids as keys and an array values for each
+     *   result in the page (words and start position):
+     * array(
+     *   file_id = array(
+     *      array(
+     *        'answer' => answer, findable in original text,
+     *        'position' => position of the answer in original text,
+     *      ),
+     *   ),
+     * );
      */
-    public static function fulltextAction()
+    public static function searchFulltext($query, $item)
     {
-        $item_id = $this->getRequest()->getParam('item_id');
-        $doc = $this->getRequest()->getParam('doc');
-        $path = $this->getRequest()->getParam('path');
-        $q = $this->getRequest()->getParam('q');
-        $q = utf8_encode($q);
-        $callback = $this->getRequest()->getParam('callback');
+        $minimumQueryLength = 4;
+        $maxResult = 10;
 
-        // On va récupérer le fichier XML de l'item
-        $this->getResponse()->clearBody();
-        $this->getResponse()->setHeader('Content-Type', 'text/html');
-        $item = get_record_by_id('item', $item_id);
+        // Simplify checks, because arrays are 0-based.
+        $maxResult--;
 
-        $list = array();
-        set_loop_records('files', $item->getFiles());
-        foreach (loop('files') as $file) {
-            if (strtolower(pathinfo($file->original_filename, PATHINFO_EXTENSION)) == 'xml') {
-                $xml_file = escapeshellarg(FILES_DIR . DIRECTORY_SEPARATOR . $file->filename);
-            }
-            elseif ($file->hasThumbnail()) {
-                if (preg_match('/(jpg|jpeg|png|gif)/', $file->filename)) {
-                    $list[$file->filename] = $file->original_filename;
-                }
-            }
-        }
-        // Sorting by original filename if needed, or keep original attached order.
-        if (get_option('bookreader_sorting_mode')) {
-            uasort($list, array(BookReader, 'compareStrings'));
+        $results = array();
+
+        // Normalize query because the search occurs inside a normalized text.
+        $cleanQuery = self::_alnumString($query);
+        if (strlen($cleanQuery) < $minimumQueryLength) {
+            return $results;
         }
 
-        $widths = array();
-        $heights = array();
-        foreach ($list as $key => $image) {
-            $pathImg = FILES_DIR . DIRECTORY_SEPARATOR . 'fullsize' . DIRECTORY_SEPARATOR . $key;
+        // Prepare query.
+        $queryWords = explode(' ', $cleanQuery);
+        $countQueryWords = count($queryWords);
+        // Prepare regex: replace all spaces to allow any characters, except
+        // those accepted (letters, numbers and symbols).
+        $pregQuery = '/' . str_replace(' ', '[\p{C}\p{M}\p{P}\p{Z}]*', preg_quote($cleanQuery)) . '/Uui';
+
+        // For this example, search is done at item level only.
+        $text = metadata($item, array('Item Type Metadata', 'Text'));
+        // Warning: PREG_OFFSET_CAPTURE is not Unicode safe.
+        if (preg_match_all($pregQuery, $text, $matches, PREG_OFFSET_CAPTURE)) {
+            // For this example, the answer is found in the first image only.
+            $files = $item->Files;
+            $file = $files[0];
+
+            $results[$file->id] = array();
+            foreach ($matches as $match) {
+                $results[$file->id][] = array(
+                    'answer' => $match[0][0],
+                    'position' => $match[0][1],
+                );
+            }
+        }
+
+        return $results;
+    }
+
+    /**
+     * Prepares data to be highlighted via javascript.
+     *
+     * @see BookReader_IndexController::fulltextAction()
+     *
+     * @return array
+     *   Array of matches with coordinates.
+     */
+    public static function highlightFiles($textsToHighlight)
+    {
+        $imageType = 'fullsize';
+        $beforeContext = 120;
+        $afterContext = 120;
+
+        $results = array();
+        foreach ($textsToHighlight as $file_id => $data) {
+            $file = get_record_by_id('file', $file_id);
+            $label = self::getLabelPage($file);
+            $pathImg = FILES_DIR . DIRECTORY_SEPARATOR . $imageType . DIRECTORY_SEPARATOR . ($imageType == 'original' ? $file->filename : $file->getDerivativeFilename());
             list($width, $height, $type, $attr) = getimagesize($pathImg);
-            $widths[] = $width;
-            $heights[] = $height;
-        }
 
-        // On a un fichier XML, on va aller l'interroger pour voir si on a des choses dedans
-        if ($xml_file) {
-            $res = shell_exec("grep -P -i '<\/?page|$q' $xml_file");
-            $res = preg_replace("/<page[^>]*>\n<\/page>\n/",'',$res);
+            // Get the ratio between original widths and heights and fullsize
+            // ones, because highlight is done first on a fullsize image, but
+            // data are set for original image.
+            $pathImg = FILES_DIR . DIRECTORY_SEPARATOR . 'original' . DIRECTORY_SEPARATOR . $file->filename;
+            list($originalWidth, $originalHeight, $type, $attr) = getimagesize($pathImg);
+            $ratio = $height / $originalHeight;
 
-            $sortie = array();
-            $sortie['ia'] = $doc;
-            $sortie['q'] = $q;
-//          $sortie['page_count'] = 200; // Voir s'il faut vraiment le récupérer
-//          $sortie['body_length'] = 140000; // Idem, voir si c'est utilisé
-            $sortie['leaf0_missing'] = false; // Kezako ?
-            $sortie['matches'] = array();
+            // Text is needed only to get context.
+            $item = get_record_by_id('item', $file->item_id);
+            $text = metadata($item, array('Item Type Metadata', 'Text'));
+            $lengthText = mb_strlen($text);
 
-            // On va parcourir toutes les lignes qui matchent
-            while (preg_match('/<page number="(\d*)" [^>]*height="(\d*)" width="(\d*)">\n(.*)\n<\/page>(.*)$/siU', $res, $match)) {
-                $page_number = $match[1] - 1;
-                $page_height = $match[2];
-                $page_width  = $match[3];
-                $zones = $match[4];
-                $res = $match[5]; // On reprend pour la suite;
+            // For this example, one third size rectangle is drawn on the
+            // middle of the image.
+            foreach ($data as $dataToHighlight) {
+                $answer = $dataToHighlight['answer'];
+                $position = $dataToHighlight['position'];
+                $length = mb_strlen($answer);
 
-                $tab_lignes = preg_split('/<text /', $zones);
-                foreach ($tab_lignes as $une_ligne) {
-                    if (preg_match('/top="(\d*)" left="(\d*)" width="(\d*)" height="(\d*)" font="(\d*)">(.*)<\/text>$/', $une_ligne, $match_ligne)) {
-                        $zone_top = $match_ligne[1];
-                        $zone_left = $match_ligne[2];
-                        $zone_width = $match_ligne[3];
-                        $zone_height = $match_ligne[4];
-                        $zone_font = $match_ligne[5];
-                        $zone_text = $match_ligne[6];
-                        $zone_text = preg_replace("/<\/?[ib]>/", "", $zone_text);
+                // Get the context of the answer.
+                $context = '...' . $answer . '...';
 
-                        $zone_right = ($page_width - $zone_left - $zone_widht);
-                        $zone_bottom = ($page_height - $zone_top - $zone_height);
+                // Create the par zone.
+                // TODO Currently, the par zone is not really used by
+                // BookReader, so we take the first word coordinates as zone
+                // coordinates.
+                $zone_left = $originalWidth / 3;
+                $zone_top = $originalHeight / 3;
+                $zone_right = $originalWidth * 2 / 3;
+                $zone_bottom = $originalHeight * 2 / 3;
 
-                        // On crée la zone "globale"
-                        $tab_zone = array();
-                        $tab_zone['text'] = $zone_text;
+                // Creates boxes for each word.
+                $boxes = array();
+                $word_left = $originalWidth / 3;
+                $word_top = $originalHeight / 3;
+                $word_right = $originalWidth * 2 / 3;
+                $word_bottom = $originalHeight * 2 / 3;
 
-                        // On va créer les boxes ...
-                        $zone_width_char = strlen($zone_text);
-                        $mot_start_char = stripos($zone_text, $q);
-                        $mot_width_char = strlen($q);
-                        $zone_text = str_ireplace($q, '{{{' . $q . '}}}', $zone_text);
+                $boxes[] = array(
+                    't' => round($word_top * $ratio),
+                    'l' => round($word_left * $ratio),
+                    'b' => round($word_bottom * $ratio),
+                    'r' => round($word_right * $ratio),
+                    'page' => $label,
+                );
 
-                        $mot_left =  $zone_left + ( ($mot_start_char * $zone_width) / $zone_width_char);
-                        $mot_right = $mot_left + ( ( ( $mot_width_char + 2) * $zone_width) / $zone_width_char );
-                    #   print 'L : ' . $mot_left . PHP_EOL;
-                    #   print 'R : ' . $mot_right . PHP_EOL;
+                // Aggregate zones to prepare current result.
+                $result = array();
+                $result['text'] = $context;
+                $result['par'] = array();
+                $result['par'][] = array(
+                    't' => round($zone_top * $ratio),
+                    'r' => round($zone_right * $ratio),
+                    'b' => round($zone_bottom * $ratio),
+                    'l' => round($zone_left * $ratio),
+                    'page' => $label,
+                    'boxes' => $boxes,
+                );
 
-                        $mot_left = round($mot_left * $widths[$page_number] / $page_width);
-                        $mot_right  = round( $mot_right * $widths[$page_number] / $page_width);
-                    #   print "Zone texte : #$zone_text ($zone_width_char char pour $zone_width px)#" . PHP_EOL;
-
-                        $mot_top = round($zone_top * $heights[$page_number] / $page_height);
-                        $mot_bottom = round($mot_top + ( $zone_height * $heights[$page_number] / $page_height  ));
-
-                        $tab_zone['par'] = array();
-                        $tab_zone['par'][] = array(
-                            't' => $zone_top,
-                            'r' => $zone_right,
-                            'b' => $zone_bottom,
-                            'l' => $zone_left,
-                            'page' => $page_number,
-                            'boxes' => array(
-                                array(
-                                    'r' => $mot_right,
-                                    'l' => $mot_left,
-                                    'b' => $mot_bottom,
-                                    't' => $mot_top,
-                                    'page' => $page_number,
-                        )));
-
-//                      if ($page_number == 513) {
-                        if (true) {
-                            $sortie['matches'][] = $tab_zone;
-                        }
-                    }
-                    elseif ($une_ligne != '') {
-                        print '####>>>>> PB ligne : #' . $une_ligne . '#' . PHP_EOL;
-                    }
-                }
+                $results[] = $result;
             }
         }
 
-        $tab_json = json_encode($sortie);
-        $pattern = array(',"', '{', '}');
-        $replacement = array(",\n\t\"", "{\n\t", "\n}");
+        return $results;
+    }
 
-        print $callback . '(' . $tab_json . ')';
+    /**
+     * Returns a cleaned  string.
+     *
+     * Removes trailing spaces and anything else, except letters, numbers and
+     * symbols.
+     *
+     * @param string $string The string to clean.
+     *
+     * @return string
+     *   The cleaned string.
+     */
+    protected static function _alnumString($string)
+    {
+        $string = preg_replace('/[^\p{L}\p{N}\p{S}]/u', ' ', $string);
+        return trim(preg_replace('/\s+/', ' ', $string));
     }
 }

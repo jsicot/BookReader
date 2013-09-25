@@ -126,7 +126,7 @@ BookReader Omeka plugin:
 [embedded version]: http://bibnum.univ-rennes2.fr/items/show/566
 [fullscreen mode]: http://bibnum.univ-rennes2.fr/viewer/show/566
 [Extract ocr]: https://github.com/symac/Plugin-Extractocr
-[PDF Toc]: http://omeka.org/add-ons/plugins/pdf-toc
+[PDF Toc]: https://github.com/symac/Plugin-PdfToc
 [BookReader issues]: https://github.com/jsicot/BookReader/Issues "GitHub BookReader"
 [GNU/GPL]: https://www.gnu.org/licenses/gpl-3.0.html "GNU/GPL v3"
 [Daniel-KM]: https://github.com/Daniel-KM "Daniel Berthereau"

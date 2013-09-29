@@ -30,12 +30,12 @@ class BookReader_Custom
             return '';
         }
 
-        $txt = metadata($file, array('Dublin Core', 'Title'));
-        if (!$txt) {
+        $txt = $file->getElementTexts('Dublin Core', 'Title');
+        if (empty($txt)) {
             $txt = 'null';
         }
         else {
-            $txt = substr($txt, strrpos($txt, ' '));
+            $txt = substr($txt[0]->text, strrpos($txt[0]->text, ' '));
             $txt = (int) $txt;
         }
 
@@ -43,7 +43,7 @@ class BookReader_Custom
     }
 
     /**
-     * Return the cover file of an item. Here, the cover is the first image.
+     * Return the cover file of an item.
      * Here, the cover file is the first image file of an item.
      *
      * @return File|null
@@ -51,7 +51,7 @@ class BookReader_Custom
     public static function getCoverFile($item)
     {
         $imagesFiles = BookReader::getImagesFiles($item);
-        return $imagesFiles[0];
+        return reset($imagesFiles);
     }
 
     /**
@@ -98,9 +98,7 @@ class BookReader_Custom
             return false;
         }
 
-        $metadata = metadata($item, array('Item Type Metadata', 'Text'));
-
-        return !empty($metadata);
+        return $item->hasElementText('Item Type Metadata', 'Text');
     }
 
     /**
@@ -149,9 +147,9 @@ class BookReader_Custom
         $pregQuery = '/' . str_replace(' ', '[\p{C}\p{M}\p{P}\p{Z}]*', preg_quote($cleanQuery)) . '/Uui';
 
         // For this example, search is done at item level only.
-        $text = metadata($item, array('Item Type Metadata', 'Text'));
+        $text = $item->getElementTexts('Item Type Metadata', 'Text');
         // Warning: PREG_OFFSET_CAPTURE is not Unicode safe.
-        if (preg_match_all($pregQuery, $text, $matches, PREG_OFFSET_CAPTURE)) {
+        if (!empty($text) && preg_match_all($pregQuery, $text[0]->text, $matches, PREG_OFFSET_CAPTURE)) {
             // For this example, the answer is found in the first image only.
             $files = $item->Files;
             $file = $files[0];
@@ -198,7 +196,8 @@ class BookReader_Custom
 
             // Text is needed only to get context.
             $item = get_record_by_id('item', $file->item_id);
-            $text = metadata($item, array('Item Type Metadata', 'Text'));
+            $text = $item->getElementTexts('Item Type Metadata', 'Text');
+            $text = $text[0]->text;
             $lengthText = mb_strlen($text);
 
             // For this example, one third size rectangle is drawn on the

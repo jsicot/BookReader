@@ -1,21 +1,21 @@
 <?php
 /**
+ * BookReader
+ *
  * This plugin adds Internet Archive BookReader into Omeka. It is used to view
  * books from the Internet Archive online and can also be used to view other
  * books.
  *
- * @see README.md
- *
  * @copyright Daniel Berthereau, 2013
  * @copyright Julien Sicot, 2011-2012
  * @license http://www.gnu.org/licenses/gpl-3.0.txt GNU GPLv3
- * @package BookReader
  */
 
 require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'helpers' . DIRECTORY_SEPARATOR . 'BookReaderFunctions.php';
 
 /**
- * BookReader plugin.
+ * The Book Reader plugin.
+ * @package Omeka\Plugins\BookReader
  */
 class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
 {
@@ -167,7 +167,9 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
             ? $args['embed_functions']
             : get_option('bookreader_embed_functions');
 
-        $mode_page = get_option('bookreader_mode_page');
+        $mode_page = isset($args['mode_page'])
+            ? $args['mode_page']
+            : get_option('bookreader_mode_page');
 
         // Build url of the page with iframe.
         $url = WEB_ROOT . '/viewer/show/' . $item->id;

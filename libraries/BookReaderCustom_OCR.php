@@ -39,12 +39,12 @@ class BookReader_Custom
             return '';
         }
 
-        $txt = metadata($file, array('Dublin Core', 'Title'));
-        if (!$txt) {
+        $txt = $file->getElementTexts('Dublin Core', 'Title');
+        if (empty($txt)) {
             $txt = 'null';
         }
         else {
-            $txt = mb_substr($txt, mb_strrpos($txt, ' '));
+            $txt = substr($txt[0]->text, strrpos($txt[0]->text, ' '));
             $txt = (int) $txt;
         }
 
@@ -52,7 +52,7 @@ class BookReader_Custom
     }
 
     /**
-     * Return the cover file of an item. Here, the cover is the first image.
+     * Return the cover file of an item.
      * Here, the cover file is the first image file of an item.
      *
      * @return File|null
@@ -60,7 +60,7 @@ class BookReader_Custom
     public static function getCoverFile($item)
     {
         $imagesFiles = BookReader::getImagesFiles($item);
-        return $imagesFiles[0];
+        return reset($imagesFiles);
     }
 
     /**
@@ -109,8 +109,7 @@ class BookReader_Custom
 
         // TODO Use one query.
         foreach ($item->Files as $file) {
-            $textAuto = metadata($file, array('OCR', 'Texte auto'));
-            if (!empty($textAuto)) {
+            if ($file->hasElementText('OCR', 'Texte auto')) {
                 return true;
             }
         }
@@ -168,8 +167,9 @@ class BookReader_Custom
         $imagesFiles = BookReader::getImagesFiles($item);
         // Look for each page of the item.
         foreach ($imagesFiles as $keyFile => $file) {
-            $textAuto = metadata($file, array('OCR', 'Texte auto'));
+            $textAuto = $file->getElementTexts('OCR', 'Texte auto');
             if (!empty($textAuto)) {
+                $textAuto = $textAuto[0]->text;
                 // Look for all answers on this page.
                 // Warning: PREG_OFFSET_CAPTURE is not Unicode safe.
                 if (preg_match_all($pregQuery, $textAuto, $matches)) {
@@ -231,11 +231,13 @@ class BookReader_Custom
             $ratio = $height / $originalHeight;
 
             // Text auto is needed only to get context.
-            $textAuto = metadata($file, array('OCR', 'Texte auto'));
+            $textAuto = $file->getElementTexts('OCR', 'Texte auto');
+            $textAuto = $textAuto[0]->text;
             $lengthTextAuto = mb_strlen($textAuto);
-            // Convert words to array in order to get next cell simply (and avoidIMPRIMERIE IMPÉRIALE
+            // Convert words to array in order to get next cell simply (and avoid
             // the integer key as string bug).
-            $motAmot = json_decode(metadata($file, array('OCR', 'Mot-à-mot')), true);
+            $motAmot = $file->getElementTexts('OCR', 'Mot-à-mot');
+            $motAmot = json_decode($motAmot[0]->text, true);
             $motAmot = $motAmot['String'];
             $offsetStartPosition = 0;
             foreach ($data as $dataToHighlight) {

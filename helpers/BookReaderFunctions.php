@@ -274,8 +274,10 @@ class BookReader
 
         $file = BookReader_Custom::getCoverFile($item);
         if ($file) {
+            $title = $item->getElementTexts('Dublin Core', 'Title');
+            $title = empty($title) ? '' : $title[0]->text;
             $defaultProps = array(
-                'alt' => html_escape(metadata($item, array('Dublin Core', 'Title'))),
+                'alt' => html_escape($title),
             );
 
             $props = array_merge($defaultProps, $props);
@@ -414,9 +416,12 @@ class BookReader
 
             // Sorting by original filename or keep attachment order.
             if (get_option('bookreader_sorting_mode')) {
-                uasort($filesForBookreader[$item->id]['images'], array(BookReader, 'compareStrings'));
-                uasort($filesForBookreader[$item->id]['non-images'], array(BookReader, 'compareStrings'));
+                uasort($filesForBookreader[$item->id]['images'], array('BookReader', 'compareStrings'));
+                uasort($filesForBookreader[$item->id]['non-images'], array('BookReader', 'compareStrings'));
             }
+            // Reset keys, because the important is to get files by order.
+            $filesForBookreader[$item->id]['images'] = array_values($filesForBookreader[$item->id]['images']);
+            $filesForBookreader[$item->id]['non-images'] = array_values($filesForBookreader[$item->id]['non-images']);
         }
 
         return $invert

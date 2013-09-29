@@ -39,7 +39,7 @@
 
 <fieldset id="fieldset-embed"><legend><?php echo __('Embed mode'); ?></legend>
     <div class="field">
-        <label for="bookreader_mode_page"><?php echo __('Number of pages in embed mode (1 or 2)'); ?></label>
+        <label for="bookreader_mode_page"><?php echo __('Default number of pages in embed mode (1 or 2)'); ?></label>
         <div class="inputs">
             <input type="text" class="textinput" name="bookreader_mode_page" size="1" value="<?php echo get_option('bookreader_mode_page'); ?>" id="bookreader_mode_page" />
         </div>

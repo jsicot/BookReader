@@ -27,6 +27,7 @@
     <meta name="viewport" content="width=device-width, maximum-scale=1.0" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <base target="_parent" />
     <link rel="apple-touch-icon" href="<?php echo WEB_FILES . '/thumbnails/' . $coverFile->getDerivativeFilename(); ?>" />
     <link rel="shortcut icon" href="<?php echo get_option('bookreader_favicon_url'); ?>" type="image/x-icon" />
     <title><?php echo $title; ?></title>

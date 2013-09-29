@@ -40,6 +40,7 @@ If you want to embed it, add this code in the item/show.php file of your theme:
         'item' => $item,
         'page' => '0',
         'embed_functions' => false,
+        'mode_page' => 1,
     ));
     ?>
 ```

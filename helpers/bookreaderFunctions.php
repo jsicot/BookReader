@@ -135,7 +135,7 @@ function bookreader_item_numLeafs($item = null)
  * @return array
  *   Array of the number, label, witdh and height of image file of an item.
  */
-function bookreader_images_data($item = null)
+function bookreader_images_data($item)
 {
     if ($item == null) {
         $item = get_current_record('item');
@@ -160,10 +160,12 @@ function bookreader_images_data($item = null)
             }
         }
     }
+    // Sorting by original filename if needed, or keep original attached order.
+    // uasort($list, 'cmp');
     
     // Sorting by original filename if needed, or keep original attached order.
        $sortOption = get_option('bookreader_sorting_mode');
-           	if($sortOption=='1'){
+       		if($sortOption=='1'){
         		uasort($list, 'cmp');
 		}
 

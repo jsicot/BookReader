@@ -170,6 +170,15 @@ class BookReader_IndexController extends Omeka_Controller_AbstractActionControll
 
         $id = $this->getRequest()->getParam('id');
         $item = get_record_by_id('item', $id);
+        
+        $supportedFormats = array(
+        'jpeg' => 'JPEG Joint Photographic Experts Group JFIF format',
+        'jpg' => 'Joint Photographic Experts Group JFIF format',
+        'png' => 'Portable Network Graphics',
+        'gif' => 'Graphics Interchange Format',
+	    );
+		// Set the regular expression to match selected/supported formats.
+		$supportedFormatRegEx = '/\.'.implode('|', array_keys($supportedFormats)).'$/';
 
         // Création d'un tableau composé de l'ensemble des images de l'item consulté
         $list = array();
@@ -177,7 +186,9 @@ class BookReader_IndexController extends Omeka_Controller_AbstractActionControll
         foreach (loop('files') as $file) {
             if ($file->hasThumbnail()) {
                 // $list[] = $file->filename;//Création du tableau
-                $list[] = $file->original_filename;
+                if (preg_match($supportedFormatRegEx, $file->original_filename)) {
+                	$list[] = $file->original_filename;
+                }
             }
         }
         // Compte le nombre d'images dans le tableau.
@@ -232,13 +243,24 @@ class BookReader_IndexController extends Omeka_Controller_AbstractActionControll
         $id = $this->getRequest()->getParam('id');
         $item = get_record_by_id('item', $id);
 
-        //création d'un tableau composé de l'ensemble des images de l'item consulté
+               $supportedFormats = array(
+        'jpeg' => 'JPEG Joint Photographic Experts Group JFIF format',
+        'jpg' => 'Joint Photographic Experts Group JFIF format',
+        'png' => 'Portable Network Graphics',
+        'gif' => 'Graphics Interchange Format',
+	    );
+		// Set the regular expression to match selected/supported formats.
+		$supportedFormatRegEx = '/\.'.implode('|', array_keys($supportedFormats)).'$/';
+
+        // Création d'un tableau composé de l'ensemble des images de l'item consulté
         $list = array();
         set_loop_records('files', $item->getFiles());
         foreach (loop('files') as $file) {
             if ($file->hasThumbnail()) {
-                // $list[] = $file->filename;
-                $list[] = $file->original_filename;
+                // $list[] = $file->filename;//Création du tableau
+                if (preg_match($supportedFormatRegEx, $file->original_filename)) {
+                	$list[] = $file->original_filename;
+                }
             }
         }
         // Compte le nombre d'images dans le tableau.

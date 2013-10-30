@@ -20,10 +20,9 @@ Installation
 - Upload the BookReader plugin folder into your plugins folder on the server;
 - Activate it from the admin → Settings → Plugins page
 - Click the Configure link to add the following
-    - Logo URL for toolbar viewer (reader)
+    - URL for custom CSS
     - Favicon URL for viewer (reader) pages
-    - Hex color for toolbar viewer (reader)
-    - Enable embed viewer in item/show page
+    - URL for custom php library (default is BookReaderCustom.php)
     - Sorting mode for the viewer (omeka default order or original filename order)
     - Number of pages in Embed mode (1 or 2)
     - Embed all functions (0 for none or 1 for all)

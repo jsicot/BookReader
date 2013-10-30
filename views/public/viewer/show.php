@@ -1,54 +1,50 @@
 <?php
     //retrieve item id
-    $id = id_bookreader_item();
+    $id = BookReader::bookreaderCurrItemId();
     $item = get_record_by_id('item', $id);
     set_current_record('item', $item);
 
     $title = metadata('item', array('Dublin Core', 'Title'));
-    $title .= ' - ' . metadata('item', array('Dublin Core', 'Creator'));
-    $title = htmlkarakter($title);
-    $title = utf8_decode($title);
+    if ($creator = metadata('item', array('Dublin Core', 'Creator'))) {
+        $title .= ' - ' . $creator;
+    }
+    $title = BookReader::htmlCharacter($title);
+    $coverFile = BookReader::getCoverFile($item);
+
+    list($imgNums, $imgLabels, $imgWidths, $imgHeights) = BookReader::imagesData();
+
+    $ui = BookReader::bookreaderCurrItemUI();
 
     $server = preg_replace('#^https?://#', '', WEB_ROOT);
     $serverFullText = $server . '/book-reader/index/fulltext';
-
-    list($imgNums, $imgLabels, $imgWidths, $imgHeights) = bookreader_images_data($item);
-
-    $sharedDir = WEB_PLUGIN . '/BookReader/views/shared';
+    $sharedUrl = WEB_PLUGIN . '/BookReader/views/shared';
+    $imgDir = WEB_PLUGIN . '/BookReader/views/shared/images/';
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
+<html <?php echo ($ui == 'embed') ? 'id="embedded" ' : ''; ?>lang="fr">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name="viewport" content="width=device-width, maximum-scale=1.0" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
-    <link rel="apple-touch-icon" href="<?php echo item_cover('link'); ?>" />
-    <link rel="shortcut icon" href="<?php echo get_option('bookreader_favicon_url'); ?>" />
+    <base target="_parent" />
+    <link rel="apple-touch-icon" href="<?php echo WEB_FILES . '/thumbnails/' . $coverFile->getDerivativeFilename(); ?>" />
+    <link rel="shortcut icon" href="<?php echo get_option('bookreader_favicon_url'); ?>" type="image/x-icon" />
     <title><?php echo $title; ?></title>
-    <link rel="stylesheet" href="<?php echo $sharedDir . '/css/BookReader.css'; ?>" />
-    <link rel="stylesheet" href="<?php echo  $sharedDir . '/css/BookReaderCustom.css'; ?>" />
-    <script type="text/javascript" src="<?php echo $sharedDir . '/javascripts/jquery-1.4.2.min.js'; ?>" charset="utf-8"></script>
-    <script type="text/javascript" src="<?php echo $sharedDir . '/javascripts/jquery-ui-1.8.5.custom.min.js'; ?>" charset="utf-8"></script>
-    <script type="text/javascript" src="<?php echo $sharedDir . '/javascripts/dragscrollable.js'; ?>" charset="utf-8"></script>
-    <script type="text/javascript" src="<?php echo $sharedDir . '/javascripts/jquery.colorbox-min.js'; ?>" charset="utf-8"></script>
-    <script type="text/javascript" src="<?php echo $sharedDir . '/javascripts/jquery.ui.ipad.js'; ?>" charset="utf-8"></script>
-    <script type="text/javascript" src="<?php echo $sharedDir . '/javascripts/jquery.bt.min.js'; ?>" charset="utf-8"></script>
-    <script type="text/javascript" src="<?php echo $sharedDir . '/javascripts/BookReader.js'; ?>" charset="utf-8"></script>
-    <script type="text/javascript" src="<?php echo $sharedDir . '/javascripts/ToCmenu.js'; ?>" charset="utf-8"></script>
-    <style>
-        #BRtoolbar,#ToCmenu,div#BRnav, #ToCbutton,#BRnavCntlBtm,.BRfloatHead, div#BRfiller, div#BRzoomer button, .BRnavCntl {
-            background-color: <?php echo get_option('bookreader_toolbar_color'); ?> !important;
-        }
-        #cboxContent {
-            border: 10px solid <?php echo get_option('bookreader_toolbar_color'); ?> !important;
-        }
-        a.logo {
-            background: url("<?php echo get_option('bookreader_logo_url'); ?>") no-repeat scroll 0 0 transparent !important;
-        }
-    </style>
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="<?php echo $sharedUrl . '/css/BookReader.css'; ?>" />
+    <link rel="stylesheet" href="<?php echo get_option('bookreader_custom_css'); ?>" />
+    <!-- JavaScripts -->
+    <script type="text/javascript" src="<?php echo $sharedUrl . '/javascripts/jquery-1.4.2.min.js'; ?>" charset="utf-8"></script>
+    <script type="text/javascript" src="<?php echo $sharedUrl . '/javascripts/jquery-ui-1.8.5.custom.min.js'; ?>" charset="utf-8"></script>
+    <script type="text/javascript" src="<?php echo $sharedUrl . '/javascripts/dragscrollable.js'; ?>" charset="utf-8"></script>
+    <script type="text/javascript" src="<?php echo $sharedUrl . '/javascripts/jquery.colorbox-min.js'; ?>" charset="utf-8"></script>
+    <script type="text/javascript" src="<?php echo $sharedUrl . '/javascripts/jquery.ui.ipad.js'; ?>" charset="utf-8"></script>
+    <script type="text/javascript" src="<?php echo $sharedUrl . '/javascripts/jquery.bt.min.js'; ?>" charset="utf-8"></script>
+    <script type="text/javascript" src="<?php echo $sharedUrl . '/javascripts/BookReader.js'; ?>" charset="utf-8"></script>
+    <script type="text/javascript" src="<?php echo $sharedUrl . '/javascripts/ToCmenu.js'; ?>" charset="utf-8"></script>
 </head>
-<body style="background-color: #65645f;">
+<body>
     <div></div>
     <div id="BookReader">
         <br />
@@ -84,7 +80,7 @@
     br.bookId  = <?php echo $item->id; ?>;
     br.subPrefix = <?php echo $item->id; ?>;
 
-    <?php echo titleLeaf(); ?>
+    <?php echo BookReader::titleLeaf($item); ?>
 
     br.numLeafs = br.pageW.length;
 
@@ -191,7 +187,7 @@
         return spreadIndices;
     }
 
-    br.ui = '<?php echo ui_bookreader_item(); ?>';
+    br.ui = '<?php echo BookReader::bookreaderCurrItemUI(); ?>';
 
     // Book title and the URL used for the book title link
     br.bookTitle= '<?php echo $title; ?>';
@@ -200,7 +196,7 @@
     br.siteName = "<?php echo option('site_title');?>";
 
     // Override the path used to find UI images
-    br.imagesBaseURL = '<?php echo bookreader_img_dir(); ?>';
+    br.imagesBaseURL = '<?php echo $imgDir; ?>';
 
     br.buildInfoDiv = function(jInfoDiv) {
         // $$$ it might make more sense to have a URL on openlibrary.org that returns this info
@@ -215,13 +211,13 @@
 
         // $$$ cover looks weird before it loads
         jInfoDiv.find('.BRfloatCover').append([
-            '<div style="height: 140px; min-width: 80px; padding: 0; margin: 0;"><?php echo link_to_item(item_cover("img")); ?></div>'
+            '<div style="height: 140px; min-width: 80px; padding: 0; margin: 0;"><?php echo link_to_item(BookReader::itemCover()); ?></div>'
         ].join(''));
 
         jInfoDiv.find('.BRfloatMeta').append([
             '<h3><?php __('Other Formats'); ?></h3>',
             '<ul class="links">',
-                '<li><?php echo item_PDF($item); ?></li>',
+                '<?php echo BookReader::linksToNonImages(); ?>',
             '</ul>',
             '<p class="moreInfo">',
                 '<a href="'+ this.bookUrl + '"><?php __('More information'); ?></a>',
@@ -250,7 +246,7 @@
     br.getEmbedURL = function(viewParams) {
         // We could generate a URL hash fragment here but for now we just leave at defaults
         //var url = 'http://' + window.location.host + '/stream/'+this.bookId;
-        var bookId = <?php echo id_bookreader_item(); ?>;
+        var bookId = <?php echo BookReader::bookreaderCurrItemId(); ?>;
         var url = '<?php echo WEB_ROOT; ?>/viewer/show/<?php echo $id; ?>';
         if (this.subPrefix != this.bookId) { // Only include if needed
             url += '/' + this.subPrefix;
@@ -269,6 +265,47 @@
         return "<iframe src='" + this.getEmbedURL(viewParams) + "' width='" + frameWidth + "' height='" + frameHeight + "' frameborder='0' ></iframe>";
     }
 
+    br.initUIStrings = function() {
+        var titles = { '.logo': '<?php echo __('Go to %s', option('site_title')); ?>', // $$$ update after getting OL record
+            '.zoom_in': '<?php echo __('Zoom in'); ?>',
+            '.zoom_out': '<?php echo __('Zoom out'); ?>',
+            '.onepg': '<?php echo __('One-page view'); ?>',
+            '.twopg': '<?php echo __('Two-page view'); ?>',
+            '.thumb': '<?php echo __('Thumbnail view'); ?>',
+            '.print': '<?php echo __('Print this page'); ?>',
+            '.embed': '<?php echo __('Embed BookReader'); ?>',
+            '.link': '<?php echo __('Link to this document and page'); ?>',
+            '.bookmark': '<?php echo __('Bookmark this page'); ?>',
+            '.read': '<?php echo __('Read this document aloud'); ?>',
+            '.share': '<?php echo __('Share this document'); ?>',
+            '.info': '<?php echo __('About this document'); ?>',
+            '.full': '<?php echo __('Show fullscreen'); ?>',
+            '.book_left': '<?php echo __('Flip left'); ?>',
+            '.book_right': '<?php echo __('Flip right'); ?>',
+            '.book_up': '<?php echo __('Page up'); ?>',
+            '.book_down': '<?php echo __('Page down'); ?>',
+            '.play': '<?php echo __('Play'); ?>',
+            '.pause': '<?php echo __('Pause'); ?>',
+            '.BRdn': '<?php echo __('Show/hide nav bar'); ?>', // Would have to keep updating on state change to have just "Hide nav bar"
+            '.BRup': '<?php echo __('Show/hide nav bar'); ?>',
+            '.book_top': '<?php echo __('First page'); ?>',
+            '.book_bottom': '<?php echo __('Last page'); ?>'
+        };
+        if ('rl' == this.pageProgression) {
+            titles['.book_leftmost'] = '<?php echo __('Last page'); ?>';
+            titles['.book_rightmost'] = '<?php echo __('First page'); ?>';
+        } else { // LTR
+            titles['.book_leftmost'] = '<?php echo __('First page'); ?>';
+            titles['.book_rightmost'] = '<?php echo __('Last page'); ?>';
+        }
+
+        for (var icon in titles) {
+            if (titles.hasOwnProperty(icon)) {
+                $('#BookReader').find(icon).attr('title', titles[icon]);
+            }
+        }
+    }
+
     // Let's go!
     br.init();
     $('#BRtoolbar').find('.read').hide();
@@ -276,20 +313,18 @@
     <?php
         // Si jamais la recherche n'est pas disponible (pas de fichier XML), on
         // va masquer les éléments permettant de la lancer (SMA 201210)
-        if (!brSearchAvailable(get_current_record('item'))): ?>
+        if (!BookReader::hasDataForSearch()): ?>
     $('#textSrch').hide();
     $('#btnSrch').hide();
         <?php endif; ?>
     </script>
 
-    <?php
-    //Table of Contents if exist, plugin PdfToc required
-    
-    echo fire_plugin_hook('toc_for_bookreader', array(
-        'view' => $this,
-        'item' => $item,
-    ));
-    
-?>
+     <?php
+     // Table of Contents if exist, plugin PdfToc required.
+     echo fire_plugin_hook('toc_for_bookreader', array(
+         'view' => $this,
+         'item' => $item,
+     ));
+    ?>
     </body>
 </html>

@@ -18,8 +18,8 @@ a {
  position:absolute;
  font-family: arial, sans-serif;
  left:0;
- right:0; 
- top:0; 
+ right:0;
+ top:0;
  bottom:0;
 }
 #BRtoolbar {
@@ -69,7 +69,6 @@ a {
     box-shadow: 0 0 2px #000, 0 0 2px #000 inset;
     background-image: url(../images/transparent.png)\0/; /* IE8 Hack */
 }
-
 #BRcontainer .annotation:hover {
     border-color: #FF0;
 }
@@ -172,7 +171,7 @@ a {
     position: absolute;
 }
 
-#BRgutter {    
+#BRgutter {
     /* border: 1px solid rgb(68, 25, 17); */
     position: absolute;
     z-index: 6;
@@ -180,7 +179,7 @@ a {
 }
 
 .BookReaderSearchHilite {
-    opacity: 0.20; 
+    opacity: 0.20;
     filter: alpha(opacity = 20);
     background-color: #00f;
     position:absolute;
@@ -191,7 +190,7 @@ a {
 }
 
 .BRpageform {
-    display: inline; 
+    display: inline;
 }
 #BRpagenum {
     border: none;
@@ -276,7 +275,6 @@ a {
 .BRicon.annotations_maker {background-position: -1400px 0;}
 .BRicon.annotations_maker:hover {background-position:-1440px 0;}
 
-
 a.logo {
     display: block;
     float: left;
@@ -342,10 +340,10 @@ form#booksearch button {
 
 .BRlogotype {
     float:left;
-    font-weight: bold; 
-    height: 25px; 
-    line-height: 25px; 
-    vertical-align: middle; 
+    font-weight: bold;
+    height: 25px;
+    line-height: 25px;
+    vertical-align: middle;
 }
 
 a.BRwhite               { color: #fff }
@@ -361,11 +359,11 @@ a.BRgrey:hover     { text-decoration: none; }
 a.BRgrey:visited   { color: #666; }
 
 .BRnavlinks {
-    float:right; 
-    padding: 0 20px 0 0; 
-    margin: 0; 
-    height: 25px; 
-    line-height: 25px; 
+    float:right;
+    padding: 0 20px 0 0;
+    margin: 0;
+    height: 25px;
+    line-height: 25px;
     vertical-align: middle;
 }
 
@@ -376,16 +374,16 @@ a.BRgrey:visited   { color: #666; }
     bottom: 25px;
     width: 100%;
     background-color: #222;
-    text-align: right; 
-    padding: 0px 0px 0px 0px; 
+    text-align: right;
+    padding: 0px 0px 0px 0px;
 }
 
-.BRwidgetlabel { 
-    color: #919070; 
-    padding: 8px 8px 4px 8px; 
-    font-family: verdana, arial, helvetica, sans-serif; 
-    font-size: 10px; 
-    float: left; 
+.BRwidgetlabel {
+    color: #919070;
+    padding: 8px 8px 4px 8px;
+    font-family: verdana, arial, helvetica, sans-serif;
+    font-size: 10px;
+    float: left;
 }
 
 .BRfliparea {
@@ -400,7 +398,7 @@ a.BRgrey:visited   { color: #666; }
     font-size: 11px;
     color: white;
     background-color: #9A9B9D;
-    opacity: 0.85,
+    opacity: 0.85;
     -webkit-border-radius: 4px;
     -moz-border-radius: 4px;
     border-radius: 4px;
@@ -738,12 +736,12 @@ div#BRnav {
     height: 40px;
     overflow: visible;
     z-index: 100;
-    background-color: #e2dcc5;    
-    
+    background-color: #e2dcc5;
+
     -webkit-box-shadow: 1px 1px 2px #333;
     /* No shadow for FF, to be consistent with toolbar */
     _position:absolute;
-    _top: expression(documentElement.scrollTop + documentElement.clientHeight-this.offsetHeight); 
+    _top: expression(documentElement.scrollTop + documentElement.clientHeight-this.offsetHeight);
 }
 div#BRnavpos {
     position: relative;
@@ -776,7 +774,7 @@ div#BRslider {
 #BRpager a {
     text-decoration: none;
 }
- /*   
+ /*
   width: 8px;
   height: 14px;
   position: absolute;
@@ -1015,8 +1013,8 @@ div#BRzoombtn {
     position: absolute;
     background-color: #e6e4e1;
     border: none!important;
-    font-size: 1.5em; 
-    z-index: 3;   
+    font-size: 1.5em;
+    z-index: 3;
     padding: 20px;
     -moz-border-radius: 8px;
     -webkit-border-radius: 8px;
@@ -1069,4 +1067,89 @@ div#BRzoombtn {
 }
 #BRnavCntlTop.BRup,#BRnavCntlTop.BRdn {
     background-position: 8px 4px;
+}
+
+/* Table of Contents */
+
+#ToCmenu {
+  position: fixed;
+  max-width:50%;
+  background-color : #E2DCC5;
+  z-index : 99;
+  overflow-x: hidden;
+  overflow-y: auto !important;
+  font-size : 12px;
+  font-family : arial,sans-serif;
+  opacity:0.75;
+}
+#ToCmenu h2,
+#ToCmenu p {
+  margin : 10px;
+}
+#ToCmenu ul {
+  padding-left : 0;
+}
+#ToCmenu li {
+  list-style : none;
+  padding-right : 20px
+}
+#ToCmenu li:hover,
+.scrollToggle:hover + li {
+  background-color : #000;
+}
+#ToCmenu a {
+  color : #000;
+  text-decoration : none;
+  width : 100%;
+  display : block;
+}
+#ToCmenu li:hover a,
+#ToCmenu .scrollToggle:hover+li a {
+  color : #FFF;
+  /* font-weight: bold; */
+}
+#ToCbutton {
+  width: 30px;
+  height: 40px;
+  background-color: #E2DCC5;
+  cursor: pointer;
+  position: absolute;
+  z-index : 100;
+  background-position : 4px 8px;
+  background-repeat: no-repeat;
+  -moz-border-radius-topright: 8px;
+  -webkit-border-top-right-radius: 8px;
+  -moz-border-radius-bottomright: 8px;
+  -webkit-border-bottom-right-radius: 8px;
+  opacity:0.75;
+}
+#ToCbutton.open {
+  background-image: url("../images/nav_control-lt.png");
+}
+#ToCbutton.close {
+  background-image: url("../images/nav_control-rt.png");
+}
+#ToCmenu .scrollToggle {
+  width : 12px;
+  height : auto;
+/*  color : transparent;*/
+  background-repeat : no-repeat;
+  background-position : center center;
+  text-align : center;
+  float : left;
+  padding : 0;
+}
+#ToCmenu .right-arrow {
+  background-image : url("../images/right_arrow.png");
+}
+#ToCmenu .right-arrow:hover,
+#ToCmenu .right-arrow.hover {
+  background-image : url("../images/right_arrow_wt.png");
+}
+#ToCmenu .down-arrow {
+  background-image : url("../images/down_arrow.png");
+}
+#ToCmenu .down-arrow:hover,
+#ToCmenu .down-arrow.hover {
+  background-image : url("../images/down_arrow_wt.png");
 }

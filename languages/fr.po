@@ -1,0 +1,218 @@
+# Translation for the BookReader plugin for Omeka.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the Omeka package.
+#
+# Daniel Berthereau <daniel.fr@berthereau.net>, 2013.
+msgid ""
+msgstr ""
+"Project-Id-Version: BookReader\n"
+"Report-Msgid-Bugs-To: https://github.com/Daniel-KM/BookReader/issues\n"
+"POT-Creation-Date: 2013-07-04 00:00+0000\n"
+"PO-Revision-Date: 2013-07-08 07:07+0200\n"
+"Last-Translator: Daniel Berthereau <daniel.fr@berthereau.net>\n"
+"Language-Team: French <kde-i18n-doc@kde.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: fr\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"X-Generator: Lokalize 1.5\n"
+
+#: config_form.php:1
+msgid "General parameters"
+msgstr "Paramètres généraux"
+
+#: config_form.php:2
+msgid "Logo URL for toolbar viewer"
+msgstr "Url du logo pour la barre d’outil du visualiseur"
+
+#: config_form.php:3
+msgid "Url to a custom css for BookReader"
+msgstr "Url du css de personnalisation de BookReader"
+
+#: config_form.php:10
+msgid "Favicon URL for viewer pages"
+msgstr "Url de la favicon pour les pages de visualisation"
+
+#: config_form.php:29
+msgid "Sorting by original filename ?"
+msgstr "Trier par nom de fichier original ?"
+
+#: config_form.php:34
+msgid ""
+"If checked, the viewer will sort images in viewer alphabetically, by "
+"original filename."
+msgstr ""
+"Si coché, le visualiseur triera les images alphabétiquement par nom de "
+"fichier original."
+
+#: config_form.php:40
+msgid "Embed mode"
+msgstr "Mode embarqué"
+
+#: config_form.php:42
+msgid "Number of pages in embed mode (1 or 2)"
+msgstr "Nombre de page en mode embarqué (1 ou 2)"
+
+#: config_form.php:49
+msgid "Enable all functions in embed mode (0 or 1)"
+msgstr "Activer toutes les fonctions en mode embarqué (0 ou 1)"
+
+#: config_form.php:56
+msgid "Class to add to the inline frame in embed mode"
+msgstr "Classe à ajouter à l’iframe du mode embarqué"
+
+#: config_form.php:63
+msgid "Width of the inline frame in embed mode"
+msgstr "Largeur de l’iframe en mode embarqué"
+
+#: config_form.php:70
+msgid "Height of the inline frame in embed mode"
+msgstr "Hauteur de l’iframe en mode embarqué"
+
+#: config_form.php:65
+msgid "Color of the background (#65645F)"
+msgstr "Couleur du fond (#65645F)"
+
+#: config_form.php:72
+msgid "Color of the toolbar (#e2dcc5)"
+msgstr "Couleur de la barre d’outils (#e2dcc5)"
+
+#: config_form.php:17
+msgid "Path of the custom library"
+msgstr "Chemin vers la bibliothèque de fonctions personnalisées"
+
+#: config_form.php:22
+msgid "Custom functions are used to get infos from your files."
+msgstr ""
+"Les fonctions personnalisées sont utilisées pour récupérer des infos sur les "
+"fichiers"
+
+#: config_form.php:23
+#, php-format
+msgid "Default directory is \"%s\"."
+msgstr "Le dossier par défaut est \"%s\"."
+
+#: helpers/BookReaderFunctions.php:354
+msgid "bytes"
+msgstr "octets"
+
+#: helpers/BookReaderFunctions.php:358
+msgid "KB"
+msgstr "Ko"
+
+#: helpers/BookReaderFunctions.php:358
+msgid "MB"
+msgstr "Mo"
+
+#: helpers/BookReaderFunctions.php:358
+msgid "GB"
+msgstr "Go"
+
+#: helpers/BookReaderFunctions.php:358
+msgid "TB"
+msgstr "To"
+
+#: views/public/viewer/show.php:226
+msgid "Other Formats"
+msgstr "Autres formats"
+
+#: views/public/viewer/show.php:231
+msgid "More information"
+msgstr "Plus d’infos"
+
+#: views/public/viewer/show.php:237
+msgid "Report a problem"
+msgstr "Signaler un problème"
+
+#: views/public/viewer/show.php:277
+msgid "Go to %s"
+msgstr "Aller à %s"
+
+#: views/public/viewer/show.php:278
+msgid "Zoom in"
+msgstr "Grossir"
+
+#: views/public/viewer/show.php:279
+msgid "Zoom out"
+msgstr "Élargir"
+
+#: views/public/viewer/show.php:280
+msgid "One-page view"
+msgstr "Voir une seule page"
+
+#: views/public/viewer/show.php:281
+msgid "Two-page view"
+msgstr "Voir deux pages"
+
+#: views/public/viewer/show.php:282
+msgid "Thumbnail view"
+msgstr "Voir les vignettes"
+
+#: views/public/viewer/show.php:283
+msgid "Print this page"
+msgstr "Imprimer cette page"
+
+#: views/public/viewer/show.php:284
+msgid "Embed BookReader"
+msgstr "Embarquer le lecteur"
+
+#: views/public/viewer/show.php:285
+msgid "Link to this document and page"
+msgstr "Lien vers ce document et cette page"
+
+#: views/public/viewer/show.php:289
+msgid "Bookmark this page"
+msgstr "Ajouter un signet sur cette page"
+
+#: views/public/viewer/show.php:287
+msgid "Read this document aloud"
+msgstr "Lire ce document à haute voix"
+
+#: views/public/viewer/show.php:288
+msgid "Share this document"
+msgstr "Partager ce document"
+
+#: views/public/viewer/show.php:289
+msgid "About this document"
+msgstr "À propos de ce document"
+
+#: views/public/viewer/show.php:290
+msgid "Show fullscreen"
+msgstr "Voir en plein écran"
+
+#: views/public/viewer/show.php:291
+msgid "Flip left"
+msgstr "Feuilleter à gauche"
+
+#: views/public/viewer/show.php:292
+msgid "Flip right"
+msgstr "Feuilleter à droite"
+
+#: views/public/viewer/show.php:293
+msgid "Page up"
+msgstr "Page précédente"
+
+#: views/public/viewer/show.php:294
+msgid "Page down"
+msgstr "Page suivante"
+
+#: views/public/viewer/show.php:295
+msgid "Play"
+msgstr "Avance automatique"
+
+#: views/public/viewer/show.php:296
+msgid "Pause"
+msgstr "Pause"
+
+#: views/public/viewer/show.php:297
+msgid "Show/hide nav bar"
+msgstr "Afficher/cacher la barre d’outis"
+
+#: views/public/viewer/show.php:299
+msgid "First page"
+msgstr "Première page"
+
+#: views/public/viewer/show.php:300
+msgid "Last page"
+msgstr "Dernière page"

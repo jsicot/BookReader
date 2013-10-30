@@ -35,16 +35,17 @@ If you want to embed it, add this code in the item/show.php file of your theme:
 
 ```
     <?php
-    fire_plugin_hook('public_items_show', array(
+    fire_plugin_hook('book_reader_item_show', array(
         'view' => $this,
         'item' => $item,
         'page' => '0',
         'embed_functions' => false,
+        'mode_page' => 1,
     ));
+    ?>
 ```
 
-This hook is generally enabled by default in themes, but you can add options if
-wanted. If an option is not set, the parameters in the config page will be used.
+If an option is not set, the parameters in the config page will be used.
 Image number starts from '0' with default functions.
 
 
@@ -133,5 +134,3 @@ BookReader Omeka plugin:
 [jsicot]: https://github.com/jsicot "Julien Sicot"
 [Université Rennes 2]: http://bibnum.univ-rennes2.fr
 [Mines ParisTech]: http://bib.mines-paristech.fr "Mines ParisTech / ENSMP"
-
-

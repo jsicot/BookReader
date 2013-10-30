@@ -7,291 +7,111 @@
 class BookReader_IndexController extends Omeka_Controller_AbstractActionController
 {
     /**
-     * This function returns the answer to a query with coordinates of the
-     * matching words.
+     * Returns the answer to a query in order to highlight it via javascript.
+     *
+     * A result can contain multiple words, multiple matches, multiple pars and
+     *  multiple boxes, for example when the answer is on two lines or pages.
+     *
+     * The resulted javascript/json is echoed and sent via Ajax.
+     *
+     * The structure of the json object is:
+     *     ->ia = item id
+     *     ->q = query
+     *      ->page_count = page count (useless)
+     *      ->body_length = body lenght (useless)
+     *      ->leaf0_missing = generally empty
+     *     ->matches = results as array of objects
+     *         ->text = few words to contextualize the result, used in nav bar
+     *         ->par = array of par zones (currently, only the [0] is used)
+     *             ->t = top limit of global zone
+     *             ->r = right limit of global zone
+     *             ->b = bottom limit of global zone
+     *             ->l = left limit of global zone
+     *             ->page = page number
+     *             ->boxes = array of coordinates of boxes to highlight
+     *                 ->r = right limit of word zone
+     *                 ->l = left limit of word zone
+     *                 ->b = bottom limit of word zone
+     *                 ->t = top limit of word zone
+     *                 ->page = page number
      */
     public function fulltextAction()
     {
         $item_id = $this->getRequest()->getParam('item_id');
+        // TODO Check if doc is different than item_id.
         $doc = $this->getRequest()->getParam('doc');
-        $path = $this->getRequest()->getParam('path');
-        $q = $this->getRequest()->getParam('q');
-        $q = utf8_encode($q);
+        $query = $this->getRequest()->getParam('q');
+        $query = utf8_encode($query);
         $callback = $this->getRequest()->getParam('callback');
 
-        // On va récupérer le fichier XML de l'item
-        $this->getResponse()->clearBody();
-        $this->getResponse()->setHeader('Content-Type', 'text/html');
         $item = get_record_by_id('item', $item_id);
 
-        $list = array();
-        set_loop_records('files', $item->getFiles());
-        foreach (loop('files') as $file) {
-            if (strtolower(pathinfo($file->original_filename, PATHINFO_EXTENSION)) == 'xml') {
-               $xml_file = escapeshellarg(FILES_DIR . DIRECTORY_SEPARATOR .'original'. DIRECTORY_SEPARATOR . $file->filename);
-            }
-            elseif ($file->hasThumbnail()) {
-                if (preg_match('/(jpg|jpeg|png|gif)/', $file->filename)) {
-                    $list[$file->filename] = $file->original_filename;
-                }
-            }
-        }
-        // Sorting by original filename if needed, or keep original attached order.
-       	$sortOption = get_option('bookreader_sorting_mode');
-       	if($sortOption=='1'){
-        	uasort($list, 'cmp');
+        $output = array();
+
+        // Check if there are data for search.
+        if (BookReader::hasDataForSearch($item)) {
+            $output['ia'] = $doc;
+            $output['q'] = $query;
+            // TODO Check if these keys are really needed.
+            // $output['page_count'] = 200;
+            // $output['body_length'] = 140000;
+            // TODO Kezako ?
+            $output['leaf0_missing'] = false;
+
+            $answer = BookReader::searchFulltext($query, $item);
+            $output['matches'] = BookReader::highlightFiles($answer);
         }
 
-        $widths = array();
-        $heights = array();
-        foreach ($list as $key => $image) {
-            $pathImg = FILES_DIR . DIRECTORY_SEPARATOR . 'fullsize' . DIRECTORY_SEPARATOR . $key;
-            list($width, $height, $type, $attr) = getimagesize($pathImg);
-            $widths[] = $width;
-            $heights[] = $height;
-        }
-
-        // On a un fichier XML, on va aller l'interroger pour voir si on a des choses dedans
-        if ($xml_file) {
-        
-        //echo "grep -P -i '<\/?page|$q' $xml_file ";
-            $res = shell_exec("grep -P -i '<\/?page|$q' $xml_file");
-            $res = preg_replace("/<page[^>]*>\n<\/page>\n/",'',$res);
-
-            $sortie = array();
-            $sortie['ia'] = $doc;
-            $sortie['q'] = $q;
-//          $sortie['page_count'] = 200; // Voir s'il faut vraiment le récupérer
-//          $sortie['body_length'] = 140000; // Idem, voir si c'est utilisé
-            $sortie['leaf0_missing'] = false; // Kezako ?
-            $sortie['matches'] = array();
-
-            // On va parcourir toutes les lignes qui matchent
-            while (preg_match('/<page number="(\d*)" [^>]*height="(\d*)" width="(\d*)">\n(.*)\n<\/page>(.*)$/siU', $res, $match)) {
-                $page_number = $match[1];
-                $page_height = $match[2];
-                $page_width  = $match[3];
-                $zones = $match[4];
-                $res = $match[5]; // On reprend pour la suite;
-
-                $tab_lignes = preg_split('/<text /', $zones);
-                foreach ($tab_lignes as $une_ligne) {
-                    if (preg_match('/top="(\d*)" left="(\d*)" width="(\d*)" height="(\d*)" font="(\d*)">(.*)<\/text>$/', $une_ligne, $match_ligne)) {
-                        $zone_top = $match_ligne[1];
-                        $zone_left = $match_ligne[2];
-                        $zone_width = $match_ligne[3];
-                        $zone_height = $match_ligne[4];
-                        $zone_font = $match_ligne[5];
-                        $zone_text = $match_ligne[6];
-                        $zone_text = preg_replace("/<\/?[ib]>/", "", $zone_text);
-
-                        $zone_right = ($page_width - $zone_left - $zone_width);
-                        $zone_bottom = ($page_height - $zone_top - $zone_height);
-
-                        // On crée la zone "globale"
-                        $tab_zone = array();
-                        $tab_zone['text'] = $zone_text;
-
-                        // On va créer les boxes ...
-                        $zone_width_char = strlen($zone_text);
-                        $mot_start_char = stripos($zone_text, $q);
-                        $mot_width_char = strlen($q);
-                        $zone_text = str_ireplace($q, '{{{' . $q . '}}}', $zone_text);
-
-                        $mot_left =  $zone_left + ( ($mot_start_char * $zone_width) / $zone_width_char);
-                        $mot_right = $mot_left + ( ( ( $mot_width_char + 2) * $zone_width) / $zone_width_char );
-                    #   print 'L : ' . $mot_left . PHP_EOL;
-                    #   print 'R : ' . $mot_right . PHP_EOL;
-
-                        $mot_left = round($mot_left * $widths[$page_number] / $page_width);
-                        $mot_right  = round( $mot_right * $widths[$page_number] / $page_width);
-                    #   print "Zone texte : #$zone_text ($zone_width_char char pour $zone_width px)#" . PHP_EOL;
-
-                        $mot_top = round($zone_top * $heights[$page_number] / $page_height);
-                        $mot_bottom = round($mot_top + ( $zone_height * $heights[$page_number] / $page_height  ));
-
-                        $tab_zone['par'] = array();
-                        $tab_zone['par'][] = array(
-                            't' => $zone_top,
-                            'r' => $zone_right,
-                            'b' => $zone_bottom,
-                            'l' => $zone_left,
-                            'page' => $page_number,
-                            'boxes' => array(
-                                array(
-                                    'r' => $mot_right,
-                                    'l' => $mot_left,
-                                    'b' => $mot_bottom,
-                                    't' => $mot_top,
-                                    'page' => $page_number,
-                        )));
-
-//                      if ($page_number == 513) {
-                        if (true) {
-                            $sortie['matches'][] = $tab_zone;
-                        }
-                    }
-                    elseif ($une_ligne != '') {
-                        print '####>>>>> PB ligne : #' . $une_ligne . '#' . PHP_EOL;
-                    }
-                }
-            }
-        }
-
-        $tab_json = json_encode($sortie);
-        $pattern = array(',"', '{', '}');
-        $replacement = array(",\n\t\"", "{\n\t", "\n}");
-
-        print $callback . '(' . $tab_json . ')';
+        // Send answer.
+        $this->getResponse()->clearBody();
+        $this->getResponse()->setHeader('Content-Type', 'text/html');
+        //header('Content-Type: text/javascript; charset=utf8');
+	//header('Access-Control-Allow-Methods: GET, POST');
+        $tab_json = json_encode($output);
+        echo $callback . '(' . $tab_json . ')';
     }
 
+    /**
+     * Returns sized image for the current image.
+     */
     public function imageProxyAction()
     {
-        $num_img = $this->getRequest()->getParam('image');
-        if ($num_img != '000') {
-            $num_img = preg_replace('`^[0]*`', '', $num_img);
-        }
-        else {
-            $num_img = '0';
-        }
-        $num_img = ($num_img - 1);
-
-        $filesDir = FILES_DIR . DIRECTORY_SEPARATOR;
-
         $scale = $this->getRequest()->getParam('scale');
-        switch ($scale) {
-            case ($scale < 1.1): $filesDir .= 'original'; break;
-            case ($scale < 1.4): $filesDir .= 'fullsize'; break;
-            case ($scale < 6): $filesDir .= 'fullsize'; break;
-            case ($scale < 16): $filesDir .= 'thumbnails'; break;
-            case ($scale < 32): $filesDir .= 'thumbnails'; break;
-            default: $filesDir .= 'fullsize'; break;
-        }
+        $itemId = $this->getRequest()->getParam('id');
+        $item = get_record_by_id('item', $itemId);
 
-        $id = $this->getRequest()->getParam('id');
-        $item = get_record_by_id('item', $id);
-        
-        $supportedFormats = array(
-        'jpeg' => 'JPEG Joint Photographic Experts Group JFIF format',
-        'jpg' => 'Joint Photographic Experts Group JFIF format',
-        'png' => 'Portable Network Graphics',
-        'gif' => 'Graphics Interchange Format',
-	    );
-		// Set the regular expression to match selected/supported formats.
-		$supportedFormatRegEx = '/\.'.implode('|', array_keys($supportedFormats)).'$/';
+        $type = BookReader::sendImage($scale, $item);
 
-        // Création d'un tableau composé de l'ensemble des images de l'item consulté
-        $list = array();
-        set_loop_records('files', $item->getFiles());
-        foreach (loop('files') as $file) {
-            if ($file->hasThumbnail()) {
-                // $list[] = $file->filename;//Création du tableau
-                if (preg_match($supportedFormatRegEx, $file->original_filename)) {
-                	$list[] = $file->original_filename;
-                }
-            }
-        }
-        // Compte le nombre d'images dans le tableau.
-        $nbimg = count($list);
-
-        // Si $list n'est pas un tableau, message d'erreur, sinon traitement.
-        if (!is_array($list)) {
-            $html = '<br />' . PHP_EOL;
-            $html .= '<br />' . PHP_EOL;
-            $html .= __('Problem');
-            $html .= '<br />' . PHP_EOL;
-            $html .= '<br />' . PHP_EOL;
-            $html .= '</a>' . PHP_EOL;
-            $html .= '</div>' . PHP_EOL;
-        }
-        else {
-              // Sorting by original filename if needed, or keep original attached order.
-       		$sortOption = get_option('bookreader_sorting_mode');
-       		if($sortOption=='1'){
-        		sort($list);
-       		 }
-        }
-
-        $image=$list[$num_img];
-        $db = get_db();
-        $query = $db
-            ->select()
-            ->from(array($db->Files), 'filename')
-            ->where('original_filename = ?', $image)
-            ->where('item_id = ?', $id);
-        $image = $db->fetchOne($query);
-        $image = $filesDir . DIRECTORY_SEPARATOR . $image;
-        $image = file_get_contents($image);
-
-        $this->getResponse()->clearBody ();
-        $this->getResponse()->setHeader('Content-Type', 'image/jpeg');
-        $this->getResponse()->setBody($image);
+        $this->_sendImage($type);
     }
 
+    /**
+     * Returns image of the current image.
+     */
     public function thumbProxyAction()
     {
-        $num_img = $this->getRequest()->getParam('image');
-        if ($num_img != '000') {
-            $num_img = preg_replace('`^[0]*`', '', $num_img);
-        } else {
-            $num_img = '0';
-        }
-        $num_img = ($num_img - 1);
+        $this->_sendImage('thumbnails');
+    }
 
-        $filesDir = FILES_DIR . DIRECTORY_SEPARATOR . 'thumbnails';
-
+    /**
+     * Helper to return image of the current image.
+     */
+    protected function _sendImage($type = 'fullsize')
+    {
         $id = $this->getRequest()->getParam('id');
         $item = get_record_by_id('item', $id);
 
-               $supportedFormats = array(
-        'jpeg' => 'JPEG Joint Photographic Experts Group JFIF format',
-        'jpg' => 'Joint Photographic Experts Group JFIF format',
-        'png' => 'Portable Network Graphics',
-        'gif' => 'Graphics Interchange Format',
-	    );
-		// Set the regular expression to match selected/supported formats.
-		$supportedFormatRegEx = '/\.'.implode('|', array_keys($supportedFormats)).'$/';
-
-        // Création d'un tableau composé de l'ensemble des images de l'item consulté
-        $list = array();
-        set_loop_records('files', $item->getFiles());
-        foreach (loop('files') as $file) {
-            if ($file->hasThumbnail()) {
-                // $list[] = $file->filename;//Création du tableau
-                if (preg_match($supportedFormatRegEx, $file->original_filename)) {
-                	$list[] = $file->original_filename;
-                }
-            }
-        }
-        // Compte le nombre d'images dans le tableau.
-        $nbimg = count($list);
-
-        // Si $list n'est pas un tableau, message d'erreyr, sinon traitement.
-        if (!is_array($list)) {
-            $html = '<br />' . PHP_EOL;
-            $html .= '<br />' . PHP_EOL;
-            $html .= __('Problem');
-            $html .= '<br />' . PHP_EOL;
-            $html .= '<br />' . PHP_EOL;
-            $html .= '</a>' . PHP_EOL;
-            $html .= '</div>' . PHP_EOL;
+        $num_img = $this->getRequest()->getParam('image');
+        if ($num_img != '000') {
+            $num_img = preg_replace('`^[0]*`', '', $num_img);
         }
         else {
-            // Sorting by original filename if needed, or keep original attached order.
-            $sortOption = get_option('bookreader_sorting_mode');
-       		if($sortOption=='1'){
-        		sort($list);
-       		 }
+            $num_img = '0';
         }
+        $num_img--;
 
-        $image = $list[$num_img];
-        $db = get_db();
-        $query = $db
-            ->select()
-            ->from(array($db->Files), 'filename')
-            ->where('original_filename = ?', $image);
-        $image = $db->fetchOne($query);
-        $image = $filesDir . DIRECTORY_SEPARATOR . $image;
+        $imagesFiles = BookReader::getImagesFiles($item);
+        $image = FILES_DIR . DIRECTORY_SEPARATOR . $type . DIRECTORY_SEPARATOR . $imagesFiles[$num_img]->getDerivativeFilename();
         $image = file_get_contents($image);
 
         $this->getResponse()->clearBody ();

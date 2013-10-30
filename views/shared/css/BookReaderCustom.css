@@ -1,6 +1,28 @@
 /**
- * Custom overrides for BookReader Demo.
+ * Custom overrides for BookReader.
  */
+
+a.logo {
+    background: url("../images/logo_icon.png") no-repeat scroll 0 0 transparent !important;
+}
+body,
+#BookReader #BRcontainer {
+    background-color: #65645f;
+}
+#BRtoolbar,
+#ToCmenu,
+#BRnav,
+#ToCbutton,
+#BRnavCntlBtm,
+.BRfloatHead,
+#BRfiller,
+#BRzoomer button,
+.BRnavCntl {
+    background-color: #e2dcc5 !important;
+}
+#cboxContent {
+    border: 10px solid #e2dcc5 !important;
+}
 
 /* Hide print and embed functionality */
 #BRtoolbar .embed,
@@ -82,7 +104,11 @@
   -webkit-border-top-right-radius: 8px;
   -moz-border-radius-bottomright: 8px;
   -webkit-border-bottom-right-radius: 8px;
+<<<<<<< HEAD
    opacity:0.75;
+=======
+  opacity:0.75;
+>>>>>>> f89d19ff000eea99dbe7c4365fa114a475533ff1
 }
 #ToCbutton.open {
   background-image: url("../images/nav_control-lt.png");
@@ -93,7 +119,7 @@
 #ToCmenu .scrollToggle {
   width : 12px;
   height : auto;
-  color : transparent;
+/*  color : transparent;*/
   background-repeat : no-repeat;
   background-position : center center;
   text-align : center;

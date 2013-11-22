@@ -60,37 +60,21 @@ class BookReader_Custom
 	*
 	* @return File|null
 	*/
-	public static function getCoverFile($item)
-	{
-		$imagesFiles = BookReader::getImagesFiles($item);
-		foreach ($imagesFiles as $key => $file) {
-			$re1 = '.*?';
-			$re2 = '(titre)';
-			$re3 = '(\\d+)';
-			if ($c = preg_match_all ('/' . $re1 . $re2 . $re3 . '/is', $file->original_filename, $matches)) {
-				return $file;
-			}
-		}
-	}
+ 	public static function getCoverFile($item)
+    	{
+        	$imagesFiles = BookReader::getImagesFiles($item);
+        	return reset($imagesFiles);
+    	}
 
 	/**
 	* Return the title leaf for javascript.
 	*
 	* @return string
 	*/
-	public static function getTitleLeaf($item)
-	{
-		$imagesFiles = BookReader::getImagesFiles($item);
-		foreach ($imagesFiles as $key => $file) {
-			$re1 = '.*?'; // Non-greedy match on filler
-			$re2 = '(titre)'; // Word 1
-			$re3 = '.*?'; // Non-greedy match on filler
-			$re4 = '(01)'; // Any Single Digit 1
-			if ($c = preg_match_all('/' . $re1 . $re2 . $re3 . $re4 . '/is', $file->original_filename, $matches)) {
-				return 'br.titleLeaf = ' . $key;
-			}
-		}
-	}
+	 public static function getTitleLeaf($item)
+    	{
+        	return 'br.titleLeaf = ' . '0';
+    	}
 
 	/**
 	* Returns the derivative size to use for the current image, depending on
@@ -173,11 +157,6 @@ class BookReader_Custom
 					$list[$file->filename] = $file->original_filename;
 				}
 			}
-		}
-
-		// Sorting by original filename if needed, or keep original attached order.
-		if (get_option('bookreader_sorting_mode')) {
-			uasort($list, array(BookReader, 'compareStrings'));
 		}
 
 		$widths = array();

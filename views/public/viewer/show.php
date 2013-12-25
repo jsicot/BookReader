@@ -28,7 +28,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
     <base target="_parent" />
-    <link rel="apple-touch-icon" href="<?php echo WEB_FILES . '/thumbnails/' . $coverFile->getDerivativeFilename(); ?>" />
+  <!--   <link rel="apple-touch-icon" href="<?php //echo WEB_FILES . '/thumbnails/' . $coverFile->getDerivativeFilename(); ?>" /> -->
     <link rel="shortcut icon" href="<?php echo get_option('bookreader_favicon_url'); ?>" type="image/x-icon" />
     <title><?php echo $title; ?></title>
     <!-- Stylesheets -->
@@ -56,260 +56,172 @@
     </div>
 
     <script type="text/javascript">
-    //
-    // This file shows the minimum you need to provide to BookReader to display a book
-    //
-    // Copyright(c)2008-2009 Internet Archive. Software license AGPL version 3.
+    // 
+// This file shows the minimum you need to provide to BookReader to display a book
+//
+// Copyright(c)2008-2009 Internet Archive. Software license AGPL version 3.
 
-    // Create the BookReader object
-    br = new BookReader();
-    br.getPageWidth = function(index) {
-        return this.pageW[index];
-    }
+// Create the BookReader object
 
-    br.getPageHeight = function(index) {
-        return this.pageH[index];
-    }
+        imagesArray = [];
+function spreadsheetLoaded(json){
 
-    br.pageW =  [<?php echo implode(',', $imgWidths);   ?> ];
-    br.pageH =  [ <?php echo implode(',', $imgHeights); ?> ];
-    br.leafMap = [<?php echo implode(',', $imgNums);  ?> ];
-    br.pageNums = [<?php echo implode(',', $imgLabels); ?> ];
-    br.server = "<?php echo $serverFullText; ?>";
-    br.bookPath = "<?php echo WEB_ROOT; ?>";
-    br.bookId  = <?php echo $item->id; ?>;
-    br.subPrefix = <?php echo $item->id; ?>;
+        imagesArray = [];
 
-    <?php echo BookReader::titleLeaf($item); ?>
+        json = json.substring(json.indexOf("(")+1);
+        json = json.substring(0,json.lastIndexOf(")"));
+        
+        json=JSON.parse(json);
+        parts = json["feed"]["entry"];
 
-    br.numLeafs = br.pageW.length;
+        for (n in parts ){
+        
+           if (parts[n]["gsx$image"]!=undefined){
 
-    br.getPageNum = function(index) {
-        var pageNum = this.pageNums[index];
-        if (pageNum) {
-            return pageNum;
-        } else {
-            return 'n' + index;
+                imagesArray.push({"image":parts[n]["gsx$image"]["$t"],"height":parts[n]["gsx$height"]["$t"],"width":parts[n]["gsx$width"]["$t"]});
+                }
         }
-    }
+        var externalArray = [];
+        var htmlstring  = "";
+        
+        
+        // Let's go!
+        //br.init();
 
+        // read-aloud and search need backend compenents and are not supported in
+        // the demo
+br = new BookReader();
+        br.imagesBaseURL = '../BookReader/images/';
 
-    // Single images in the Internet Archive scandata.xml metadata are (somewhat incorrectly)
-    // given a "leaf" number.  Some of these images from the scanning process should not
-    // be displayed in the BookReader (for example colour calibration cards).  Since some
-    // of the scanned images will not be displayed in the BookReader (those marked with
-    // addToAccessFormats false in the scandata.xml) leaf numbers and BookReader page
-    // indexes are generally not the same.  This function returns the BookReader page
-    // index given a scanned leaf number.
-    //
-    // This function is used, for example, to map between search results (that use the
-    // leaf numbers) and the displayed pages in the BookReader.
-    br.leafNumToIndex = function(leafNum) {
-        for (var index = 0; index < this.leafMap.length; index++) {
-            if (this.leafMap[index] == leafNum) {
-                return index;
+        // Return the width of a given page. Here we assume all images are 800
+        // pixels wide
+        br.getPageWidth = function(index) {
+                if ((imagesArray[index])&&(imagesArray[index].width!=undefined)) {
+                return parseInt(imagesArray[index].width);
+                }
+                else{
+                return 800;
+                }
+        }
+
+        // Return the height of a given page. Here we assume all images are 1200
+        // pixels high
+        br.getPageHeight = function(index) {
+                if ((imagesArray[index])&&(imagesArray[index].height!=undefined)){
+                return parseInt(imagesArray[index].height)
+                }
+                else{
+                return 1200;
+                }
+        }
+
+        // We load the images from archive.org -- you can modify this function to
+        // retrieve images
+        // using a different URL structure
+        br.getPageURI = function(index, reduce, rotate) {
+                // reduce and rotate are ignored in this simple implementation, but we
+                // could e.g. look at reduce and load images from a different directory
+                // or pass the information to an image server
+                // var leafStr = '000';
+                // var imgStr = (index+1).toString();
+                // var re = new RegExp("0{"+imgStr.length+"}$");
+                // var url =
+                // 'http://www.archive.org/download/BookReader/img/page'+leafStr.replace(re,
+                // imgStr) + '.jpg';
+                
+                url = imagesArray[index].image;
+
+                return url;
+        }
+
+        // Return which side, left or right, that a given page should be displayed
+        // on
+        br.getPageSide = function(index) {
+                if (0 == (index & 0x1)) {
+                        return 'R';
+                } else {
+                        return 'L';
+                }
+        }
+
+        // This function returns the left and right indices for the user-visible
+        // spread that contains the given index. The return values may be
+        // null if there is no facing page or the index is invalid.
+        br.getSpreadIndices = function(pindex) {
+                var spreadIndices = [ null, null ];
+                if ('rl' == this.pageProgression) {
+                        // Right to Left
+                        if (this.getPageSide(pindex) == 'R') {
+                                spreadIndices[1] = pindex;
+                                spreadIndices[0] = pindex + 1;
+                        } else {
+                                // Given index was LHS
+                                spreadIndices[0] = pindex;
+                                spreadIndices[1] = pindex - 1;
+                        }
+                } else {
+                        // Left to right
+                        if (this.getPageSide(pindex) == 'L') {
+                                spreadIndices[0] = pindex;
+                                spreadIndices[1] = pindex + 1;
+                        } else {
+                                // Given index was RHS
+                                spreadIndices[1] = pindex;
+                                spreadIndices[0] = pindex - 1;
+                        }
+                }
+
+                return spreadIndices;
+        }
+
+        // For a given "accessible page index" return the page number in the book.
+        //
+        // For example, index 5 might correspond to "Page 1" if there is front
+        // matter such
+        // as a title page and table of contents.
+        br.getPageNum = function(index) {
+                return index + 1;
+        }
+
+        // Total number of leafs
+        br.numLeafs = imagesArray.length;
+
+        // Book title and the URL used for the book title link
+        br.bookTitle = json["feed"]["title"]["$t"];
+        br.bookUrl = "proba" //BookReaderConfig.bookUrl;
+
+        // Override the path used to find UI images
+        // br.imagesBaseURL = '../BookReader/images/';
+
+        br.getEmbedCode = function(frameWidth, frameHeight, viewParams) {
+                return "Embed code not supported in bookreader demo.";
+        }
+        br.init();
+        $('#BRtoolbar').find('.read').hide();
+        $('#BRreturn').html($('#BRreturn').text());
+        //$('#textSrch').hide();
+        //$('#btnSrch').hide();
+        return;
+}                
+function loadData(){
+        var dataurl = 'https://spreadsheets.google.com/feeds/list/'+'0Ag7PrlWT3aWadDdVODJLVUs0a1AtUVlUWlhnXzdwcGc'+'/od6/public/values?alt=json-in-script&callback=spreadsheetLoaded';
+        $.ajax({
+          url: dataurl,
+          dataType: 'jsonP',
+          jsonpCallback: "spreadsheetLoaded",
+            success: function(data){
+                        spreadsheetLoaded(data);
             }
-        }
+        });}
+$(document).ready(function() {
+key = window.location.search.split("key=")[0];
+console.log(window.location + "; " + key);
+loadData();
 
-        return null;
-    }
+        
+});
 
-    // Remove the page number assertions for all but the highest index page with
-    // a given assertion.  Ensures there is only a single page "{pagenum}"
-    // e.g. the last page asserted as page 5 retains that assertion.
-    br.uniquifyPageNums = function() {
-        var seen = {};
 
-        for (var i = br.pageNums.length - 1; i--; i >= 0) {
-            var pageNum = br.pageNums[i];
-            if ( !seen[pageNum] ) {
-                seen[pageNum] = true;
-            } else {
-                br.pageNums[i] = null;
-            }
-        }
-
-    }
-
-    br.cleanupMetadata = function() {
-        br.uniquifyPageNums();
-    }
-
-    // We load the images from archive.org -- you can modify this function to retrieve images
-    // using a different URL structure
-    br.getPageURI = function(index, reduce, rotate) {
-        // reduce and rotate are ignored in this simple implementation, but we
-        // could e.g. look at reduce and load images from a different directory
-        // or pass the information to an image server
-        var leafStr = '0000';
-        var imgStr = (index+1).toString();
-        var re = new RegExp("0{"+imgStr.length+"}$");
-        var url = '<?php echo WEB_ROOT; ?>/book-reader/index/image-proxy/?image='+leafStr.replace(re, imgStr) + '&id=<?php echo $id; ?>&scale='+reduce ;
-        return url;
-    }
-
-    // Return which side, left or right, that a given page should be displayed on
-    br.getPageSide = function(index) {
-        if (0 == (index & 0x1)) {
-            return 'R';
-        } else {
-            return 'L';
-        }
-    }
-
-    // This function returns the left and right indices for the user-visible
-    // spread that contains the given index.  The return values may be
-    // null if there is no facing page or the index is invalid.
-    br.getSpreadIndices = function(pindex) {
-        var spreadIndices = [null, null];
-        if ('rl' == this.pageProgression) {
-            // Right to Left
-            if (this.getPageSide(pindex) == 'R') {
-                spreadIndices[1] = pindex;
-                spreadIndices[0] = pindex + 1;
-            } else {
-                // Given index was LHS
-                spreadIndices[0] = pindex;
-                spreadIndices[1] = pindex - 1;
-            }
-        } else {
-            // Left to right
-            if (this.getPageSide(pindex) == 'L') {
-                spreadIndices[0] = pindex;
-                spreadIndices[1] = pindex + 1;
-            } else {
-                // Given index was RHS
-                spreadIndices[1] = pindex;
-                spreadIndices[0] = pindex - 1;
-            }
-        }
-
-        return spreadIndices;
-    }
-
-    br.ui = '<?php echo BookReader::bookreaderCurrItemUI(); ?>';
-
-    // Book title and the URL used for the book title link
-    br.bookTitle= '<?php echo $title; ?>';
-    br.bookUrl  = "<?php echo record_url($item); ?>";
-    br.logoURL = "<?php echo WEB_ROOT; ?>";
-    br.siteName = "<?php echo option('site_title');?>";
-
-    // Override the path used to find UI images
-    br.imagesBaseURL = '<?php echo $imgDir; ?>';
-
-    br.buildInfoDiv = function(jInfoDiv) {
-        // $$$ it might make more sense to have a URL on openlibrary.org that returns this info
-
-        var escapedTitle = BookReader.util.escapeHTML(this.bookTitle);
-        var domainRe = /(\w+\.(com|org))/;
-        var domainMatch = domainRe.exec(this.bookUrl);
-        var domain = this.bookUrl;
-        if (domainMatch) {
-            domain = domainMatch[1];
-        }
-
-        // $$$ cover looks weird before it loads
-        jInfoDiv.find('.BRfloatCover').append([
-            '<div style="height: 140px; min-width: 80px; padding: 0; margin: 0;"><?php echo link_to_item(BookReader::itemCover()); ?></div>'
-        ].join(''));
-
-        jInfoDiv.find('.BRfloatMeta').append([
-            '<h3><?php __('Other Formats'); ?></h3>',
-            '<ul class="links">',
-                '<?php echo BookReader::linksToNonImages(); ?>',
-            '</ul>',
-            '<p class="moreInfo">',
-                '<a href="'+ this.bookUrl + '"><?php __('More information'); ?></a>',
-            '</p>'
-        ].join('\n'));
-
-        jInfoDiv.find('.BRfloatFoot').append([
-            '<span>|</span>',
-            '<a href="mailto:<?php echo option('administrator_email');?>" class="problem"><?php __('Report a problem'); ?></a>'
-        ].join('\n'));
-
-        if (domain == 'archive.org') {
-            jInfoDiv.find('.BRfloatMeta p.moreInfo span').css(
-                {'background': 'url(http://www.archive.org/favicon.ico) no-repeat', 'width': 22, 'height': 18 }
-            );
-        }
-
-        jInfoDiv.find('.BRfloatTitle a').attr({'href': this.bookUrl, 'alt': this.bookTitle}).text(this.bookTitle);
-        var bookPath = (window.location + '').replace('#','%23');
-        jInfoDiv.find('a.problem').attr('href','mailto:<?php echo option('administrator_email');?>?subject=' + bookPath);
-    }
-
-    // getEmbedURL
-    //________
-    // Returns a URL for an embedded version of the current book
-    br.getEmbedURL = function(viewParams) {
-        // We could generate a URL hash fragment here but for now we just leave at defaults
-        //var url = 'http://' + window.location.host + '/stream/'+this.bookId;
-        var bookId = <?php echo BookReader::bookreaderCurrItemId(); ?>;
-        var url = '<?php echo WEB_ROOT; ?>/viewer/show/<?php echo $id; ?>';
-        if (this.subPrefix != this.bookId) { // Only include if needed
-            url += '/' + this.subPrefix;
-        }
-        url += '?ui=embed';
-        if (typeof(viewParams) != 'undefined') {
-            url += '#' + this.fragmentFromParams(viewParams);
-        }
-        return url;
-    }
-
-    // getEmbedCode
-    //________
-    // Returns the embed code HTML fragment suitable for copy and paste
-    br.getEmbedCode = function(frameWidth, frameHeight, viewParams) {
-        return "<iframe src='" + this.getEmbedURL(viewParams) + "' width='" + frameWidth + "' height='" + frameHeight + "' frameborder='0' ></iframe>";
-    }
-
-    br.initUIStrings = function() {
-        var titles = { '.logo': '<?php echo __('Go to %s', option('site_title')); ?>', // $$$ update after getting OL record
-            '.zoom_in': '<?php echo __('Zoom in'); ?>',
-            '.zoom_out': '<?php echo __('Zoom out'); ?>',
-            '.onepg': '<?php echo __('One-page view'); ?>',
-            '.twopg': '<?php echo __('Two-page view'); ?>',
-            '.thumb': '<?php echo __('Thumbnail view'); ?>',
-            '.print': '<?php echo __('Print this page'); ?>',
-            '.embed': '<?php echo __('Embed BookReader'); ?>',
-            '.link': '<?php echo __('Link to this document and page'); ?>',
-            '.bookmark': '<?php echo __('Bookmark this page'); ?>',
-            '.read': '<?php echo __('Read this document aloud'); ?>',
-            '.share': '<?php echo __('Share this document'); ?>',
-            '.info': '<?php echo __('About this document'); ?>',
-            '.full': '<?php echo __('Show fullscreen'); ?>',
-            '.book_left': '<?php echo __('Flip left'); ?>',
-            '.book_right': '<?php echo __('Flip right'); ?>',
-            '.book_up': '<?php echo __('Page up'); ?>',
-            '.book_down': '<?php echo __('Page down'); ?>',
-            '.play': '<?php echo __('Play'); ?>',
-            '.pause': '<?php echo __('Pause'); ?>',
-            '.BRdn': '<?php echo __('Show/hide nav bar'); ?>', // Would have to keep updating on state change to have just "Hide nav bar"
-            '.BRup': '<?php echo __('Show/hide nav bar'); ?>',
-            '.book_top': '<?php echo __('First page'); ?>',
-            '.book_bottom': '<?php echo __('Last page'); ?>'
-        };
-        if ('rl' == this.pageProgression) {
-            titles['.book_leftmost'] = '<?php echo __('Last page'); ?>';
-            titles['.book_rightmost'] = '<?php echo __('First page'); ?>';
-        } else { // LTR
-            titles['.book_leftmost'] = '<?php echo __('First page'); ?>';
-            titles['.book_rightmost'] = '<?php echo __('Last page'); ?>';
-        }
-
-        for (var icon in titles) {
-            if (titles.hasOwnProperty(icon)) {
-                $('#BookReader').find(icon).attr('title', titles[icon]);
-            }
-        }
-    }
-
-    // Let's go!
-    br.init();
-    $('#BRtoolbar').find('.read').hide();
-    $('#BRreturn').html($('#BRreturn').text());
     <?php
         // Si jamais la recherche n'est pas disponible (pas de fichier XML), on
         // va masquer les éléments permettant de la lancer (SMA 201210)
@@ -328,3 +240,4 @@
     ?>
     </body>
 </html>
+

@@ -5,13 +5,13 @@ BookReader (plugin for Omeka)
 Summary
 -----------
 
-This plugin adds [Internet Archive BookReader] into [Omeka].
+This plugin adds [Internet Archive BookReader] into [Omeka] and is cloned from https://github.com/jsicot/BookReader.
 The IA BookReader is used to view books from the Internet Archive online and can
 also be used to view other books.
 BookReader plugin for Omeka allows you to create online flip book from image
-files constituting an item.
+files listed in gDoc spreadsheet (clone from https://github.com/duxan/bookreaderspreadsheet).
 
-See demo of the [embedded version] or use in [fullscreen mode].
+Therefore this plugin is merge of funcionalities from [BookReader](https://github.com/jsicot/BookReader) and [bookreaderspreadsheet](https://github.com/duxan/bookreaderspreadsheet). Main benefit is that item doesn't need to have all pages/images uploaded to Omeka and that there is no need for composit PDF, so presentation is completely parted from metadata.
 
 
 Installation
@@ -48,13 +48,12 @@ If an option is not set, the parameters in the config page will be used.
 Image number starts from '0' with default functions.
 
 
-Using the BookReader Plugin
+Problems/issues
 ---------------------------
 
-- Create an item
-- Add some image files to this item
-- Add eventually PDF file to this item (PDF file should be consist of the same
-images uploaded in previous step)
+- Thumbs are not set because files are not in database but on custom server place listed in gDoc.
+- Link to individual spreadsheet is hardcoded for testing, it needs to be extracted from item metadata.
+- Plugin now messes up Zoom.it plugin, so separation is needed.
 
 
 Optional plugins
@@ -64,12 +63,6 @@ The extract ocr and pdfToc plugins are highly recommended.
 
 - [Extract ocr] allows fulltext searching inside a flip book
 - [PDF Toc] retrieves table of contents from pdf file associated to an item
-
-
-Troubleshooting
----------------
-
-See online [BookReader issues].
 
 
 License
@@ -90,20 +83,6 @@ details.
 You should have received a copy of the GNU General Public License along with
 this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-
-
-Contact
--------
-
-See developer documentation on [Internet Archive BookReader] and [source of IA BookReader]
-on GitHub.
-
-Current maintainers:
-* Julien Sicot (see [jsicot]) (original plugin)
-* Daniel Berthereau (see [Daniel-KM]) (upgrade for Omeka 2.0)
-
-First version has been built by Julien Sicot for [Université Rennes 2].
-The upgrade for Omeka 2.0 has been built for [Mines ParisTech].
 
 
 Copyright

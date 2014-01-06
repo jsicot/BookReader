@@ -143,6 +143,9 @@ class BookReader_Custom
     {
         $minimumQueryLength = 4;
         $maxResult = 10;
+        // Warning: PREG_OFFSET_CAPTURE is not Unicode safe.
+        // So, if needed, uncomment the following line.
+        mb_internal_encoding("UTF-8");
 
         // Simplify checks, because arrays are 0-based.
         $maxResult--;
@@ -155,13 +158,9 @@ class BookReader_Custom
             return $results;
         }
 
-        // Prepare query.
-        $queryWords = explode(' ', $cleanQuery);
-        $countQueryWords = count($queryWords);
         // Prepare regex: replace all spaces to allow any characters, except
         // those accepted (letters, numbers and symbols).
         $pregQuery = '/' . str_replace(' ', '[\p{C}\p{M}\p{P}\p{Z}]*', preg_quote($cleanQuery)) . '/Uui';
-
         // Search results.
         $iResult = 0;
         $imagesFiles = BookReader::getImagesFiles($item);
@@ -171,7 +170,6 @@ class BookReader_Custom
             if (!empty($textAuto)) {
                 $textAuto = $textAuto[0]->text;
                 // Look for all answers on this page.
-                // Warning: PREG_OFFSET_CAPTURE is not Unicode safe.
                 if (preg_match_all($pregQuery, $textAuto, $matches)) {
                     $result = array();
                     $offset = 0;
@@ -215,6 +213,8 @@ class BookReader_Custom
         $imageType = 'fullsize';
         $beforeContext = 120;
         $afterContext = 120;
+        // If needed, uncomment the following line.
+        mb_internal_encoding('UTF-8');
 
         $results = array();
         foreach ($textsToHighlight as $file_id => $data) {
@@ -268,8 +268,7 @@ class BookReader_Custom
                     ? mb_strlen($textAuto)
                     : $position + $length + mb_strlen($match[0]) - 1;
 
-                $fullAnswer = mb_substr($textAuto, $startPosition, $endPosition - $startPosition);
-
+                $words = mb_substr($textAuto, $startPosition, $endPosition - $startPosition);
                 // Get the context of the answer.
                 $startContext = ($startPosition - $beforeContext) < 0
                     ? 0
@@ -278,7 +277,6 @@ class BookReader_Custom
                 $context = ($startContext === 0 ? '' : '...' )
                     . mb_substr($textAuto, $startContext, $lengthContext)
                     . ($startContext + $lengthContext > $lengthTextAuto ? '' : '...');
-
                 // Create the par zone.
                 // TODO Currently, the par zone is not really used by
                 // BookReader, so we take the first word coordinates as zone
@@ -293,7 +291,6 @@ class BookReader_Custom
 
                 // Creates boxes for each word.
                 $boxes = array();
-                $words = $fullAnswer;
 
                 // Set the internal pointer to current position before getting
                 //  values.

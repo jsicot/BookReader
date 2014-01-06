@@ -151,7 +151,7 @@ class BookReader
             $item = get_current_record('item');
         }
 
-        return BookReader_Custom::sendImage($query, $item);
+        return BookReader_Custom::sendImage($scale, $item);
     }
 
     /**
@@ -399,9 +399,10 @@ class BookReader
                 'jpg' => 'Joint Photographic Experts Group JFIF format',
                 'png' => 'Portable Network Graphics',
                 'gif' => 'Graphics Interchange Format',
+                'tiff' => 'Tagged Image File Format',
             );
             // Set the regular expression to match selected/supported formats.
-            $supportedFormatRegEx = '/\.' . implode('|', array_keys($supportedFormats)) . '$/';
+            $supportedFormatRegEx = '/\.' . implode('|', array_keys($supportedFormats)) . '$/i';
 
             // Retrieve image files from the item.
             set_loop_records('files', $item->getFiles());

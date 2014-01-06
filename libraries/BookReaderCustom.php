@@ -127,6 +127,9 @@ class BookReader_Custom
     {
         $minimumQueryLength = 4;
         $maxResult = 10;
+        // Warning: PREG_OFFSET_CAPTURE is not Unicode safe.
+        // So, if needed, uncomment the following line.
+        // mb_internal_encoding("UTF-8");
 
         // Simplify checks, because arrays are 0-based.
         $maxResult--;
@@ -139,16 +142,12 @@ class BookReader_Custom
             return $results;
         }
 
-        // Prepare query.
-        $queryWords = explode(' ', $cleanQuery);
-        $countQueryWords = count($queryWords);
         // Prepare regex: replace all spaces to allow any characters, except
         // those accepted (letters, numbers and symbols).
         $pregQuery = '/' . str_replace(' ', '[\p{C}\p{M}\p{P}\p{Z}]*', preg_quote($cleanQuery)) . '/Uui';
 
         // For this example, search is done at item level only.
         $text = $item->getElementTexts('Item Type Metadata', 'Text');
-        // Warning: PREG_OFFSET_CAPTURE is not Unicode safe.
         if (!empty($text) && preg_match_all($pregQuery, $text[0]->text, $matches, PREG_OFFSET_CAPTURE)) {
             // For this example, the answer is found in the first image only.
             $files = $item->Files;
@@ -179,6 +178,8 @@ class BookReader_Custom
         $imageType = 'fullsize';
         $beforeContext = 120;
         $afterContext = 120;
+        // If needed, uncomment the following line.
+        // mb_internal_encoding("UTF-8");
 
         $results = array();
         foreach ($textsToHighlight as $file_id => $data) {

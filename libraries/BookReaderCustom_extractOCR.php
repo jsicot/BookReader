@@ -178,6 +178,16 @@ class BookReader_Custom
 				if(!$xml) die('{"Error":"Invalid XML!"}');
 				$result = array();
 				
+				// We need to store the name of the function to be used
+				// for string length. mb_strlen() is better (especially 
+				// for diacrictics) but not available on all systems so 
+				// sometimes we need to use the default strlen()
+				$strlen_function = "strlen";
+				if (function_exists('mb_strlen'))
+				{
+					$strlen_function = "mb_strlen";
+				}
+
 				foreach( $xml->page as $page) {	
 					foreach($page->attributes() as $a => $b) {
 						if ($a == 'height') $page_height = (string)$b ;
@@ -189,7 +199,7 @@ class BookReader_Custom
 						$boxes = array();
 						$zone_text = strip_tags($row->asXML());
 						foreach($queryWords as $q) {
-							if(mb_strlen($q) >= 3) {
+							if($strlen_function($q) >= 3) {
 								if(preg_match("/$q/Uui", $zone_text) > 0) {
 									foreach($row->attributes() as $a => $b) {
 										if ($a == 'top') $zone_top = (string)$b;

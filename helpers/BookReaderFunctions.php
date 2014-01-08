@@ -345,12 +345,9 @@ class BookReader
      * @return integer
      *   -1, 0 or 1.
      */
-    public static function compareStrings($a, $b)
+    private static function compareFilenames($a, $b)
     {
-        if ($a == $b) {
-            return 0;
-        }
-        return ($a < $b) ? -1 : 1;
+        return strcmp($a->original_filename, $b->original_filename);
     }
 
     /**
@@ -416,8 +413,8 @@ class BookReader
 
             // Sorting by original filename or keep attachment order.
             if (get_option('bookreader_sorting_mode')) {
-                uasort($filesForBookreader[$item->id]['images'], array('BookReader', 'compareStrings'));
-                uasort($filesForBookreader[$item->id]['non-images'], array('BookReader', 'compareStrings'));
+                uasort($filesForBookreader[$item->id]['images'], array('BookReader', 'compareFilenames'));
+                uasort($filesForBookreader[$item->id]['non-images'], array('BookReader', 'compareFilenames'));
             }
             // Reset keys, because the important is to get files by order.
             $filesForBookreader[$item->id]['images'] = array_values($filesForBookreader[$item->id]['images']);

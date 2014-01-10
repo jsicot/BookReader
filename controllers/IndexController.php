@@ -65,8 +65,8 @@ class BookReader_IndexController extends Omeka_Controller_AbstractActionControll
         // Send answer.
         $this->getResponse()->clearBody();
         $this->getResponse()->setHeader('Content-Type', 'text/html');
-        //header('Content-Type: text/javascript; charset=utf8');
-	//header('Access-Control-Allow-Methods: GET, POST');
+        // header('Content-Type: text/javascript; charset=utf8');
+        // header('Access-Control-Allow-Methods: GET, POST');
         $tab_json = json_encode($output);
         echo $callback . '(' . $tab_json . ')';
     }
@@ -101,19 +101,23 @@ class BookReader_IndexController extends Omeka_Controller_AbstractActionControll
         $id = $this->getRequest()->getParam('id');
         $item = get_record_by_id('item', $id);
 
-        $num_img = $this->getRequest()->getParam('image');
-        if ($num_img != '000') {
-            $num_img = preg_replace('`^[0]*`', '', $num_img);
+        $index = $this->getRequest()->getParam('image');
+        // Get the index.
+        if ($index != '000') {
+            $index = preg_replace('`^[0]*`', '', $index);
+            $index--;
         }
         else {
-            $num_img = '0';
+            $index = 0;
         }
-        $num_img--;
 
-        $imagesFiles = BookReader::getImagesFiles($item);
-        $image = FILES_DIR . DIRECTORY_SEPARATOR . $type . DIRECTORY_SEPARATOR . $imagesFiles[$num_img]->getDerivativeFilename();
+        $imagesFiles = BookReader::getLeaves($item);
+        $image = $imagesFiles[$index];
+        $image = empty($image)
+            ? dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR . 'shared' . DIRECTORY_SEPARATOR . 'images' . DIRECTORY_SEPARATOR . 'blank.png'
+            : $image->getWebPath($type);
+
         $image = file_get_contents($image);
-
         $this->getResponse()->clearBody ();
         $this->getResponse()->setHeader('Content-Type', 'image/jpeg');
         $this->getResponse()->setBody($image);

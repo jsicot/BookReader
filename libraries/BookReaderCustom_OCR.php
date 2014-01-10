@@ -1,9 +1,5 @@
 <?php
 /**
- * @file
- *   All functions of this file must be adapted to your needs, except names and
- *   parameters.
- *
  * This code is designed to display and to search inside full text imported
  * from ocr refNum xml data.
  *
@@ -26,52 +22,424 @@
 class BookReader_Custom
 {
     /**
-     * Get the page label from a string, generally the last word of a filename.
+     * Get an array of all images of an item in order to display them with
+     * BookReader.
      *
-     * @todo Currently, the page label should be a number.
+     * @return array
+     *   Array of filenames associated to original filenames.
+     */
+    public static function getLeaves($item)
+    {
+        return self::_get_list_of_leaves($item, false);
+    }
+
+    /**
+     * Get an array of all non-images of an item in order to display them as
+     * links.
+     *
+     * @return array
+     *   Array of filenames associated to original filenames.
+     */
+    public static function getNonLeaves($item)
+    {
+        return self::_get_list_of_leaves($item, true);
+    }
+
+    /**
+     * Get an array of all leaves (or all non-leaves) of an item in order to
+     * display them with BookReader.
+     *
+     * Difference with the default method is that multiple views and missing
+     * pages are added when needed, so the parity remains clean.
+     *
+     * @param Item $item
+     * @param boolean $invert
+     *
+     * @return array
+     *   Array of files or nulls.
+     */
+    protected static function _get_list_of_leaves($item, $invert)
+    {
+        static $leaves = array();
+
+        if (!isset($leaves[$item->id])) {
+            $leaves[$item->id] = array(
+                'leaves' => array(),
+                'non-leaves' => array(),
+            );
+
+            $supportedFormats = array(
+                'jpeg' => 'JPEG Joint Photographic Experts Group JFIF format',
+                'jpg' => 'Joint Photographic Experts Group JFIF format',
+                'png' => 'Portable Network Graphics',
+                'gif' => 'Graphics Interchange Format',
+                'tiff' => 'Tagged Image File Format',
+            );
+            // Set the regular expression to match selected/supported formats.
+            $supportedFormatRegEx = '/\.' . implode('|', array_keys($supportedFormats)) . '$/i';
+
+            // Retrieve image files from the item.
+            set_loop_records('files', $item->getFiles());
+            foreach (loop('files') as $file) {
+                if ($file->hasThumbnail() && preg_match($supportedFormatRegEx, $file->filename)) {
+                    $leaves[$item->id]['leaves'][] = $file;
+                }
+                else {
+                    $leaves[$item->id]['non-leaves'][] = $file;
+                }
+            }
+
+            // Sorting by original filename or keep attachment order.
+            if (get_option('bookreader_sorting_mode')) {
+                uasort($leaves[$item->id]['leaves'], array('BookReader', 'compareFilenames'));
+                uasort($leaves[$item->id]['non-leaves'], array('BookReader', 'compareFilenames'));
+            }
+
+            // Insert missing pages and multiple views.
+            $leaves[$item->id]['leaves'] = self::_complete_list_of_leaves($leaves[$item->id]['leaves']);
+
+            // Reset keys, because the important is to get files by order.
+            $leaves[$item->id]['leaves'] = array_values($leaves[$item->id]['leaves']);
+            $leaves[$item->id]['non-leaves'] = array_values($leaves[$item->id]['non-leaves']);
+        }
+
+        return $invert
+            ? $leaves[$item->id]['non-leaves']
+            : $leaves[$item->id]['leaves'];
+    }
+
+    /**
+     * Insert missing pages and multiple views.
+     *
+     * Of course, there are only digitalized leaves here (we don't use the
+     * original scan data or refNum infos).
+     *
+     * In used source, the order of pages integrates or not missing ones.
+     *
+     * This process doesn't include multiple successive missing pages.
+     *
+     * @todo Use a simple query from the item.
+     *
+     * @return array
+     *   Array of files or nulls.
+     */
+    protected static function _complete_list_of_leaves($leaves)
+    {
+        // Quick preload infos of all leaves and insert missing or non
+        // digitalized leaves.
+        $infos_leaves = array();
+        $first = true;
+        foreach ($leaves as $file) {
+            // Get infos of current file.
+            $ordre = $file-> getElementTexts('refNum', 'Numéro d’ordre');
+            $ordre = $ordre ? $ordre[0]->text : '';
+            // If a number is missing, process can't be done, so keep originals.
+            if (empty($ordre)) {
+                return $leaves;
+            }
+            // We don't use the type of page, because here, the list contains
+            // only the digitalized leaves.
+            $multiple = $file-> getElementTexts('refNum', 'Vue multiple');
+            $multiple = $multiple ? $multiple[0]->text : '';
+            $position = $file->getElementTexts('refNum', 'Position de la vue');
+            $position = $position ? $position[0]->text : '';
+
+            // Insert missing or non digitalized leaves as null.
+            // Two methods are possible: check of order or check of position and
+            // multiple views. As the order doesn't include systematicaly the
+            // missing page, we use the second method.
+
+            // The first leaf is always good.
+            if ($first) {
+                $first = false;
+            }
+            else {
+                if (!$multiple && !empty($position) && ($position == $previous_position)) {
+                    $infos_leaves[] = array(
+                        'file' => null,
+                        'ordre' => null,
+                        'multiple' => null,
+                        'position' => ($previous_position == 'Gauche') ? 'Droite' : 'Gauche',
+                    );
+                }
+            }
+            $previous_position = $position;
+
+            // Keep infos of current leaf.
+            $infos_leaves[] = array(
+                'file' => $file,
+                'ordre' => $ordre,
+                'multiple' => $multiple,
+                'position' => $position,
+            );
+        }
+
+        // Now, the parity is clean and all infos are available.
+        // So we can insert the regarding leaf in case of multiple views of a
+        // page. The regarding leaf can be a missing page.
+        // No static is used, because multiple are rare and very rarely more
+        // than two.
+        $result = array();
+        foreach ($infos_leaves as $key => &$info) {
+            // Add current leaf.
+            $result[] = $info['file'];
+            if ($info['multiple']) {
+                $current = $key;
+                // If the multiple view is on the left side, the regarding leaf
+                // will be the first view of the next page.
+                if ($info['position'] == 'Gauche') {
+                    while (++$current <= count($infos_leaves)) {
+                        if ($infos_leaves[$current]['multiple'] != $info['multiple']) {
+                            $result[] = $infos_leaves[$current]['file'];
+                            break;
+                        }
+                    }
+                }
+                // Else regarding leaf is the last view of previous page.
+                else {
+                    if ($info['multiple'] < $info['ordre']) {
+                        while (--$current > 0) {
+                            if ($infos_leaves[$current]['multiple'] != $info['multiple']) {
+                                $result[] = $infos_leaves[$current]['file'];
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Add "Dos" cover in the first or last position, if present.
+        $first = $result[0]->getElementTexts('Dublin Core', 'Title');
+        $first = $first ? $first[0]->text : '';
+        $last = $result[count($result) - 1]->getElementTexts('Dublin Core', 'Title');
+        $last = $last ? $last[0]->text : '';
+        if ($first == 'Dos' && $last != 'Dos') {
+            $result[] = $result[0];
+        }
+        elseif ($first != 'Dos' && $last == 'Dos') {
+            $result[] = array_unshift($result, $result[count($result) - 1]);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Get the page index of a file in the list of images.
+     *
+     * Generally, the index is the order of the file attached to the item, but
+     * it can be another one for right to left languages, or when it's necessary
+     * to display an image more than once or to insert a special page. This is
+     * specially useful to keep the parity of pages (left / right) when blanck
+     * pages are not digitalized or when a page has more than one views.
+     *
+     * @return integer|null
+     *   Index of the page.
+     */
+    public static function getPageIndex($file)
+    {
+        if (empty($file)) {
+            return null;
+        }
+
+        $indexes = self::getPageIndexes($file->getItem());
+        $leaves = self::getLeaves($file->getItem());
+        foreach($leaves as $key => $leaf) {
+            if ($leaf && $leaf->id == $file->id) {
+                return $key;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Get the list of indexes of pages for an item.
+     *
+     * This function is used to get quickly all page indexes of an item. First
+     * page should be 0 if document starts from right, and 1 if document starts
+     * from left. Use null for a missing page.
+     *
+     * @see getPageIndex()
+     *
+     * @return array of integers
+     */
+    public static function getPageIndexes($item)
+    {
+        $leaves = self::getLeaves($item);
+        $indexes = array();
+        $first = true;
+        foreach($leaves as $key => $leaf) {
+            if ($first === true) {
+                $position = $leaf->getElementTexts('refNum', 'Position de la vue');
+                $first = ($position && $position[0]->text == 'Gauche') ? 1 : 0;
+            }
+            $indexes[] = $first + $key;
+        }
+        return $indexes;
+    }
+
+    /**
+     * Get the page number or the name of a page of a file, like "6" or "XIV".
+     * If "null" is returned, the label in viewer will be the page index + 1.
+     *
+     * @see getPageLabel()
      *
      * @return string
-     *   Label of the page, or 'null' if none.
+     *   Number of the page, empty to use the page label, or 'null' if none.
      */
-    public static function getLabelPage($file)
+    public static function getPageNumber($file)
     {
-        if (is_null($file)) {
+        static $pageNumbers = array();
+
+        if (empty($file)) {
             return '';
+        }
+
+        if (!isset($pageNumbers[$file->id])) {
+            $txt = $file->getElementTexts('refNum', 'Numéro de page');
+            if (empty($txt)) {
+                $pageNumbers[$file->id] = '';
+            }
+            else {
+                $pageNumbers[$file->id] = $txt[0]->text;
+            }
+        }
+
+        return $pageNumbers[$file->id];
+    }
+
+    /**
+     * Get the list of numbers of pages of an item.
+     *
+     * This function is used to get quickly all page numbers of an item.
+     *
+     * In this example, the process is not optimized and this is only a wrapper
+     * for getPageNumber().
+     *
+     * @see getPageNumber()
+     *
+     * @return array of strings
+     */
+    public static function getPageNumbers($item)
+    {
+        $leaves = self::getLeaves($item);
+        $numbers = array();
+        foreach ($leaves as $file) {
+            $numbers[] = self::getPageNumber($file);
+        }
+        return $numbers;
+    }
+
+    /**
+     * Get the page label of a file, like "4th Cover" or "Faux titre".
+     *
+     * This function is first used for pages without pagination, like cover,
+     * summary, title page, index, inserted page, planches, etc. If there is a
+     * page number, this label is not needed, but it can be used to add a
+     * specific information ("Page XIV : Illustration").
+     *
+     * @see getPageNumber()
+     *
+     * @return string
+     *   Label of the page, if needed.
+     */
+    public static function getPageLabel($file)
+    {
+        if (empty($file)) {
+            return __('Blank page');
         }
 
         $txt = $file->getElementTexts('Dublin Core', 'Title');
         if (empty($txt)) {
-            $txt = 'null';
+            $txt = '';
         }
         else {
-            $txt = substr($txt[0]->text, strrpos($txt[0]->text, ' '));
-            $txt = (int) $txt;
+            $number = self::getPageNumber($file);
+            $txt = ($txt[0]->text == __('Page') . ' ' . $number)
+                ? ''
+                : $txt[0]->text;
         }
 
         return $txt;
     }
 
     /**
-     * Return the cover file of an item.
-     * Here, the cover file is the first image file of an item.
+     * Get the list of labels of pages of an item.
+     *
+     * This function is used to get quickly all page labels of an item.
+     *
+     *@todo The process is not optimized and this is only a wrapper
+     * for getPageLabel().
+     *
+     * @see getPageLabel()
+     *
+     * @return array of strings
+     */
+    public static function getPageLabels($item)
+    {
+        $leaves = self::getLeaves($item);
+        $labels = array();
+        foreach ($leaves as $file) {
+            $labels[] = self::getPageLabel($file);
+        }
+        return $labels;
+    }
+
+    /**
+     * Return the cover file of an item (the leaf to display as a thumbnail).
+     *
+     * Here, we choose to use the page title as cover.
      *
      * @return File|null
      */
     public static function getCoverFile($item)
     {
-        $imagesFiles = BookReader::getImagesFiles($item);
-        return reset($imagesFiles);
+        $index = self::getTitleLeaf($item);
+        $leaves = self::getLeaves($item);
+        return $leaves[$index];
     }
 
     /**
-     * Return the title leaf for javascript.
-     * Here, return the first leaf.
+     * Return index of the title leaf.
      *
-     * @return string
+     * @return integer
+     *   Index for bookreader.
      */
     public static function getTitleLeaf($item)
     {
-        return 'br.titleLeaf = ' . '0';
+        $db = get_db();
+
+        $element = $db->getTable('Element')->findByElementSetNameAndElementName('refNum', 'Type de page');
+
+        $bind = array(
+            $element->id,
+            $item->id,
+        );
+
+        // Order: "Première page à afficher" before "Page de titre".
+        $sql = "
+            SELECT files.id
+            FROM {$db->File} files
+                JOIN {$db->ElementText} element_texts
+                    ON element_texts.record_id = files.id
+                        AND element_texts.record_type = 'File'
+                        AND element_texts.element_id = ?
+            WHERE files.item_id = ?
+                AND (element_texts.text = 'Première page à afficher'
+                    OR element_texts.text = 'Page de titre')
+            ORDER BY
+                element_texts.text DESC
+            LIMIT 1
+        ";
+        $result = $db->fetchOne($sql, $bind);
+
+        if ($result) {
+            $file = get_record_by_id('File', $result);
+            return self::getPageIndex($file);
+        }
+        else {
+            return 0;
+        }
     }
 
     /**
@@ -142,7 +510,7 @@ class BookReader_Custom
     public static function searchFulltext($query, $item)
     {
         $minimumQueryLength = 4;
-        $maxResult = 10;
+        $maxResult = 100;
         // Warning: PREG_OFFSET_CAPTURE is not Unicode safe.
         // So, if needed, uncomment the following line.
         mb_internal_encoding("UTF-8");
@@ -163,9 +531,9 @@ class BookReader_Custom
         $pregQuery = '/' . str_replace(' ', '[\p{C}\p{M}\p{P}\p{Z}]*', preg_quote($cleanQuery)) . '/Uui';
         // Search results.
         $iResult = 0;
-        $imagesFiles = BookReader::getImagesFiles($item);
+        $leaves = self::getLeaves($item);
         // Look for each page of the item.
-        foreach ($imagesFiles as $keyFile => $file) {
+        foreach ($leaves as $keyFile => $file) {
             $textAuto = $file->getElementTexts('OCR', 'Texte auto');
             if (!empty($textAuto)) {
                 $textAuto = $textAuto[0]->text;
@@ -219,7 +587,7 @@ class BookReader_Custom
         $results = array();
         foreach ($textsToHighlight as $file_id => $data) {
             $file = get_record_by_id('file', $file_id);
-            $label = self::getLabelPage($file);
+            $label = self::getPageLabel($file);
             $pathImg = FILES_DIR . DIRECTORY_SEPARATOR . $imageType . DIRECTORY_SEPARATOR . ($imageType == 'original' ? $file->filename : $file->getDerivativeFilename());
             list($width, $height, $type, $attr) = getimagesize($pathImg);
 

@@ -764,11 +764,12 @@ div#BRslider {
 /* XXXmang verify correct use of handle class */
 #BRpager .ui-slider-handle {
     position: absolute;
-    width: 23px;
+    min-width: 23px;
     height: 27px;
     top: 13px;
     margin-left: -12px; /* Center icon */
-    background: url(../images/slider.png);
+    background: url("../images/slider.png") no-repeat scroll 0 0 rgba(0, 0, 0, 0);
+    white-space: nowrap;
     z-index: 103;
 }
 #BRpager a {
@@ -822,7 +823,7 @@ div#pagenum {
     line-height: 19px;
     font-weight: 700;
     padding: 0 5px;
-    width: 80px;
+    min-width: 80px;
     text-align: right;
     background-color: #000;
     font-family: "Lucida Grande", "Arial", sans-serif;

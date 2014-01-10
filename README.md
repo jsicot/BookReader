@@ -22,7 +22,7 @@ Installation
 - Click the Configure link to add the following
     - URL for custom CSS
     - Favicon URL for viewer (reader) pages
-    - URL for custom php library (default is BookReaderCustom.php)
+    - Path to custom php library (default is BookReaderCustom.php)
     - Sorting mode for the viewer (omeka default order or original filename order)
     - Number of pages in Embed mode (1 or 2)
     - Embed all functions (0 for none or 1 for all)
@@ -30,7 +30,7 @@ Installation
     - The height of the inline frame (Embedded Simple Viewer)
 
 The viewer is always available at `http://www.example.com/viewer/show/{item id}`.
-If you want to embed it, add this code in the item/show.php file of your theme:
+If you want to embed it, add this code in the `items/show.php` file of your theme:
 
 ```
     <?php
@@ -48,6 +48,49 @@ If an option is not set, the parameters in the config page will be used.
 Image number starts from '0' with default functions.
 
 
+Customing
+---------
+
+There are several way to store data about items in Omeka, so the BookReader can
+be customized via a file in the libraries folder.
+
+BookReader uses several arrays to get images and infos about them. Take a
+document of twelve pages as an example. In Javascript, we have these arrays:
+- br.leafMap : mapping of pages, as [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+- br.pageNums : number of pages, as [,, "i", "ii", "iii", "iv", 1, 2, 3, 4, 5,]
+- br.pageLabels : label of pages, as ["Cover", "Blank",,,,, "Page 1 (unnumbered)",,,,, "Back cover"]
+With the default files of BookReader, all images of an item are displayed, so
+the leafMap indexes are always a simple list of numbers like above (starting
+from 0 when the first page is a right page, else from 1). Page numbers and/or
+page labels can be empty, so in that case the index is used. When the user
+leafs through the document, the viewer sends a request with index + 1 as image
+parameter. So the controller can send the index - 1 to select image in the
+ordered list of images files.
+
+Some functions of php are used to make relation with this index and to provide
+images. They are used in the beginning and via Ajax. During creation of the
+viewer, php should provide mapping, numbers and labels via BookReader custom
+functions (`getPageIndexes()`, `getPageNumbers()` and `getPageLabels()`). These
+functions use one main method, `getLeaves()`, that provides the ordered
+list of all images that should be displayed as leaves (saved by default as a
+static variable in php). This list is used too to get the selected image when
+needed via the index. The `getNonLeaves()` method is used to get links to other
+files to share. So,The list of leaves files is a simple array as [File 1, File 2, File 3, File 4...].
+
+In case of a non-digitalized blank or forgotten page, in order to keep the
+left/right succession of leafs, the mapping and the page numbers and labels
+should be the same, and the list of leaves files should be [File 1, null, File 3, File 4...].
+The `transparent.png` image will be displayed if an image is missing, with the
+width and the height of the first page.
+
+In case of multiple files for the same page, for example with a pop-up or with
+and without a tracing paper, the mapping can be: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 9, 12, 11].
+Other arrays should be set in accordance: number of pages as [,, "i", "ii", "iii", "iv", 1, 2, 3, 4, 5, 4, 5,],
+labels as ["Cover", "Blank",,,,, "Page 1 (unnumbered)",,,, "Page 5 with tracing paper", "Back cover"]
+and files as [File 1, null, File 3, File 4..., File 10, File 11a, File 10, File 11b, File 12].
+Any other arrangements can be used.
+
+
 Using the BookReader Plugin
 ---------------------------
 
@@ -62,8 +105,11 @@ Optional plugins
 
 The extract ocr and pdfToc plugins are highly recommended.
 
-- [Extract ocr] allows fulltext searching inside a flip book. To enable it in BookReader, you need to overwrite Bookreader/libraries/BookReaderCustom.php using Bookreader/libraries/BookReaderCustom_extractOCR.php
-- [PDF Toc] retrieves table of contents from pdf file associated to an item
+- [Extract ocr] allows fulltext searching inside a flip book. To enable it in
+BookReader, you need to overwrite Bookreader/libraries/BookReaderCustom.php
+using Bookreader/libraries/BookReaderCustom_extractOCR.php or to set the path
+in configuration panel of the extension.
+- [PDF Toc] retrieves table of contents from pdf file associated to an item.
 
 
 Troubleshooting
@@ -99,8 +145,8 @@ See developer documentation on [Internet Archive BookReader] and [source of IA B
 on GitHub.
 
 Current maintainers:
-* Julien Sicot (see [jsicot]) (original plugin)
-* Daniel Berthereau (see [Daniel-KM]) (upgrade for Omeka 2.0)
+* [Julien Sicot]
+* [Daniel Berthereau]
 
 First version has been built by Julien Sicot for [Université Rennes 2].
 The upgrade for Omeka 2.0 has been built for [Mines ParisTech].
@@ -120,7 +166,7 @@ BookReader Omeka plugin:
 * Copyright Daniel Berthereau, 2013 (upgrade for Omeka 2.0)
 
 
-[Omeka]: https://omeka.org "Omeka.org"
+[Omeka]: https://omeka.org
 [Internet Archive BookReader]: http://openlibrary.org/dev/docs/bookreader
 [source of IA BookReader]: http://github.com/openlibrary/bookreader
 [embedded version]: http://bibnum.univ-rennes2.fr/items/show/566
@@ -129,7 +175,7 @@ BookReader Omeka plugin:
 [PDF Toc]: https://github.com/symac/Plugin-PdfToc
 [BookReader issues]: https://github.com/jsicot/BookReader/Issues "GitHub BookReader"
 [GNU/GPL]: https://www.gnu.org/licenses/gpl-3.0.html "GNU/GPL v3"
-[Daniel-KM]: https://github.com/Daniel-KM "Daniel Berthereau"
-[jsicot]: https://github.com/jsicot "Julien Sicot"
+[Daniel Berthereau]: https://github.com/Daniel-KM
+[Julien Sicot]: https://github.com/jsicot
 [Université Rennes 2]: http://bibnum.univ-rennes2.fr
 [Mines ParisTech]: http://bib.mines-paristech.fr "Mines ParisTech / ENSMP"

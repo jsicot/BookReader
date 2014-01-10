@@ -44,7 +44,7 @@ function BookReader() {
     this.reduce  = 4;
     this.padding = 10;          // Padding in 1up
 
-    this.mode    = this.constMode1up;
+    this.mode = this.constMode1up;
     this.ui = 'full';           // UI mode
     this.uiAutoHide = false;    // Controls whether nav/toolbar will autohide
 
@@ -165,7 +165,7 @@ BookReader.prototype.init = function() {
 
     // Sanitize/process parameters
 
-    if ( !this.canSwitchToMode( this.mode ) ) {
+    if (!this.canSwitchToMode(this.mode)) {
         this.mode = this.constMode1up;
     }
 
@@ -3051,9 +3051,9 @@ BookReader.prototype.getPrintURI = function() {
     if (this.constMode2up == this.mode) {
         options += '&file2=' + this._getPageFile(this.twoPage.currentIndexR) + '&width2=' + this._getPageWidth(this.twoPage.currentIndexR);
         options += '&height2=' + this._getPageHeight(this.twoPage.currentIndexR);
-        options += '&title=' + encodeURIComponent(this.shortTitle(50) + ' - Pages ' + this.getPageNum(this.twoPage.currentIndexL) + ', ' + this.getPageNum(this.twoPage.currentIndexR));
+        options += '&title=' + encodeURIComponent(this.shortTitle(50) + ' - ' + this.getPageLabel(this.twoPage.currentIndexL) + ' - ' + this.getPageLabel(this.twoPage.currentIndexR));
     } else {
-        options += '&title=' + encodeURIComponent(this.shortTitle(50) + ' - Page ' + this.getPageNum(indexToPrint));
+        options += '&title=' + encodeURIComponent(this.shortTitle(50) + ' - ' + this.getPageLabel(indexToPrint));
     }
 
     return '/bookreader/print.php?' + options;
@@ -3403,12 +3403,12 @@ BookReader.prototype.initEmbedNavbar = function() {
 }
 
 BookReader.prototype.updateNavPageNum = function(index) {
-    var pageNum = this.getPageNum(index);
+    var pageLabel = this.getPageLabel(index);
     var pageStr;
-    if (pageNum[0] == 'n') { // funny index
+    if (pageLabel[0] == 'n') { // funny index
         pageStr = index + 1 + ' / ' + this.numLeafs; // Accessible index starts at 0 (alas) so we add 1 to make human
     } else {
-        pageStr = 'Page ' + pageNum;
+        pageStr = pageLabel;
     }
 
     $('#pagenum .currentpage').text(pageStr);
@@ -3424,21 +3424,20 @@ BookReader.prototype.updateNavIndex = function(index) {
 }
 
 BookReader.prototype.addSearchResult = function(queryString, pageIndex) {
-    var pageNumber = this.getPageNum(pageIndex);
+    var pageLabel = this.getPageLabel(pageIndex);
     var uiStringSearch = "Search result"; // i18n
-    var uiStringPage = "Page"; // i18n
 
     var percentThrough = BookReader.util.cssPercentage(pageIndex, this.numLeafs - 1);
     var pageDisplayString = '';
-    if (pageNumber) {
-        pageDisplayString = uiStringPage + ' ' + pageNumber;
+    if (pageLabel) {
+        pageDisplayString = pageLabel;
     }
 
     var re = new RegExp('{{{(.+?)}}}', 'g');
     queryString = queryString.replace(re, '<a href="#" onclick="br.jumpToIndex('+pageIndex+'); return false;">$1</a>')
 
-    var marker = $('<div class="search" style="top:'+(-$('#BRcontainer').height())+'px; left:' + percentThrough + ';" title="' + uiStringSearch + '"><div class="query">'
-        + queryString + '<span>' + uiStringPage + ' ' + pageNumber + '</span></div>')
+    var marker = $('<div class="search" style="top:'+(-$('#BRcontainer').height())+'px; left:' + percentThrough + ';" title="' + uiStringSearch + '">'
+        + '<div class="query">' + queryString + '<span>' + pageLabel + '</span></div>')
     .data({'self': this, 'pageIndex': pageIndex })
     .appendTo('#BRnavline').bt({
         contentSelector: '$(this).find(".query")',
@@ -3497,12 +3496,10 @@ BookReader.prototype.removeSearchResults = function() {
 }
 
 BookReader.prototype.addChapter = function(chapterTitle, pageNumber, pageIndex) {
-    var uiStringPage = 'Page'; // i18n
-
     var percentThrough = BookReader.util.cssPercentage(pageIndex, this.numLeafs - 1);
 
     $('<div class="chapter" style="left:' + percentThrough + ';"><div class="title">'
-        + chapterTitle + '<span>|</span> ' + uiStringPage + ' ' + pageNumber + '</div></div>')
+        + chapterTitle + '<span>|</span> '+ pageNumber + '</div></div>')
     .appendTo('#BRnavline')
     .data({'self': this, 'pageIndex': pageIndex })
     .bt({
@@ -4350,8 +4347,9 @@ BookReader.prototype.paramsFromFragment = function(urlFragment) {
 
     // Index and page
     if ('undefined' != typeof(urlHash['page'])) {
-        // page was set -- may not be int
-        params.page = urlHash['page'];
+        // page was set -- may not be int and may be number or label. Check it.
+        var hashPage = BookReader.util.decodeURIComponentPlus(urlHash['page']);
+        params.page = this.getPageNumFromHash(hashPage);
     }
 
     // $$$ process /region
@@ -4402,12 +4400,14 @@ BookReader.prototype.fragmentFromParams = function(params) {
 
     var fragments = [];
 
+    // page
     if ('undefined' != typeof(params.page)) {
         fragments.push('page', params.page);
     } else {
         if ('undefined' != typeof(params.index)) {
             // Don't have page numbering but we do have the index
-            fragments.push('page', 'n' + params.index);
+            var index = params.index + 1;
+            fragments.push('page', 'n' + index);
         }
     }
 
@@ -4458,7 +4458,8 @@ BookReader.prototype.getPageIndices = function(pageNum) {
     if (pageNum.slice(0,1) == 'n') {
         try {
             var pageIntStr = pageNum.slice(1, pageNum.length);
-            var pageIndex = parseInt(pageIntStr);
+            // Index starts at 0 so we make it internal.
+            var pageIndex = parseInt(pageIntStr) - 1;
             indices.push(pageIndex);
             return indices;
         } catch(err) {
@@ -4480,7 +4481,7 @@ BookReader.prototype.getPageIndices = function(pageNum) {
 //________
 // Returns the name of the page as it should be displayed in the user interface
 BookReader.prototype.getPageName = function(index) {
-    return 'Page ' + this.getPageNum(index);
+    return this.getPageLabel(index);
 }
 
 // updateLocationHash
@@ -4739,7 +4740,6 @@ BookReader.util = {
     }
     // The final property here must NOT have a comma after it - IE7
 }
-
 
 // ttsToggle()
 //______________________________________________________________________________

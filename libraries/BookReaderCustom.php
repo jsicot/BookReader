@@ -17,16 +17,70 @@
 class BookReader_Custom
 {
     /**
-     * Get the page label from a string, generally the last word of a filename.
+     * Get the page index of a file in the list of images.
      *
-     * @todo Currently, the page label should be a number.
+     * Generally, the index is the order of the file attached to the item, but
+     * it can be another one for right to left languages, or when it's necessary
+     * to display an image more than once or to insert a special page. This is
+     * specially useful to keep the parity of pages (left / right) when blanck
+     * pages are not digitalized or when a page has more than one views.
+     *
+     * @return integer|null
+     *   Index of the page.
+     */
+    public static function getPageIndex($file)
+    {
+        if (empty($file)) {
+            return null;
+        }
+
+        $indexes = self::getPageIndexes($file->getItem());
+        $leaves = self::getLeaves($file->getItem());
+        foreach($leaves as $key => $leaf) {
+            if ($leaf && $leaf->id == $file->id) {
+                return $key;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Get the list of indexes of pages for an item.
+     *
+     * This function is used to get quickly all page indexes of an item. First
+     * page should be 0 if document starts from right, and 1 if document starts
+     * from left. Use null for a missing page.
+     *
+     * @see getPageIndex()
+     *
+     * @return array of integers
+     */
+    public static function getPageIndexes($item)
+    {
+        $leaves = BookReader::getLeaves($item);
+        $indexes = array();
+        foreach($leaves as $key => $leaf) {
+            $indexes[] = empty($leaf) ? null : $key;
+        }
+        return $indexes;
+    }
+
+    /**
+     * Get the page number or the name of a page of a file, like "6" or "XIV".
+     * If "null" is returned, the label in viewer will be the page index + 1.
+     *
+     * This example uses the Dublin Core Title of the file. If this title start
+     * with 'Page' like in "Page 6" or "Page XIV", it extracts "6" or "XIV" and
+     * return it.
+     *
+     * @see getPageLabel()
      *
      * @return string
-     *   Label of the page, or 'null' if none.
+     *   Number of the page, empty to use the page label, or 'null' if none.
      */
-    public static function getLabelPage($file)
+    public static function getPageNumber($file)
     {
-        if (is_null($file)) {
+        if (empty($file)) {
             return '';
         }
 
@@ -35,34 +89,122 @@ class BookReader_Custom
             $txt = 'null';
         }
         else {
-            $txt = substr($txt[0]->text, strrpos($txt[0]->text, ' '));
-            $txt = (int) $txt;
+            $firstSpace = strrpos($txt[0]->text, ' ');
+            if (substr($txt[0]->text, 0, $firstSpace) == 'Page') {
+                $txt = trim(substr($txt[0]->text, $firstSpace + 1));
+                $txt = ((int) $txt == $txt)
+                    ? $txt
+                    : json_encode($txt);
+            }
+            else {
+                $txt = '';
+            }
         }
 
         return $txt;
     }
 
     /**
-     * Return the cover file of an item.
+     * Get the list of numbers of pages of an item.
+     *
+     * This function is used to get quickly all page numbers of an item.
+     *
+     * In this example, the process is not optimized and this is only a wrapper
+     * for getPageNumber().
+     *
+     * @see getPageNumber()
+     *
+     * @return array of strings
+     */
+    public static function getPageNumbers($item)
+    {
+        $leaves = BookReader::getLeaves($item);
+        $numbers = array();
+        foreach ($leaves as $file) {
+            $numbers[] = self::getPageNumber($file);
+        }
+        return $numbers;
+    }
+
+    /**
+     * Get the page label of a file, like "4th Cover" or "Faux titre".
+     *
+     * This function is first used for pages without pagination, like cover,
+     * summary, title page, index, inserted page, planches, etc. If there is a
+     * page number, this label is not needed, but it can be used to add a
+     * specific information ("Page XIV : Illustration").
+     *
+     * @see getPageNumber()
+     *
+     * @return string
+     *   Label of the page, if needed.
+     */
+    public static function getPageLabel($file)
+    {
+        if (empty($file)) {
+            return '';
+        }
+
+        $txt = $file->getElementTexts('Dublin Core', 'Title');
+        if (empty($txt)) {
+            $txt = '';
+        }
+        else {
+            $firstSpace = strrpos($txt[0]->text, ' ');
+            $txt = (substr($txt[0]->text, 0, $firstSpace) == 'Page')
+                ? ''
+                : $txt[0]->text;
+        }
+
+        return $txt;
+    }
+
+    /**
+     * Get the list of labels of pages of an item.
+     *
+     * This function is used to get quickly all page labels of an item.
+     *
+     * In this example, the process is not optimized and this is only a wrapper
+     * for getPageLabel().
+     *
+     * @see getPageLabel()
+     *
+     * @return array of strings
+     */
+    public static function getPageLabels($item)
+    {
+        $leaves = BookReader::getLeaves($item);
+        $labels = array();
+        foreach ($leaves as $file) {
+            $labels[] = self::getPageLabel($file);
+        }
+        return $labels;
+    }
+
+    /**
+     * Return the cover file of an item (the leaf to display as a thumbnail).
+     *
      * Here, the cover file is the first image file of an item.
      *
      * @return File|null
      */
     public static function getCoverFile($item)
     {
-        $imagesFiles = BookReader::getImagesFiles($item);
-        return reset($imagesFiles);
+        $leaves = BookReader::getLeaves($item);
+        return reset($leaves);
     }
 
     /**
-     * Return the title leaf for javascript.
-     * Here, return the first leaf.
+     * Return index of the title leaf.
      *
-     * @return string
+     * Here, the title is the first leaf of an item.
+     *
+     * @return integer
+     *   Index for bookreader.
      */
     public static function getTitleLeaf($item)
     {
-        return 'br.titleLeaf = ' . '0';
+        return 0;
     }
 
     /**
@@ -184,7 +326,7 @@ class BookReader_Custom
         $results = array();
         foreach ($textsToHighlight as $file_id => $data) {
             $file = get_record_by_id('file', $file_id);
-            $label = self::getLabelPage($file);
+            $label = self::getPageLabel($file);
             $pathImg = FILES_DIR . DIRECTORY_SEPARATOR . $imageType . DIRECTORY_SEPARATOR . ($imageType == 'original' ? $file->filename : $file->getDerivativeFilename());
             list($width, $height, $type, $attr) = getimagesize($pathImg);
 

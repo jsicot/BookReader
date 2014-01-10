@@ -1,7 +1,5 @@
 <?php
-    //retrieve item id
-    $id = BookReader::bookreaderCurrItemId();
-    $item = get_record_by_id('item', $id);
+    $item = get_record_by_id('item', BookReader::currentItemId());
     set_current_record('item', $item);
 
     $title = metadata('item', array('Dublin Core', 'Title'));
@@ -11,9 +9,9 @@
     $title = BookReader::htmlCharacter($title);
     $coverFile = BookReader::getCoverFile($item);
 
-    list($imgNums, $imgLabels, $imgWidths, $imgHeights) = BookReader::imagesData();
+    list($pageIndexes, $pageNumbers, $pageLabels, $imgWidths, $imgHeights) = BookReader::imagesData($item);
 
-    $ui = BookReader::bookreaderCurrItemUI();
+    $ui = BookReader::currentItemUI();
 
     $server = preg_replace('#^https?://#', '', WEB_ROOT);
     $serverFullText = $server . '/book-reader/index/fulltext';
@@ -28,7 +26,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
     <base target="_parent" />
-    <link rel="apple-touch-icon" href="<?php echo WEB_FILES . '/thumbnails/' . $coverFile->getDerivativeFilename(); ?>" />
+    <link rel="apple-touch-icon" href="<?php echo $coverFile->getWebPath('thumbnail'); ?>" />
     <link rel="shortcut icon" href="<?php echo get_option('bookreader_favicon_url'); ?>" type="image/x-icon" />
     <title><?php echo $title; ?></title>
     <!-- Stylesheets -->
@@ -59,40 +57,134 @@
     //
     // This file shows the minimum you need to provide to BookReader to display a book
     //
-    // Copyright(c)2008-2009 Internet Archive. Software license AGPL version 3.
+    // Copyright (c) 2008-2009 Internet Archive. Software license AGPL version 3.
 
     // Create the BookReader object
     br = new BookReader();
-    br.getPageWidth = function(index) {
-        return this.pageW[index];
-    }
 
-    br.getPageHeight = function(index) {
-        return this.pageH[index];
-    }
-
-    br.pageW =  [<?php echo implode(',', $imgWidths);   ?> ];
-    br.pageH =  [ <?php echo implode(',', $imgHeights); ?> ];
-    br.leafMap = [<?php echo implode(',', $imgNums);  ?> ];
-    br.pageNums = [<?php echo implode(',', $imgLabels); ?> ];
+    br.leafMap = [<?php echo implode(',', $pageIndexes); ?>];
+    br.pageNums = [<?php echo implode(',', $pageNumbers); ?>];
+    br.pageLabels = [<?php echo implode(',', $pageLabels); ?>];
+    br.pageW = [<?php echo implode(',', $imgWidths); ?>];
+    br.pageH = [<?php echo implode(',', $imgHeights); ?>];
     br.server = "<?php echo $serverFullText; ?>";
     br.bookPath = "<?php echo WEB_ROOT; ?>";
-    br.bookId  = <?php echo $item->id; ?>;
+    br.bookId = <?php echo $item->id; ?>;
     br.subPrefix = <?php echo $item->id; ?>;
-
-    <?php echo BookReader::titleLeaf($item); ?>
+    br.titleLeaf = <?php echo BookReader::getTitleLeaf($item); ?>;
 
     br.numLeafs = br.pageW.length;
 
+    // If there is no width, it will be the width of the verso of the current
+    // leaf, else width of first page.
+    br.getPageWidth = function(index) {
+        var width = this.pageW[index];
+        if (width == undefined) {
+            if ('rl' != this.pageProgression) {
+                if (this.getPageSide(index) == 'R') {
+                    width = this.pageW[index + 1];
+                } else {
+                    width = this.pageW[index - 1];
+                }
+            } else {
+                if (this.getPageSide(index) == 'L') {
+                    width = this.pageW[index + 1];
+                } else {
+                    width = this.pageW[index - 1];
+                }
+            }
+        }
+        if (width == undefined) {
+            width = this.pageW[0];
+        }
+        return width;
+    }
+
+    br.getPageHeight = function(index) {
+        var height = this.pageH[index];
+        if (height == undefined) {
+            if ('rl' != this.pageProgression) {
+                if (this.getPageSide(index) == 'R') {
+                    height = this.pageH[index + 1];
+                } else {
+                    height = this.pageH[index - 1];
+                }
+            }
+            else {
+                if (this.getPageSide(index) == 'L') {
+                    height = this.pageH[index + 1];
+                } else {
+                    height = this.pageH[index - 1];
+                }
+            }
+            if (height == undefined) {
+                height = this.pageH[0];
+            }
+        }
+        return height;
+    }
+
+    // TODO Bug if page num starts with a "n" (rarely used as page number).
+    // This is used only to build the url to a specific page.
     br.getPageNum = function(index) {
         var pageNum = this.pageNums[index];
         if (pageNum) {
             return pageNum;
         } else {
-            return 'n' + index;
+            var pageLabel = this.pageLabels[index];
+            if (pageLabel) {
+                return pageLabel;
+            } else {
+                // Accessible index starts at 0 so we add 1 to make human.
+                index++;
+                return 'n' + index;
+            }
         }
     }
 
+    br.getPageLabel = function(index) {
+        var pageLabel = this.pageLabels[index];
+        if (pageLabel) {
+            return pageLabel;
+        } else {
+            var pageNum = this.pageNums[index];
+            if (pageNum) {
+                return '<?php echo __('Page'); ?> ' + pageNum;
+            } else {
+                // Accessible index starts at 0 so we add 1 to make human.
+                index++;
+                return 'n' + index;
+            }
+        }
+    }
+
+    // This is used only to get the page num from the url of a specific page.
+    // This is needed because the hash can be the number or the label.
+    // Practically, it does a simple check of the page hash.
+    br.getPageNumFromHash = function(pageHash) {
+        // Check if this is a page number.
+        for (var index = 0; index < this.pageNums.length; index++) {
+            if (this.pageNums[index] == pageHash) {
+                return pageHash;
+            }
+        }
+        // Check if this is a page label.
+        for (var index = 0; index < this.pageLabels.length; index++) {
+            if (this.pageLabels[index] == pageHash) {
+                return pageHash;
+            }
+        }
+        // Check if this is an index.
+        if (pageHash.slice(0,1) == 'n') {
+            var pageIndex = pageHash.slice(1, pageHash.length);
+            // Index starts at 0 so we make it internal.
+            pageIndex = parseInt(pageIndex) - 1;
+            if (this.getPageNum(pageIndex) == pageHash) {
+                return pageHash;
+            }
+        }
+        return undefined;
+    }
 
     // Single images in the Internet Archive scandata.xml metadata are (somewhat incorrectly)
     // given a "leaf" number.  Some of these images from the scanning process should not
@@ -114,6 +206,7 @@
         return null;
     }
 
+    // TODO To be removed, because it's not used currently.
     // Remove the page number assertions for all but the highest index page with
     // a given assertion.  Ensures there is only a single page "{pagenum}"
     // e.g. the last page asserted as page 5 retains that assertion.
@@ -128,9 +221,9 @@
                 br.pageNums[i] = null;
             }
         }
-
     }
 
+    // TODO To be removed, because it's not used currently.
     br.cleanupMetadata = function() {
         br.uniquifyPageNums();
     }
@@ -144,15 +237,18 @@
         var leafStr = '0000';
         var imgStr = (index+1).toString();
         var re = new RegExp("0{"+imgStr.length+"}$");
-        var url = '<?php echo WEB_ROOT; ?>/book-reader/index/image-proxy/?image='+leafStr.replace(re, imgStr) + '&id=<?php echo $id; ?>&scale='+reduce ;
+        var url = '<?php echo WEB_ROOT; ?>/book-reader/index/image-proxy/?image='+leafStr.replace(re, imgStr)+'&id=<?php echo $item->id; ?>&scale='+reduce;
         return url;
     }
 
-    // Return which side, left or right, that a given page should be displayed on
+    // Return which side, left or right, that a given page should be displayed on.
     br.getPageSide = function(index) {
-        if (0 == (index & 0x1)) {
+        var leafNum = this.leafMap[index];
+        if (0 == (leafNum & 0x1)) {
+            // Even leaf number is a right page (zero-based arrays).
             return 'R';
         } else {
+            // Odd leaf number is a left page.
             return 'L';
         }
     }
@@ -162,39 +258,38 @@
     // null if there is no facing page or the index is invalid.
     br.getSpreadIndices = function(pindex) {
         var spreadIndices = [null, null];
-        if ('rl' == this.pageProgression) {
-            // Right to Left
-            if (this.getPageSide(pindex) == 'R') {
-                spreadIndices[1] = pindex;
-                spreadIndices[0] = pindex + 1;
-            } else {
-                // Given index was LHS
-                spreadIndices[0] = pindex;
-                spreadIndices[1] = pindex - 1;
-            }
-        } else {
+        if (pindex == -1) pindex = 0;
+        if ('rl' != this.pageProgression) {
             // Left to right
             if (this.getPageSide(pindex) == 'L') {
                 spreadIndices[0] = pindex;
                 spreadIndices[1] = pindex + 1;
             } else {
-                // Given index was RHS
-                spreadIndices[1] = pindex;
+                // Given index was right hand side.
                 spreadIndices[0] = pindex - 1;
+                spreadIndices[1] = pindex;
+            }
+        } else {
+            // Right to Left
+            if (this.getPageSide(pindex) == 'R') {
+                spreadIndices[0] = pindex + 1;
+                spreadIndices[1] = pindex;
+            } else {
+                // Given index was left hand side.
+                spreadIndices[0] = pindex;
+                spreadIndices[1] = pindex - 1;
             }
         }
 
         return spreadIndices;
     }
 
-    br.ui = '<?php echo BookReader::bookreaderCurrItemUI(); ?>';
-
+    br.ui = '<?php echo BookReader::currentItemUI(); ?>';
     // Book title and the URL used for the book title link
     br.bookTitle= '<?php echo $title; ?>';
     br.bookUrl  = "<?php echo record_url($item); ?>";
     br.logoURL = "<?php echo WEB_ROOT; ?>";
     br.siteName = "<?php echo option('site_title');?>";
-
     // Override the path used to find UI images
     br.imagesBaseURL = '<?php echo $imgDir; ?>';
 
@@ -217,7 +312,7 @@
         jInfoDiv.find('.BRfloatMeta').append([
             '<h3><?php __('Other Formats'); ?></h3>',
             '<ul class="links">',
-                '<?php echo BookReader::linksToNonImages(); ?>',
+                '<?php echo BookReader::linksToNonImages($item); ?>',
             '</ul>',
             '<p class="moreInfo">',
                 '<a href="'+ this.bookUrl + '"><?php __('More information'); ?></a>',
@@ -246,8 +341,8 @@
     br.getEmbedURL = function(viewParams) {
         // We could generate a URL hash fragment here but for now we just leave at defaults
         //var url = 'http://' + window.location.host + '/stream/'+this.bookId;
-        var bookId = <?php echo BookReader::bookreaderCurrItemId(); ?>;
-        var url = '<?php echo WEB_ROOT; ?>/viewer/show/<?php echo $id; ?>';
+        var bookId = <?php echo $item->id; ?>;
+        var url = '<?php echo WEB_ROOT; ?>/viewer/show/<?php echo $item->id; ?>';
         if (this.subPrefix != this.bookId) { // Only include if needed
             url += '/' + this.subPrefix;
         }
@@ -266,7 +361,8 @@
     }
 
     br.initUIStrings = function() {
-        var titles = { '.logo': '<?php echo __('Go to %s', option('site_title')); ?>', // $$$ update after getting OL record
+        var titles = {
+            '.logo': '<?php echo __('Go to %s', option('site_title')); ?>', // $$$ update after getting OL record
             '.zoom_in': '<?php echo __('Zoom in'); ?>',
             '.zoom_out': '<?php echo __('Zoom out'); ?>',
             '.onepg': '<?php echo __('One-page view'); ?>',
@@ -310,7 +406,7 @@
     br.init();
     $('#BRtoolbar').find('.read').hide();
     $('#BRreturn').html($('#BRreturn').text());
-    <?php
+<?php
         // Si jamais la recherche n'est pas disponible (pas de fichier XML), on
         // va masquer les éléments permettant de la lancer (SMA 201210)
         if (!BookReader::hasDataForSearch()): ?>
@@ -326,5 +422,6 @@
          'item' => $item,
      ));
     ?>
+
     </body>
 </html>

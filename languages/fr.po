@@ -6,17 +6,17 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: BookReader\n"
-"Report-Msgid-Bugs-To: https://github.com/Daniel-KM/BookReader/issues\n"
-"POT-Creation-Date: 2013-07-04 00:00+0000\n"
-"PO-Revision-Date: 2013-07-08 07:07+0200\n"
-"Last-Translator: Daniel Berthereau <daniel.fr@berthereau.net>\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2014-01-10 21:58+0100\n"
+"PO-Revision-Date: 2014-01-10 22:16+0100\n"
+"Last-Translator: Daniel Berthereau <Daniel.fr@Berthereau.net>\n"
 "Language-Team: French <kde-i18n-doc@kde.org>\n"
+"Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: fr\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
-"X-Generator: Lokalize 1.5\n"
+"X-Generator: Poedit 1.5.4\n"
 
 #: config_form.php:1
 msgid "General parameters"
@@ -93,126 +93,294 @@ msgstr ""
 msgid "Default directory is \"%s\"."
 msgstr "Le dossier par défaut est \"%s\"."
 
-#: helpers/BookReaderFunctions.php:354
+#: helpers/BookReaderFunctions.php:354 helpers/BookReaderFunctions.php:565
 msgid "bytes"
 msgstr "octets"
 
-#: helpers/BookReaderFunctions.php:358
+#: helpers/BookReaderFunctions.php:358 helpers/BookReaderFunctions.php:568
 msgid "KB"
 msgstr "Ko"
 
-#: helpers/BookReaderFunctions.php:358
+#: helpers/BookReaderFunctions.php:358 helpers/BookReaderFunctions.php:568
 msgid "MB"
 msgstr "Mo"
 
-#: helpers/BookReaderFunctions.php:358
+#: helpers/BookReaderFunctions.php:358 helpers/BookReaderFunctions.php:568
 msgid "GB"
 msgstr "Go"
 
-#: helpers/BookReaderFunctions.php:358
+#: helpers/BookReaderFunctions.php:358 helpers/BookReaderFunctions.php:568
 msgid "TB"
 msgstr "To"
 
-#: views/public/viewer/show.php:226
+#: views/public/viewer/show.php:226 views/public/viewer/show.php:313
 msgid "Other Formats"
 msgstr "Autres formats"
 
-#: views/public/viewer/show.php:231
+#: views/public/viewer/show.php:231 views/public/viewer/show.php:318
 msgid "More information"
 msgstr "Plus d’infos"
 
-#: views/public/viewer/show.php:237
+#: views/public/viewer/show.php:237 views/public/viewer/show.php:324
 msgid "Report a problem"
 msgstr "Signaler un problème"
 
-#: views/public/viewer/show.php:277
+#: views/public/viewer/show.php:277 views/public/viewer/show.php:365
+#, php-format
 msgid "Go to %s"
 msgstr "Aller à %s"
 
-#: views/public/viewer/show.php:278
+#: views/public/viewer/show.php:278 views/public/viewer/show.php:366
 msgid "Zoom in"
 msgstr "Grossir"
 
-#: views/public/viewer/show.php:279
+#: views/public/viewer/show.php:279 views/public/viewer/show.php:367
 msgid "Zoom out"
 msgstr "Élargir"
 
-#: views/public/viewer/show.php:280
+#: views/public/viewer/show.php:280 views/public/viewer/show.php:368
 msgid "One-page view"
 msgstr "Voir une seule page"
 
-#: views/public/viewer/show.php:281
+#: views/public/viewer/show.php:281 views/public/viewer/show.php:369
 msgid "Two-page view"
 msgstr "Voir deux pages"
 
-#: views/public/viewer/show.php:282
+#: views/public/viewer/show.php:282 views/public/viewer/show.php:370
 msgid "Thumbnail view"
 msgstr "Voir les vignettes"
 
-#: views/public/viewer/show.php:283
+#: views/public/viewer/show.php:283 views/public/viewer/show.php:371
 msgid "Print this page"
 msgstr "Imprimer cette page"
 
-#: views/public/viewer/show.php:284
+#: views/public/viewer/show.php:284 views/public/viewer/show.php:372
 msgid "Embed BookReader"
 msgstr "Embarquer le lecteur"
 
-#: views/public/viewer/show.php:285
+#: views/public/viewer/show.php:285 views/public/viewer/show.php:373
 msgid "Link to this document and page"
 msgstr "Lien vers ce document et cette page"
 
-#: views/public/viewer/show.php:289
+#: views/public/viewer/show.php:289 views/public/viewer/show.php:374
 msgid "Bookmark this page"
 msgstr "Ajouter un signet sur cette page"
 
-#: views/public/viewer/show.php:287
+#: views/public/viewer/show.php:287 views/public/viewer/show.php:375
 msgid "Read this document aloud"
 msgstr "Lire ce document à haute voix"
 
-#: views/public/viewer/show.php:288
+#: views/public/viewer/show.php:288 views/public/viewer/show.php:376
 msgid "Share this document"
 msgstr "Partager ce document"
 
-#: views/public/viewer/show.php:289
+#: views/public/viewer/show.php:289 views/public/viewer/show.php:377
 msgid "About this document"
 msgstr "À propos de ce document"
 
-#: views/public/viewer/show.php:290
+#: views/public/viewer/show.php:290 views/public/viewer/show.php:378
 msgid "Show fullscreen"
 msgstr "Voir en plein écran"
 
-#: views/public/viewer/show.php:291
+#: views/public/viewer/show.php:291 views/public/viewer/show.php:379
 msgid "Flip left"
 msgstr "Feuilleter à gauche"
 
-#: views/public/viewer/show.php:292
+#: views/public/viewer/show.php:292 views/public/viewer/show.php:380
 msgid "Flip right"
 msgstr "Feuilleter à droite"
 
-#: views/public/viewer/show.php:293
+#: views/public/viewer/show.php:293 views/public/viewer/show.php:381
 msgid "Page up"
 msgstr "Page précédente"
 
-#: views/public/viewer/show.php:294
+#: views/public/viewer/show.php:294 views/public/viewer/show.php:382
 msgid "Page down"
 msgstr "Page suivante"
 
-#: views/public/viewer/show.php:295
+#: views/public/viewer/show.php:295 views/public/viewer/show.php:383
 msgid "Play"
 msgstr "Avance automatique"
 
-#: views/public/viewer/show.php:296
+#: views/public/viewer/show.php:296 views/public/viewer/show.php:384
 msgid "Pause"
 msgstr "Pause"
 
-#: views/public/viewer/show.php:297
+#: views/public/viewer/show.php:297 views/public/viewer/show.php:385
+#: views/public/viewer/show.php:386
 msgid "Show/hide nav bar"
 msgstr "Afficher/cacher la barre d’outis"
 
-#: views/public/viewer/show.php:299
+#: views/public/viewer/show.php:299 views/public/viewer/show.php:387
+#: views/public/viewer/show.php:392 views/public/viewer/show.php:394
 msgid "First page"
 msgstr "Première page"
 
-#: views/public/viewer/show.php:300
+#: views/public/viewer/show.php:300 views/public/viewer/show.php:388
+#: views/public/viewer/show.php:391 views/public/viewer/show.php:395
 msgid "Last page"
 msgstr "Dernière page"
+
+#: config_form.php:23
+#, php-format
+msgid "Default file is \"%s\"."
+msgstr "Le fichier par défaut est \"%s\"."
+
+#: config_form.php:42
+msgid "Default number of pages in embed mode (1 or 2)"
+msgstr "Nombre de pages en mode embarqué (1 ou 2)"
+
+#: views/public/viewer/show.php:152 libraries/BookReaderCustom_OCR.php:358
+msgid "Page"
+msgstr "Page"
+
+#: views/public/viewer/show.php:407
+msgid "Search results will appear below..."
+msgstr "Les résultats de la recherche vont apparaître ci-dessous..."
+
+#: views/public/viewer/show.php:408
+msgid "No matches were found."
+msgstr "Aucune correspondance trouvée."
+
+#: views/public/viewer/show.php:409
+msgid ""
+"This book hasn't been indexed for searching yet. We've just started indexing "
+"it, so search should be available soon. Please try again later. Thanks!"
+msgstr ""
+"Ce document n'a pas encore été indexé pour la recherche. La recherche sera "
+"disponible prochainement. Merci de réessayer plus tard !"
+
+#: views/public/viewer/show.php:410
+msgid "Embed Bookreader"
+msgstr "Embarquer le lecteur"
+
+#: views/public/viewer/show.php:411
+msgid ""
+"The bookreader uses iframes for embedding. It will not work on web hosts "
+"that block iframes. The embed feature has been tested on blogspot.com blogs "
+"as well as self-hosted Wordpress blogs. This feature will NOT work on "
+"wordpress.com blogs."
+msgstr ""
+"Ce lecteur utilise  les iframes pour être intégré dans une page. Il ne "
+"fonctionne pas sur les serveurs des fournisseurs qui bloquent les iframes. "
+"Cette fonctionnalité a été testée sur les blogs de blogspot.com et sur les "
+"blogs Wordpress auto-hébergés. Elle ne fonctionne PAS sur les blogs de "
+"wordpress.com."
+
+#: views/public/viewer/show.php:412
+msgid "Close"
+msgstr "Fermer"
+
+#: views/public/viewer/show.php:413 views/public/viewer/show.php:418
+msgid "Add a bookmark"
+msgstr "Ajouter un signet"
+
+#: views/public/viewer/show.php:414
+msgid ""
+"You can add a bookmark to any page in any book. If you elect to make your "
+"bookmark public, other readers will be able to see it."
+msgstr ""
+"Vous pouvez ajouter un signet à toutes les pages de tous les documents. Si "
+"vous choisissez de rendre publics vos signets, les autres lecteurs pourront "
+"les consulter."
+
+#: views/public/viewer/show.php:415
+msgid ""
+"You must be logged in to your <a href=\"\">Open Library account</a> to add "
+"bookmarks."
+msgstr ""
+"Vous devez être connecté sur votre <a href=\"\">compte Open Library</a> pour "
+"ajouter des signets."
+
+#: views/public/viewer/show.php:416
+msgid "Make this bookmark public."
+msgstr "Rendre ce signet public."
+
+#: views/public/viewer/show.php:417
+msgid "Keep this bookmark private."
+msgstr "Maintenir ce signet privé."
+
+#: views/public/viewer/show.php:419
+msgid "Search result"
+msgstr "Recherche de résultats"
+
+#: views/public/viewer/show.php:420
+msgid "Search inside"
+msgstr "Rechercher dans ce document"
+
+#: views/public/viewer/show.php:421
+msgid "GO"
+msgstr "GO"
+
+#: views/public/viewer/show.php:422
+msgid "Go to this book's page on Open Library"
+msgstr "Se rendre sur la page de ce document sur Open Library"
+
+#: views/public/viewer/show.php:423
+msgid "Loading audio..."
+msgstr "Chargement de l'audio..."
+
+#: views/public/viewer/show.php:424
+msgid ""
+"Could not load soundManager2, possibly due to FlashBlock. Audio playback is "
+"disabled"
+msgstr ""
+"Impossible de charger soundManager2, peut-être à cause de FlashBlock. "
+"L'audio est désactivée."
+
+#: views/public/viewer/show.php:425
+msgid "About this book"
+msgstr "À propos de ce document"
+
+#: views/public/viewer/show.php:426
+msgid "About the BookReader"
+msgstr "À propos du lecteur BookReader"
+
+#: views/public/viewer/show.php:427
+msgid "Copy and paste one of these options to share this book elsewhere."
+msgstr "Copier-coller l'une de ces options pour partager ce document partout."
+
+#: views/public/viewer/show.php:428
+msgid "Link to this page view:"
+msgstr "Lien vers ce document et cette page:"
+
+#: views/public/viewer/show.php:429
+msgid "Link to the book:"
+msgstr "Lien vers ce document:"
+
+#: views/public/viewer/show.php:430
+msgid "Embed a mini Book Reader:"
+msgstr "Embarquer un mini-lecteur:"
+
+#: views/public/viewer/show.php:431
+msgid "1 page"
+msgstr "1 page"
+
+#: views/public/viewer/show.php:432
+msgid "2 pages"
+msgstr "2 pages"
+
+#: views/public/viewer/show.php:433
+msgid "Open to this page?"
+msgstr "Ouvrir à cette page ?"
+
+#: views/public/viewer/show.php:434
+msgid "NOTE:"
+msgstr "NOTE:"
+
+#: views/public/viewer/show.php:435
+msgid ""
+"We've tested EMBED on blogspot.com blogs as well as self-hosted Wordpress "
+"blogs. This feature will NOT work on wordpress.com blogs."
+msgstr ""
+"Nous avons testé la fonctionnalité d'intégration sur les blogs de blogspot."
+"com et sur les blogs Wordpress auto-hébergés. Elle ne fonctionne PAS sur les "
+"blogs de wordpress.com."
+
+#: views/public/viewer/show.php:436
+msgid "Finished"
+msgstr "Terminé"
+
+#: libraries/BookReaderCustom_OCR.php:349
+msgid "Blank page"
+msgstr "Page blanche"

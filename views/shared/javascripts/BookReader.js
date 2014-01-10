@@ -2739,7 +2739,7 @@ BookReader.prototype.search = function(term) {
     this.searchTerm = term;
 
     this.removeSearchResults();
-    this.showProgressPopup('<img id="searchmarker" src="'+this.imagesBaseURL + 'marker_srch-on.png'+'"> Search results will appear below...');
+    this.showProgressPopup('<img id="searchmarker" src="'+this.imagesBaseURL + 'marker_srch-on.png'+'"> '+this.i18n('Search results will appear below...'));
     $.ajax({url:url, dataType:'jsonp', jsonpCallback:'br.BRSearchCallback'});
 }
 
@@ -2752,10 +2752,10 @@ BookReader.prototype.BRSearchCallback = function(results) {
     //console.log(br.searchResults);
 
     if (0 == results.matches.length) {
-        var errStr  = 'No matches were found.';
+        var errStr  = this.i18n('No matches were found.');
         var timeout = 1000;
         if (false === results.indexed) {
-            errStr  = "<p>This book hasn't been indexed for searching yet. We've just started indexing it, so search should be available soon. Please try again later. Thanks!</p>";
+            errStr  = "<p>"+this.i18n("This book hasn't been indexed for searching yet. We've just started indexing it, so search should be available soon. Please try again later. Thanks!")+"</p>";
             timeout = 5000;
         }
         $(br.popup).html(errStr);
@@ -3089,10 +3089,10 @@ BookReader.prototype.showEmbedCode = function() {
         WebkitBoxShadow: '0 0 6px #000'
     }).appendTo('#BookReader');
 
-    htmlStr =  '<h3 style="background:#615132;padding:10px;margin:0 0 10px;color:#fff;">Embed Bookreader</h3>';
-    htmlStr += '<p style="padding:10px;line-height:18px;">The bookreader uses iframes for embedding. It will not work on web hosts that block iframes. The embed feature has been tested on blogspot.com blogs as well as self-hosted Wordpress blogs. This feature will NOT work on wordpress.com blogs.</p>';
+    htmlStr =  '<h3 style="background:#615132;padding:10px;margin:0 0 10px;color:#fff;">'+this.i18n('Embed Bookreader')+'</h3>';
+    htmlStr += '<p style="padding:10px;line-height:18px;">'+this.i18n('The bookreader uses iframes for embedding. It will not work on web hosts that block iframes. The embed feature has been tested on blogspot.com blogs as well as self-hosted Wordpress blogs. This feature will NOT work on wordpress.com blogs.')+'</p>';
     htmlStr += '<textarea rows="2" cols="40" style="margin-left:10px;width:368px;height:40px;color:#333;font-size:12px;border:2px inset #ccc;background:#efefef;padding:2px;-webkit-border-radius:4px;-moz-border-radius:4px;border-radius:4px;">' + this.getEmbedCode() + '</textarea>';
-    htmlStr += '<a href="javascript:;" class="popOff" onclick="$(this.parentNode).remove();$(\'.coverUp\').hide();return false" style="color:#999;"><span>Close</span></a>';
+    htmlStr += '<a href="javascript:;" class="popOff" onclick="$(this.parentNode).remove();$(\'.coverUp\').hide();return false" style="color:#999;"><span>'+this.i18n('Close')+'</span></a>';
 
     this.embedPopup.innerHTML = htmlStr;
     $('#BookReader').append('<div class="coverUp" style="position:absolute;z-index:299;width:100%;height:100%;background:#000;opacity:.4;filter:alpha(opacity=40);" onclick="$(\'.popped\').hide();$(this).hide();"></div>');
@@ -3124,10 +3124,14 @@ BookReader.prototype.showBookmarkCode = function() {
         WebkitBoxShadow: '0 0 6px #000'
     }).appendTo('#BookReader');
 
-    htmlStr =  '<h3 style="background:#615132;padding:10px;margin:0 0 10px;color:#fff;">Add a bookmark</h3>';
-    htmlStr += '<p style="padding:10px;line-height:18px;">You can add a bookmark to any page in any book. If you elect to make your bookmark public, other readers will be able to see it. <em>You must be logged in to your <a href="">Open Library account</a> to add bookmarks.</em></p>';
-    htmlStr += '<form name="bookmark" id="bookmark" style="line-height:20px;margin-left:10px;"><label style="padding-bottom"10px;><input type="radio" name="privacy" id="p2" disabled="disabled" checked="checked"/> Make this bookmark public.</label><br/><label style="padding-bottom:10px;"><input type="radio" name="privacy" id="p1" disabled="disabled"/> Keep this bookmark private.</label><br/><br/><button type="submit" style="font-size:20px;" disabled="disabled">Add a bookmark</button></form>';
-    htmlStr += '<a href="javascript:;" class="popOff" onclick="$(this.parentNode).remove();$(\'.coverUp\').hide();return false;" style="color:#999;"><span>Close</span></a>';
+    htmlStr =  '<h3 style="background:#615132;padding:10px;margin:0 0 10px;color:#fff;">'+this.i18n('Add a bookmark')+'</h3>';
+    htmlStr += '<p style="padding:10px;line-height:18px;">'+this.i18n('You can add a bookmark to any page in any book. If you elect to make your bookmark public, other readers will be able to see it.');
+    htmlStr += '<em> '+this.i18n('You must be logged in to your <a href="">Open Library account</a> to add bookmarks.')+'</em></p>';
+    htmlStr += '<form name="bookmark" id="bookmark" style="line-height:20px;margin-left:10px;">';
+    htmlStr += '<label style="padding-bottom"10px;><input type="radio" name="privacy" id="p2" disabled="disabled" checked="checked"/> '+this.i18n('Make this bookmark public.')+'</label><br/>';
+    htmlStr += '<label style="padding-bottom:10px;"><input type="radio" name="privacy" id="p1" disabled="disabled"/> '+this.i18n('Keep this bookmark private.')+'</label><br/><br/>';
+    htmlStr += '<button type="submit" style="font-size:20px;" disabled="disabled">'+this.i18n('Add a bookmark')+'</button></form>';
+    htmlStr += '<a href="javascript:;" class="popOff" onclick="$(this.parentNode).remove();$(\'.coverUp\').hide();return false;" style="color:#999;"><span>'+this.i18n('Close')+'</span></a>';
 
     this.bookmarkPopup.innerHTML = htmlStr;
     $('#BookReader').append('<div class="coverUp" style="position:absolute;z-index:299;width:100%;height:100%;background:#000;opacity:.4;filter:alpha(opacity=40);" onclick="$(\'.popped\').hide();$(this).hide();"></div>');
@@ -3425,19 +3429,19 @@ BookReader.prototype.updateNavIndex = function(index) {
 
 BookReader.prototype.addSearchResult = function(queryString, pageIndex) {
     var pageLabel = this.getPageLabel(pageIndex);
-    var uiStringSearch = "Search result"; // i18n
+    var uiStringSearch = this.i18n('Search result');
 
     var percentThrough = BookReader.util.cssPercentage(pageIndex, this.numLeafs - 1);
-    var pageDisplayString = '';
-    if (pageLabel) {
-        pageDisplayString = pageLabel;
+    var pageDisplayString = pageLabel;
+    if (pageLabel == undefined || pageLabel[0] == 'n') { // funny index
+        pageDisplayString = pageIndex + 1 + ' / ' + this.numLeafs; // Accessible index starts at 0 (alas) so we add 1 to make human
     }
 
     var re = new RegExp('{{{(.+?)}}}', 'g');
     queryString = queryString.replace(re, '<a href="#" onclick="br.jumpToIndex('+pageIndex+'); return false;">$1</a>')
 
     var marker = $('<div class="search" style="top:'+(-$('#BRcontainer').height())+'px; left:' + percentThrough + ';" title="' + uiStringSearch + '">'
-        + '<div class="query">' + queryString + '<span>' + pageLabel + '</span></div>')
+        + '<div class="query">' + queryString + '<span> ' + pageDisplayString + '</span></div>')
     .data({'self': this, 'pageIndex': pageIndex })
     .appendTo('#BRnavline').bt({
         contentSelector: '$(this).find(".query")',
@@ -3621,7 +3625,7 @@ BookReader.prototype.initToolbar = function(mode, ui) {
     $("#BookReader").append(
           "<div id='BRtoolbar'>"
         +   "<span id='BRtoolbarbuttons'>"
-        +     "<form action='javascript:br.search($(\"#textSrch\").val());' id='booksearch'><input type='search' id='textSrch' name='textSrch' val='' placeholder='Search inside'/><button type='submit' id='btnSrch' name='btnSrch'>GO</button></form>"
+        +     "<form action='javascript:br.search($(\"#textSrch\").val());' id='booksearch'><input type='search' id='textSrch' name='textSrch' val='' placeholder='"+this.i18n('Search inside')+"'/><button type='submit' id='btnSrch' name='btnSrch'>"+this.i18n('GO')+"</button></form>"
         +     "<button class='BRicon play'></button>"
         +     "<button class='BRicon pause'></button>"
         +     "<button class='BRicon info'></button>"
@@ -3711,8 +3715,8 @@ BookReader.prototype.initToolbar = function(mode, ui) {
 BookReader.prototype.blankInfoDiv = function() {
     return $([
         '<div class="BRfloat" id="BRinfo">',
-            '<div class="BRfloatHead">About this book',
-                '<a class="floatShut" href="javascript:;" onclick="$.fn.colorbox.close();"><span class="shift">Close</span></a>',
+            '<div class="BRfloatHead">'+this.i18n('About this book'),
+                '<a class="floatShut" href="javascript:;" onclick="$.fn.colorbox.close();"><span class="shift">'+this.i18n('Close')+'</span></a>',
             '</div>',
             '<div class="BRfloatBody">',
                 '<div class="BRfloatCover">',
@@ -3724,7 +3728,7 @@ BookReader.prototype.blankInfoDiv = function() {
                 '</div>',
             '</div>',
             '<div class="BRfloatFoot">',
-                '<a href="http://openlibrary.org/dev/docs/bookreader">About the BookReader</a>',
+                '<a href="http://openlibrary.org/dev/docs/bookreader">'+this.i18n('About the BookReader')+'</a>',
             '</div>',
         '</div>'].join('\n')
     );
@@ -3735,7 +3739,7 @@ BookReader.prototype.blankShareDiv = function() {
         '<div class="BRfloat" id="BRshare">',
             '<div class="BRfloatHead">',
                 'Share',
-                '<a class="floatShut" href="javascript:;" onclick="$.fn.colorbox.close();"><span class="shift">Close</span></a>',
+                '<a class="floatShut" href="javascript:;" onclick="$.fn.colorbox.close();"><span class="shift">'+this.i18n('Close')+'</span></a>',
             '</div>',
         '</div>'].join('\n')
     );
@@ -4674,14 +4678,13 @@ BookReader.prototype.gotOpenLibraryRecord = function(self, olObject) {
                 .appendTo('#BRreturn');
 
         } else {
-            $('<a/>').attr( { 'href': self.bookUrl, 'title': 'Go to this book\'s page on Open Library' } )
+            $('<a/>').attr( { 'href': self.bookUrl, 'title':this.i18n("Go to this book's page on Open Library") } )
                 .text('On openlibrary.org')
                 .appendTo('#BRreturn');
         }
 
         $('#BRreturn').css({ 'line-height': '19px'} );
         $('#BRreturn a').css( {'height': '18px' } );
-
 
     }
 }
@@ -4749,7 +4752,7 @@ BookReader.prototype.ttsToggle = function () {
 
     if (false == this.ttsPlaying) {
         this.ttsPlaying = true;
-        this.showProgressPopup('Loading audio...');
+        this.showProgressPopup(this.i18n('Loading audio...'));
         if(soundManager.supported()) {
             this.ttsStart();
         } else {
@@ -4757,7 +4760,7 @@ BookReader.prototype.ttsToggle = function () {
               if (oStatus.success) {
                 this.ttsStart();
               } else {
-                alert('Could not load soundManager2, possibly due to FlashBlock. Audio playback is disabled');
+                alert(this.i18n('Could not load soundManager2, possibly due to FlashBlock. Audio playback is disabled'));
               }
             }, this);
         }
@@ -4822,7 +4825,7 @@ BookReader.prototype.ttsStartCB = function (data) {
         return;
     }
 
-    this.showProgressPopup('Loading audio...');
+    this.showProgressPopup(this.i18n('Loading audio...'));
 
     ///// Many soundManger2 callbacks are broken when using HTML5 audio.
     ///// whileloading: broken on safari, worked in FF4, but broken on FireFox 5
@@ -5173,37 +5176,37 @@ BookReader.prototype.buildShareDiv = function(jShareDiv)
     var self = this;
 
     var jForm = $([
-        '<p>Copy and paste one of these options to share this book elsewhere.</p>',
+        '<p>'+this.i18n('Copy and paste one of these options to share this book elsewhere.')+'</p>',
         '<form method="post" action="">',
             '<fieldset>',
-                '<label for="pageview">Link to this page view:</label>',
+                '<label for="pageview">'+this.i18n('Link to this page view:')+'</label>',
                 '<input type="text" name="pageview" id="pageview" value="' + pageView + '"/>',
             '</fieldset>',
             '<fieldset>',
-                '<label for="booklink">Link to the book:</label>',
+                '<label for="booklink">'+this.i18n('Link to the book:')+'</label>',
                 '<input type="text" name="booklink" id="booklink" value="' + bookView + '"/>',
             '</fieldset>',
             '<fieldset>',
-                '<label for="iframe">Embed a mini Book Reader:</label>',
+                '<label for="iframe">'+this.i18n('Embed a mini Book Reader:')+'</label>',
                 '<fieldset class="sub">',
                     '<label class="sub">',
                         '<input type="radio" name="pages" value="' + this.constMode1up + '" checked="checked"/>',
-                        '1 page',
+                        this.i18n('1 page'),
                     '</label>',
                     '<label class="sub">',
                         '<input type="radio" name="pages" value="' + this.constMode2up + '"/>',
-                        '2 pages',
+                        this.i18n('2 pages'),
                     '</label>',
                     '<label class="sub">',
                         '<input type="checkbox" name="thispage" value="thispage"/>',
-                        'Open to this page?',
+                        this.i18n('Open to this page?'),
                     '</label>',
                 '</fieldset>',
                 '<textarea cols="30" rows="4" name="iframe" class="BRframeEmbed"></textarea>',
-                '<p class="meta"><strong>NOTE:</strong> We\'ve tested EMBED on blogspot.com blogs as well as self-hosted Wordpress blogs. This feature will NOT work on wordpress.com blogs.</p>',
+                '<p class="meta"><strong>'+this.i18n('NOTE:')+'</strong> '+this.i18n("We've tested EMBED on blogspot.com blogs as well as self-hosted Wordpress blogs. This feature will NOT work on wordpress.com blogs.")+'</p>',
             '</fieldset>',
             '<fieldset class="center">',
-                '<button type="button" onclick="$.fn.colorbox.close();">Finished</button>',
+                '<button type="button" onclick="$.fn.colorbox.close();">'+this.i18n('Finished')+'</button>',
             '</fieldset>',
         '</form>'].join('\n'));
 

@@ -310,18 +310,18 @@
         ].join(''));
 
         jInfoDiv.find('.BRfloatMeta').append([
-            '<h3><?php __('Other Formats'); ?></h3>',
+            '<h3><?php echo __('Other Formats'); ?></h3>',
             '<ul class="links">',
                 '<?php echo BookReader::linksToNonImages($item); ?>',
             '</ul>',
             '<p class="moreInfo">',
-                '<a href="'+ this.bookUrl + '"><?php __('More information'); ?></a>',
+                '<a href="'+ this.bookUrl + '"><?php echo __('More information'); ?></a>',
             '</p>'
         ].join('\n'));
 
         jInfoDiv.find('.BRfloatFoot').append([
             '<span>|</span>',
-            '<a href="mailto:<?php echo option('administrator_email');?>" class="problem"><?php __('Report a problem'); ?></a>'
+            '<a href="mailto:<?php echo option('administrator_email');?>" class="problem"><?php echo __('Report a problem'); ?></a>'
         ].join('\n'));
 
         if (domain == 'archive.org') {
@@ -400,6 +400,42 @@
                 $('#BookReader').find(icon).attr('title', titles[icon]);
             }
         }
+    }
+
+    br.i18n = function(msg) {
+        var msgs = {
+            'Search results will appear below...':<?php echo json_encode(__('Search results will appear below...')); ?>,
+            'No matches were found.':<?php echo json_encode(__('No matches were found.')); ?>,
+            "This book hasn't been indexed for searching yet. We've just started indexing it, so search should be available soon. Please try again later. Thanks!":<?php echo json_encode(__("This book hasn't been indexed for searching yet. We've just started indexing it, so search should be available soon. Please try again later. Thanks!")); ?>,
+            'Embed Bookreader':<?php echo json_encode(__('Embed Bookreader')); ?>,
+            'The bookreader uses iframes for embedding. It will not work on web hosts that block iframes. The embed feature has been tested on blogspot.com blogs as well as self-hosted Wordpress blogs. This feature will NOT work on wordpress.com blogs.':<?php echo json_encode(__('The bookreader uses iframes for embedding. It will not work on web hosts that block iframes. The embed feature has been tested on blogspot.com blogs as well as self-hosted Wordpress blogs. This feature will NOT work on wordpress.com blogs.')); ?>,
+            'Close':<?php echo json_encode(__('Close')); ?>,
+            'Add a bookmark':<?php echo json_encode(__('Add a bookmark')); ?>,
+            'You can add a bookmark to any page in any book. If you elect to make your bookmark public, other readers will be able to see it.':<?php echo json_encode(__('You can add a bookmark to any page in any book. If you elect to make your bookmark public, other readers will be able to see it.')); ?>,
+            'You must be logged in to your <a href="">Open Library account</a> to add bookmarks.':<?php echo json_encode(__('You must be logged in to your <a href="">Open Library account</a> to add bookmarks.')); ?>,
+            'Make this bookmark public.':<?php echo json_encode(__('Make this bookmark public.')); ?>,
+            'Keep this bookmark private.':<?php echo json_encode(__('Keep this bookmark private.')); ?>,
+            'Add a bookmark':<?php echo json_encode(__('Add a bookmark')); ?>,
+            'Search result':<?php echo json_encode(__('Search result')); ?>,
+            'Search inside':<?php echo json_encode(__('Search inside')); ?>,
+            'GO':<?php echo json_encode(__('GO')); ?>,
+            "Go to this book's page on Open Library":<?php echo json_encode(__("Go to this book's page on Open Library")); ?>,
+            'Loading audio...':<?php echo json_encode(__('Loading audio...')); ?>,
+            'Could not load soundManager2, possibly due to FlashBlock. Audio playback is disabled':<?php echo json_encode(__('Could not load soundManager2, possibly due to FlashBlock. Audio playback is disabled')); ?>,
+            'About this book':<?php echo json_encode(__('About this book')); ?>,
+            'About the BookReader':<?php echo json_encode(__('About the BookReader')); ?>,
+            'Copy and paste one of these options to share this book elsewhere.':<?php echo json_encode(__('Copy and paste one of these options to share this book elsewhere.')); ?>,
+            'Link to this page view:':<?php echo json_encode(__('Link to this page view:')); ?>,
+            'Link to the book:':<?php echo json_encode(__('Link to the book:')); ?>,
+            'Embed a mini Book Reader:':<?php echo json_encode(__('Embed a mini Book Reader:')); ?>,
+            '1 page':<?php echo json_encode(__('1 page')); ?>,
+            '2 pages':<?php echo json_encode(__('2 pages')); ?>,
+            'Open to this page?':<?php echo json_encode(__('Open to this page?')); ?>,
+            'NOTE:':<?php echo json_encode(__('NOTE:')); ?>,
+            "We've tested EMBED on blogspot.com blogs as well as self-hosted Wordpress blogs. This feature will NOT work on wordpress.com blogs.":<?php echo json_encode(__("We've tested EMBED on blogspot.com blogs as well as self-hosted Wordpress blogs. This feature will NOT work on wordpress.com blogs.")); ?>,
+            'Finished':<?php echo json_encode(__('Finished')); ?>
+        };
+        return msgs[msg];
     }
 
     // Let's go!

@@ -1,22 +1,23 @@
-# Translation for the BookReader plugin for Omeka.
+# SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the Omeka package.
+# This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: BookReader\n"
-"Report-Msgid-Bugs-To: https://github.com/Daniel-KM/BookReader/issues\n"
-"POT-Creation-Date: 2013-07-04 00:00+0000\n"
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2014-01-10 21:58+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: config_form.php:1
+#: config_form.php:1 config_form.php:1
 msgid "General parameters"
 msgstr ""
 
@@ -24,25 +25,25 @@ msgstr ""
 msgid "Logo URL for toolbar viewer"
 msgstr ""
 
-#: config_form.php:3
+#: config_form.php:3 config_form.php:3
 msgid "Url to a custom css for BookReader"
 msgstr ""
 
-#: config_form.php:10
+#: config_form.php:10 config_form.php:10
 msgid "Favicon URL for viewer pages"
 msgstr ""
 
-#: config_form.php:29
+#: config_form.php:29 config_form.php:29
 msgid "Sorting by original filename ?"
 msgstr ""
 
-#: config_form.php:34
+#: config_form.php:34 config_form.php:34
 msgid ""
 "If checked, the viewer will sort images in viewer alphabetically, by "
 "original filename."
 msgstr ""
 
-#: config_form.php:40
+#: config_form.php:40 config_form.php:40
 msgid "Embed mode"
 msgstr ""
 
@@ -50,19 +51,19 @@ msgstr ""
 msgid "Number of pages in embed mode (1 or 2)"
 msgstr ""
 
-#: config_form.php:49
+#: config_form.php:49 config_form.php:49
 msgid "Enable all functions in embed mode (0 or 1)"
 msgstr ""
 
-#: config_form.php:56
+#: config_form.php:56 config_form.php:56
 msgid "Class to add to the inline frame in embed mode"
 msgstr ""
 
-#: config_form.php:63
+#: config_form.php:63 config_form.php:63
 msgid "Width of the inline frame in embed mode"
 msgstr ""
 
-#: config_form.php:70
+#: config_form.php:70 config_form.php:70
 msgid "Height of the inline frame in embed mode"
 msgstr ""
 
@@ -74,11 +75,11 @@ msgstr ""
 msgid "Color of the toolbar (#e2dcc5)"
 msgstr ""
 
-#: config_form.php:17
+#: config_form.php:17 config_form.php:17
 msgid "Path of the custom library"
 msgstr ""
 
-#: config_form.php:22
+#: config_form.php:22 config_form.php:22
 msgid "Custom functions are used to get infos from your files."
 msgstr ""
 
@@ -87,126 +88,277 @@ msgstr ""
 msgid "Default directory is \"%s\"."
 msgstr ""
 
-#: helpers/BookReaderFunctions.php:354
+#: helpers/BookReaderFunctions.php:354 helpers/BookReaderFunctions.php:565
 msgid "bytes"
 msgstr ""
 
-#: helpers/BookReaderFunctions.php:358
+#: helpers/BookReaderFunctions.php:358 helpers/BookReaderFunctions.php:568
 msgid "KB"
 msgstr ""
 
-#: helpers/BookReaderFunctions.php:358
+#: helpers/BookReaderFunctions.php:358 helpers/BookReaderFunctions.php:568
 msgid "MB"
 msgstr ""
 
-#: helpers/BookReaderFunctions.php:358
+#: helpers/BookReaderFunctions.php:358 helpers/BookReaderFunctions.php:568
 msgid "GB"
 msgstr ""
 
-#: helpers/BookReaderFunctions.php:358
+#: helpers/BookReaderFunctions.php:358 helpers/BookReaderFunctions.php:568
 msgid "TB"
 msgstr ""
 
-#: views/public/viewer/show.php:226
+#: views/public/viewer/show.php:226 views/public/viewer/show.php:313
 msgid "Other Formats"
 msgstr ""
 
-#: views/public/viewer/show.php:231
+#: views/public/viewer/show.php:231 views/public/viewer/show.php:318
 msgid "More information"
 msgstr ""
 
-#: views/public/viewer/show.php:237
+#: views/public/viewer/show.php:237 views/public/viewer/show.php:324
 msgid "Report a problem"
 msgstr ""
 
-#: views/public/viewer/show.php:277
+#: views/public/viewer/show.php:277 views/public/viewer/show.php:365
+#, php-format
 msgid "Go to %s"
 msgstr ""
 
-#: views/public/viewer/show.php:278
+#: views/public/viewer/show.php:278 views/public/viewer/show.php:366
 msgid "Zoom in"
 msgstr ""
 
-#: views/public/viewer/show.php:279
+#: views/public/viewer/show.php:279 views/public/viewer/show.php:367
 msgid "Zoom out"
 msgstr ""
 
-#: views/public/viewer/show.php:280
+#: views/public/viewer/show.php:280 views/public/viewer/show.php:368
 msgid "One-page view"
 msgstr ""
 
-#: views/public/viewer/show.php:281
+#: views/public/viewer/show.php:281 views/public/viewer/show.php:369
 msgid "Two-page view"
 msgstr ""
 
-#: views/public/viewer/show.php:282
+#: views/public/viewer/show.php:282 views/public/viewer/show.php:370
 msgid "Thumbnail view"
 msgstr ""
 
-#: views/public/viewer/show.php:283
+#: views/public/viewer/show.php:283 views/public/viewer/show.php:371
 msgid "Print this page"
 msgstr ""
 
-#: views/public/viewer/show.php:284
+#: views/public/viewer/show.php:284 views/public/viewer/show.php:372
 msgid "Embed BookReader"
 msgstr ""
 
-#: views/public/viewer/show.php:285
+#: views/public/viewer/show.php:285 views/public/viewer/show.php:373
 msgid "Link to this document and page"
 msgstr ""
 
-#: views/public/viewer/show.php:289
+#: views/public/viewer/show.php:289 views/public/viewer/show.php:374
 msgid "Bookmark this page"
 msgstr ""
 
-#: views/public/viewer/show.php:287
+#: views/public/viewer/show.php:287 views/public/viewer/show.php:375
 msgid "Read this document aloud"
 msgstr ""
 
-#: views/public/viewer/show.php:288
+#: views/public/viewer/show.php:288 views/public/viewer/show.php:376
 msgid "Share this document"
 msgstr ""
 
-#: views/public/viewer/show.php:289
+#: views/public/viewer/show.php:289 views/public/viewer/show.php:377
 msgid "About this document"
 msgstr ""
 
-#: views/public/viewer/show.php:290
+#: views/public/viewer/show.php:290 views/public/viewer/show.php:378
 msgid "Show fullscreen"
 msgstr ""
 
-#: views/public/viewer/show.php:291
+#: views/public/viewer/show.php:291 views/public/viewer/show.php:379
 msgid "Flip left"
 msgstr ""
 
-#: views/public/viewer/show.php:292
+#: views/public/viewer/show.php:292 views/public/viewer/show.php:380
 msgid "Flip right"
 msgstr ""
 
-#: views/public/viewer/show.php:293
+#: views/public/viewer/show.php:293 views/public/viewer/show.php:381
 msgid "Page up"
 msgstr ""
 
-#: views/public/viewer/show.php:294
+#: views/public/viewer/show.php:294 views/public/viewer/show.php:382
 msgid "Page down"
 msgstr ""
 
-#: views/public/viewer/show.php:295
+#: views/public/viewer/show.php:295 views/public/viewer/show.php:383
 msgid "Play"
 msgstr ""
 
-#: views/public/viewer/show.php:296
+#: views/public/viewer/show.php:296 views/public/viewer/show.php:384
 msgid "Pause"
 msgstr ""
 
-#: views/public/viewer/show.php:297
+#: views/public/viewer/show.php:297 views/public/viewer/show.php:385
+#: views/public/viewer/show.php:386
 msgid "Show/hide nav bar"
 msgstr ""
 
-#: views/public/viewer/show.php:299
+#: views/public/viewer/show.php:299 views/public/viewer/show.php:387
+#: views/public/viewer/show.php:392 views/public/viewer/show.php:394
 msgid "First page"
 msgstr ""
 
-#: views/public/viewer/show.php:300
+#: views/public/viewer/show.php:300 views/public/viewer/show.php:388
+#: views/public/viewer/show.php:391 views/public/viewer/show.php:395
 msgid "Last page"
+msgstr ""
+
+#: config_form.php:23
+#, php-format
+msgid "Default file is \"%s\"."
+msgstr ""
+
+#: config_form.php:42
+msgid "Default number of pages in embed mode (1 or 2)"
+msgstr ""
+
+#: views/public/viewer/show.php:152 libraries/BookReaderCustom_OCR.php:358
+msgid "Page"
+msgstr ""
+
+#: views/public/viewer/show.php:407
+msgid "Search results will appear below..."
+msgstr ""
+
+#: views/public/viewer/show.php:408
+msgid "No matches were found."
+msgstr ""
+
+#: views/public/viewer/show.php:409
+msgid ""
+"This book hasn't been indexed for searching yet. We've just started indexing "
+"it, so search should be available soon. Please try again later. Thanks!"
+msgstr ""
+
+#: views/public/viewer/show.php:410
+msgid "Embed Bookreader"
+msgstr ""
+
+#: views/public/viewer/show.php:411
+msgid ""
+"The bookreader uses iframes for embedding. It will not work on web hosts "
+"that block iframes. The embed feature has been tested on blogspot.com blogs "
+"as well as self-hosted Wordpress blogs. This feature will NOT work on "
+"wordpress.com blogs."
+msgstr ""
+
+#: views/public/viewer/show.php:412
+msgid "Close"
+msgstr ""
+
+#: views/public/viewer/show.php:413 views/public/viewer/show.php:418
+msgid "Add a bookmark"
+msgstr ""
+
+#: views/public/viewer/show.php:414
+msgid ""
+"You can add a bookmark to any page in any book. If you elect to make your "
+"bookmark public, other readers will be able to see it."
+msgstr ""
+
+#: views/public/viewer/show.php:415
+msgid ""
+"You must be logged in to your <a href=\"\">Open Library account</a> to add "
+"bookmarks."
+msgstr ""
+
+#: views/public/viewer/show.php:416
+msgid "Make this bookmark public."
+msgstr ""
+
+#: views/public/viewer/show.php:417
+msgid "Keep this bookmark private."
+msgstr ""
+
+#: views/public/viewer/show.php:419
+msgid "Search result"
+msgstr ""
+
+#: views/public/viewer/show.php:420
+msgid "Search inside"
+msgstr ""
+
+#: views/public/viewer/show.php:421
+msgid "GO"
+msgstr ""
+
+#: views/public/viewer/show.php:422
+msgid "Go to this book's page on Open Library"
+msgstr ""
+
+#: views/public/viewer/show.php:423
+msgid "Loading audio..."
+msgstr ""
+
+#: views/public/viewer/show.php:424
+msgid ""
+"Could not load soundManager2, possibly due to FlashBlock. Audio playback is "
+"disabled"
+msgstr ""
+
+#: views/public/viewer/show.php:425
+msgid "About this book"
+msgstr ""
+
+#: views/public/viewer/show.php:426
+msgid "About the BookReader"
+msgstr ""
+
+#: views/public/viewer/show.php:427
+msgid "Copy and paste one of these options to share this book elsewhere."
+msgstr ""
+
+#: views/public/viewer/show.php:428
+msgid "Link to this page view:"
+msgstr ""
+
+#: views/public/viewer/show.php:429
+msgid "Link to the book:"
+msgstr ""
+
+#: views/public/viewer/show.php:430
+msgid "Embed a mini Book Reader:"
+msgstr ""
+
+#: views/public/viewer/show.php:431
+msgid "1 page"
+msgstr ""
+
+#: views/public/viewer/show.php:432
+msgid "2 pages"
+msgstr ""
+
+#: views/public/viewer/show.php:433
+msgid "Open to this page?"
+msgstr ""
+
+#: views/public/viewer/show.php:434
+msgid "NOTE:"
+msgstr ""
+
+#: views/public/viewer/show.php:435
+msgid ""
+"We've tested EMBED on blogspot.com blogs as well as self-hosted Wordpress "
+"blogs. This feature will NOT work on wordpress.com blogs."
+msgstr ""
+
+#: views/public/viewer/show.php:436
+msgid "Finished"
+msgstr ""
+
+#: libraries/BookReaderCustom_OCR.php:349
+msgid "Blank page"
 msgstr ""

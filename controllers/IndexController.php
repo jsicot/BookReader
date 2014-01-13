@@ -90,7 +90,7 @@ class BookReader_IndexController extends Omeka_Controller_AbstractActionControll
      */
     public function thumbProxyAction()
     {
-        $this->_sendImage('thumbnails');
+        $this->_sendImage('thumbnail');
     }
 
     /**

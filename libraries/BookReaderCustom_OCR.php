@@ -456,8 +456,8 @@ class BookReader_Custom
             case ($scale < 2): return 'fullsize';
             case ($scale < 4): return 'fullsize';
             case ($scale < 8): return 'fullsize';
-            case ($scale < 16): return 'thumbnails';
-            case ($scale < 32): return 'thumbnails';
+            case ($scale < 16): return 'thumbnail';
+            case ($scale < 32): return 'thumbnail';
         }
         return 'fullsize';
     }

@@ -162,8 +162,8 @@ described in the LICENSE file.
 
 BookReader Omeka plugin:
 
-* Copyright Julien Sicot, 2011-2012
-* Copyright Daniel Berthereau, 2013 (upgrade for Omeka 2.0)
+* Copyright Julien Sicot, 2011-2013
+* Copyright Daniel Berthereau, 2013-2014 (upgrade for Omeka 2.0)
 
 
 [Omeka]: https://omeka.org

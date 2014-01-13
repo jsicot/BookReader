@@ -31,7 +31,9 @@
         <div class="inputs">
             <?php echo get_view()->formCheckbox('bookreader_sorting_mode', TRUE, array('checked' => (boolean) get_option('bookreader_sorting_mode'))); ?>
             <p class="explanation">
-                <?php echo __('If checked, the viewer will sort images in viewer alphabetically, by original filename.'); ?>
+                <?php echo __('If checked, the viewer will sort images in viewer alphabetically, by original filename.');
+                echo ' ' . __('Note that you can batch reorder files in admin/items/show page. This will avoid to reorder them each time the item is displayed.');
+                echo ' ' . __("In that case, don't forget to uncheck this box."); ?>
             </p>
         </div>
     </div>

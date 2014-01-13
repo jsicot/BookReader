@@ -534,6 +534,9 @@ class BookReader_Custom
         $leaves = self::getLeaves($item);
         // Look for each page of the item.
         foreach ($leaves as $keyFile => $file) {
+            if (empty($file)) {
+                continue;
+            }
             $textAuto = $file->getElementTexts('OCR', 'Texte auto');
             if (!empty($textAuto)) {
                 $textAuto = $textAuto[0]->text;

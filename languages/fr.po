@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: BookReader\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-01-10 21:58+0100\n"
-"PO-Revision-Date: 2014-01-10 22:16+0100\n"
+"POT-Creation-Date: 2014-01-11 22:46+0100\n"
+"PO-Revision-Date: 2014-01-11 22:50+0100\n"
 "Last-Translator: Daniel Berthereau <Daniel.fr@Berthereau.net>\n"
 "Language-Team: French <kde-i18n-doc@kde.org>\n"
 "Language: fr\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "X-Generator: Poedit 1.5.4\n"
 
-#: config_form.php:1
+#: config_form.php:1 views/admin/plugins/bookreader-config-form.php:1
 msgid "General parameters"
 msgstr "Paramètres généraux"
 
@@ -26,19 +26,19 @@ msgstr "Paramètres généraux"
 msgid "Logo URL for toolbar viewer"
 msgstr "Url du logo pour la barre d’outil du visualiseur"
 
-#: config_form.php:3
+#: config_form.php:3 views/admin/plugins/bookreader-config-form.php:3
 msgid "Url to a custom css for BookReader"
 msgstr "Url du css de personnalisation de BookReader"
 
-#: config_form.php:10
+#: config_form.php:10 views/admin/plugins/bookreader-config-form.php:10
 msgid "Favicon URL for viewer pages"
 msgstr "Url de la favicon pour les pages de visualisation"
 
-#: config_form.php:29
+#: config_form.php:29 views/admin/plugins/bookreader-config-form.php:29
 msgid "Sorting by original filename ?"
 msgstr "Trier par nom de fichier original ?"
 
-#: config_form.php:34
+#: config_form.php:34 views/admin/plugins/bookreader-config-form.php:34
 msgid ""
 "If checked, the viewer will sort images in viewer alphabetically, by "
 "original filename."
@@ -46,7 +46,7 @@ msgstr ""
 "Si coché, le visualiseur triera les images alphabétiquement par nom de "
 "fichier original."
 
-#: config_form.php:40
+#: config_form.php:40 views/admin/plugins/bookreader-config-form.php:42
 msgid "Embed mode"
 msgstr "Mode embarqué"
 
@@ -54,19 +54,19 @@ msgstr "Mode embarqué"
 msgid "Number of pages in embed mode (1 or 2)"
 msgstr "Nombre de page en mode embarqué (1 ou 2)"
 
-#: config_form.php:49
+#: config_form.php:49 views/admin/plugins/bookreader-config-form.php:51
 msgid "Enable all functions in embed mode (0 or 1)"
 msgstr "Activer toutes les fonctions en mode embarqué (0 ou 1)"
 
-#: config_form.php:56
+#: config_form.php:56 views/admin/plugins/bookreader-config-form.php:58
 msgid "Class to add to the inline frame in embed mode"
 msgstr "Classe à ajouter à l’iframe du mode embarqué"
 
-#: config_form.php:63
+#: config_form.php:63 views/admin/plugins/bookreader-config-form.php:65
 msgid "Width of the inline frame in embed mode"
 msgstr "Largeur de l’iframe en mode embarqué"
 
-#: config_form.php:70
+#: config_form.php:70 views/admin/plugins/bookreader-config-form.php:72
 msgid "Height of the inline frame in embed mode"
 msgstr "Hauteur de l’iframe en mode embarqué"
 
@@ -78,11 +78,11 @@ msgstr "Couleur du fond (#65645F)"
 msgid "Color of the toolbar (#e2dcc5)"
 msgstr "Couleur de la barre d’outils (#e2dcc5)"
 
-#: config_form.php:17
+#: config_form.php:17 views/admin/plugins/bookreader-config-form.php:17
 msgid "Path of the custom library"
 msgstr "Chemin vers la bibliothèque de fonctions personnalisées"
 
-#: config_form.php:22
+#: config_form.php:22 views/admin/plugins/bookreader-config-form.php:22
 msgid "Custom functions are used to get infos from your files."
 msgstr ""
 "Les fonctions personnalisées sont utilisées pour récupérer des infos sur les "
@@ -221,12 +221,12 @@ msgstr "Première page"
 msgid "Last page"
 msgstr "Dernière page"
 
-#: config_form.php:23
+#: config_form.php:23 views/admin/plugins/bookreader-config-form.php:23
 #, php-format
 msgid "Default file is \"%s\"."
 msgstr "Le fichier par défaut est \"%s\"."
 
-#: config_form.php:42
+#: config_form.php:42 views/admin/plugins/bookreader-config-form.php:44
 msgid "Default number of pages in embed mode (1 or 2)"
 msgstr "Nombre de pages en mode embarqué (1 ou 2)"
 
@@ -384,3 +384,41 @@ msgstr "Terminé"
 #: libraries/BookReaderCustom_OCR.php:349
 msgid "Blank page"
 msgstr "Page blanche"
+
+#: views/admin/plugins/bookreader-config-form.php:35
+msgid ""
+"Note that you can batch reorder files in admin/items/show page. This will "
+"avoid to reorder them each time the item is displayed."
+msgstr ""
+"Notez que vous pouvez réordonner les fichiers en lot dans la page admin/"
+"items/show. Cela évitera de réordonner ces fichiers chaque fois que le "
+"document est affiché."
+
+#: views/admin/plugins/bookreader-config-form.php:36
+msgid "In that case, don't forget to uncheck this box."
+msgstr "Dans ce cas, n'oubliez pas de décocher cette case."
+
+#: views/admin/forms/bookreader-batch-edit.php:2
+msgid "Files order"
+msgstr "Classer les fichiers"
+
+#: views/admin/forms/bookreader-batch-edit.php:5
+msgid "Order files of each item by original filename."
+msgstr ""
+"Trier les fichiers de chaque document par leur nom de fichier original."
+
+#: views/admin/forms/bookreader-batch-edit.php:6
+msgid ""
+"By default, leaves (images) are ordered before non-leaves files. You can "
+"order by filename only."
+msgstr ""
+"Par défaut, les pages (les images) sont classées avant les autres fichiers. "
+"Vous pouvez classer les fichiers par leurs seuls noms."
+
+#: views/admin/forms/bookreader-batch-edit.php:9
+msgid "Order files"
+msgstr "Trier les fichiers"
+
+#: views/admin/forms/bookreader-batch-edit.php:20
+msgid "Mix files types"
+msgstr "Mélanger les types de fichiers"

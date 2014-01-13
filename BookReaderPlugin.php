@@ -24,13 +24,23 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
      */
     protected $_hooks = array(
         'install',
-        'uninstall',
         'upgrade',
+        'uninstall',
         'initialize',
         'config_form',
         'config',
         'define_routes',
+        'admin_items_batch_edit_form',
+        'items_batch_edit_custom',
         'book_reader_item_show',
+    );
+
+    /**
+     * @var array Filters for the plugin.
+     */
+    protected $_filters = array(
+        // Currently, it's a checkbox, so no error can be done.
+        // 'items_batch_edit_error',
     );
 
     /**
@@ -61,14 +71,6 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
     }
 
     /**
-     * Uninstalls the plugin.
-     */
-    public function hookUninstall()
-    {
-        $this->_uninstallOptions();
-    }
-
-    /**
      * Upgrade the plugin.
      */
     public function hookUpgrade($args)
@@ -81,6 +83,14 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
             delete_option('bookreader_logo_url');
             delete_option('bookreader_toolbar_color');
         }
+    }
+
+    /**
+     * Uninstalls the plugin.
+     */
+    public function hookUninstall()
+    {
+        $this->_uninstallOptions();
     }
 
     /**
@@ -98,7 +108,10 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
      */
     public function hookConfigForm()
     {
-        require 'config_form.php';
+        echo get_view()->partial(
+            'plugins/bookreader-config-form.php',
+            array()
+        );
     }
 
     /**
@@ -138,9 +151,84 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
             'viewer/:action/:id',
             array(
                 'controller' => 'viewer',
-                'module'     => 'book-reader',
-                'id'         => '/d+',
+                'module' => 'book-reader',
+                'id' => '/d+',
         )));
+    }
+
+    /**
+     * Add a partial batch edit form.
+     *
+     * @return void
+     */
+    public function hookAdminItemsBatchEditForm($args)
+    {
+        $view = $args['view'];
+        echo get_view()->partial(
+            'forms/bookreader-batch-edit.php'
+        );
+    }
+
+    /**
+     * Process the partial batch edit form.
+     *
+     * @return void
+     */
+    public function hookItemsBatchEditCustom($args)
+    {
+        $item = $args['item'];
+        $order_by_filename = $args['custom']['bookreader']['orderByFilename'];
+        $mix_files_types = $args['custom']['bookreader']['mixFilesTypes'];
+
+        if (!$order_by_filename) {
+            return;
+        }
+
+        if ($item->fileCount() == 0) {
+            return;
+        }
+
+        if ($mix_files_types) {
+            $list = $item->Files;
+            usort($list, array('BookReader', 'compareFilenames'));
+        }
+        else {
+            // Get leaves and remove blank ones.
+            $leaves = array_filter(BookReader::getLeaves($item));
+            $non_leaves = array_filter(BookReader::getNonLeaves($item));
+            // Order them separately.
+            usort($leaves, array('BookReader', 'compareFilenames'));
+            usort($non_leaves, array('BookReader', 'compareFilenames'));
+            // Finally, merge them.
+            $list = array_merge($leaves, $non_leaves);
+        }
+
+        // To avoid issues with unique index when updating (order should be
+        // unique for each file of an item), all orders are reset to null before
+        // true process.
+        $db = $this->_db;
+        $bind = array(
+            $item->id,
+        );
+        $sql = "
+            UPDATE `$db->Files` files
+            SET files.order = NULL
+            WHERE files.item_id = ?
+        ";
+        $db->query($sql, $bind);
+
+        // To avoid multiple updates, we do a single query.
+        foreach ($list as &$file) {
+            $file = $file->id;
+        }
+        // The array is made unique, because a leaf can be repeated.
+        $list = implode(',', array_unique($list));
+        $sql = "
+            UPDATE `$db->Files` files
+            SET files.order = FIND_IN_SET(files.id, '$list')
+            WHERE files.id in ($list)
+        ";
+        $db->query($sql);
     }
 
     /**

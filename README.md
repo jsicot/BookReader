@@ -59,6 +59,9 @@ document of twelve pages as an example. In Javascript, we have these arrays:
 - br.leafMap : mapping of pages, as [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
 - br.pageNums : number of pages, as [,, "i", "ii", "iii", "iv", 1, 2, 3, 4, 5,]
 - br.pageLabels : label of pages, as ["Cover", "Blank",,,,, "Page 1 (unnumbered)",,,,, "Back cover"]
+- br.pageWidths : default width of each image, as [500, 500, 500, 500, 500, 500, 500, 500, 500, 500, 500, 500]
+- br.pageHeights : default height of each image, as [800, 800, 800, 800, 800, 800, 800, 800, 800, 800, 800, 800]
+
 With the default files of BookReader, all images of an item are displayed, so
 the leafMap indexes are always a simple list of numbers like above (starting
 from 0 when the first page is a right page, else from 1). Page numbers and/or
@@ -89,6 +92,15 @@ Other arrays should be set in accordance: number of pages as [,, "i", "ii", "iii
 labels as ["Cover", "Blank",,,,, "Page 1 (unnumbered)",,,, "Page 5 with tracing paper", "Back cover"]
 and files as [File 1, null, File 3, File 4..., File 10, File 11a, File 10, File 11b, File 12].
 Any other arrangements can be used.
+
+To avoid to calculate these data each time an item is displayed, it's
+recommanded to save them either in a xml file, or in the database. It's
+specially important for widths and heights data, as all of them should be got
+before first display.
+A batch can be launched in the admin/items/show page if needed. The function
+`saveData()` should be customized to your needs. Of course, other functions
+should check if these data are available and use them. This function can be used
+too the first time a viewer is displayed for an item.
 
 
 Using the BookReader Plugin

@@ -270,7 +270,7 @@ class BookReader
      *
      * @return integer|null
      */
-    public static function getLeafIndex($file = null)
+    public static function getLeafIndex($file = null, $leaves = null)
     {
         if (empty($file)) {
             $file = get_current_record('file');
@@ -281,7 +281,8 @@ class BookReader
         }
 
         $item = $file->getItem();
-        $leaves = self::getLeaves($item);
+        // Use leaves if they are sent as parameter.
+        $leaves = is_null($leaves) ? self::getLeaves($item) : $leaves;
         foreach($leaves as $key => $leaf) {
             if ($leaf && $leaf->id == $file->id) {
                 return $key;
@@ -352,7 +353,7 @@ class BookReader
      * @return array
      *   Array of width and height of image files of an item.
      */
-    public static function getImagesSizes($item = null, $imageType = 'fullsize')
+    public static function getImagesSizes($item = null, $imageType = 'fullsize', $leaves = null)
     {
         if (empty($item)) {
             $item = get_current_record('item');
@@ -364,8 +365,9 @@ class BookReader
 
         $widths = array();
         $heights = array();
-        $leavesFiles = self::getLeaves($item);
-        foreach ($leavesFiles as $file) {
+        // Use leaves if they are sent as parameter.
+        $leaves = is_null($leaves) ? self::getLeaves($item) : $leaves;
+        foreach ($leaves as $file) {
             // The size of a missing page is calculated by javascript from the
             // size of the verso of the current page or from the first page.
             if (empty($file)) {
@@ -657,6 +659,19 @@ class BookReader
             if ($size < 1024) {
                 return (int) $size . ' ' . $unit;
             }
+        }
+    }
+
+    /**
+     * Save all BookReader data about an item in a file or in database.
+     *
+     * @return false|array
+     *   False if an error occur, else array of data.
+     */
+    public static function saveData($item)
+    {
+        if (method_exists('BookReader_Custom', 'saveData')) {
+            return BookReader_Custom::saveData($item);
         }
     }
 }

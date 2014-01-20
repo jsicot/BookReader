@@ -157,7 +157,7 @@
         } else {
             var pageNum = this.pageNums[index];
             if (pageNum) {
-                return '<?php echo __('Page'); ?> ' + pageNum;
+                return '<?php echo html_escape(__('Page')); ?> ' + pageNum;
             } else {
                 // Accessible index starts at 0 so we add 1 to make human.
                 index++;
@@ -334,18 +334,18 @@
         ].join(''));
 
         jInfoDiv.find('.BRfloatMeta').append([
-            '<h3><?php echo __('Other Formats'); ?></h3>',
+            '<h3><?php echo html_escape(__('Other Formats')); ?></h3>',
             '<ul class="links">',
                 '<?php echo BookReader::linksToNonImages($item); ?>',
             '</ul>',
             '<p class="moreInfo">',
-                '<a href="'+ this.bookUrl + '"><?php echo __('More information'); ?></a>',
+                '<a href="'+ this.bookUrl + '"><?php echo html_escape(__('More information')); ?></a>',
             '</p>'
         ].join('\n'));
 
         jInfoDiv.find('.BRfloatFoot').append([
             '<span>|</span>',
-            '<a href="mailto:<?php echo option('administrator_email');?>" class="problem"><?php echo __('Report a problem'); ?></a>'
+            '<a href="mailto:<?php echo option('administrator_email');?>" class="problem"><?php echo html_escape(__('Report a problem')); ?></a>'
         ].join('\n'));
 
         if (domain == 'archive.org') {

@@ -6,8 +6,8 @@
  * books from the Internet Archive online and can also be used to view other
  * books.
  *
- * @copyright Daniel Berthereau, 2013
- * @copyright Julien Sicot, 2011-2012
+ * @copyright Daniel Berthereau, 2013-2014
+ * @copyright Julien Sicot, 2011-2013
  * @license http://www.gnu.org/licenses/gpl-3.0.txt GNU GPLv3
  */
 
@@ -179,11 +179,27 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
         $item = $args['item'];
         $order_by_filename = $args['custom']['bookreader']['orderByFilename'];
         $mix_files_types = $args['custom']['bookreader']['mixFilesTypes'];
+        $save_data = $args['custom']['bookreader']['saveData'];
 
-        if (!$order_by_filename) {
-            return;
+        if ($order_by_filename) {
+            $this->_sortFiles($item, $mix_files_types);
         }
 
+        if ($save_data) {
+            BookReader::saveData($item);
+        }
+    }
+
+    /**
+     * Sort all files of an item by name.
+     *
+     * @param Item $item
+     * @param boolean $mix_files_types
+     *
+     * @return void
+     */
+    protected function _sortFiles($item, $mix_files_types = false)
+    {
         if ($item->fileCount() == 0) {
             return;
         }

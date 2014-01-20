@@ -65,8 +65,8 @@
     br.leafMap = [<?php echo implode(',', $pageIndexes); ?>];
     br.pageNums = [<?php echo implode(',', $pageNumbers); ?>];
     br.pageLabels = [<?php echo implode(',', $pageLabels); ?>];
-    br.pageW = [<?php echo implode(',', $imgWidths); ?>];
-    br.pageH = [<?php echo implode(',', $imgHeights); ?>];
+    br.pageWidths = [<?php echo implode(',', $imgWidths); ?>];
+    br.pageHeights = [<?php echo implode(',', $imgHeights); ?>];
     br.server = "<?php echo $serverFullText; ?>";
     br.bookPath = "<?php echo WEB_ROOT; ?>";
     br.bookId = <?php echo $item->id; ?>;
@@ -78,26 +78,26 @@
     // If there is no width, it will be the width of the verso of the current
     // leaf, else width of first or last page.
     br.getPageWidth = function(index) {
-        var width = this.pageW[index];
+        var width = this.pageWidths[index];
         if (width == undefined) {
             if ('rl' != this.pageProgression) {
                 if (this.getPageSide(index) == 'R') {
-                    width = this.pageW[index + 1];
+                    width = this.pageWidths[index + 1];
                 } else {
-                    width = this.pageW[index - 1];
+                    width = this.pageWidths[index - 1];
                 }
             } else {
                 if (this.getPageSide(index) == 'L') {
-                    width = this.pageW[index + 1];
+                    width = this.pageWidths[index + 1];
                 } else {
-                    width = this.pageW[index - 1];
+                    width = this.pageWidths[index - 1];
                 }
             }
             if (width == undefined) {
                 if (Math.min(Math.max(index, 0), this.numLeafs - 1)) {
-                    width = this.pageW[0];
+                    width = this.pageWidths[0];
                 } else {
-                    width = this.pageW[this.numLeafs - 1];
+                    width = this.pageWidths[this.numLeafs - 1];
                 }
             }
         }
@@ -105,27 +105,27 @@
     }
 
     br.getPageHeight = function(index) {
-        var height = this.pageH[index];
+        var height = this.pageHeights[index];
         if (height == undefined) {
             if ('rl' != this.pageProgression) {
                 if (this.getPageSide(index) == 'R') {
-                    height = this.pageH[index + 1];
+                    height = this.pageHeights[index + 1];
                 } else {
-                    height = this.pageH[index - 1];
+                    height = this.pageHeights[index - 1];
                 }
             }
             else {
                 if (this.getPageSide(index) == 'L') {
-                    height = this.pageH[index + 1];
+                    height = this.pageHeights[index + 1];
                 } else {
-                    height = this.pageH[index - 1];
+                    height = this.pageHeights[index - 1];
                 }
             }
             if (height == undefined) {
                 if (Math.min(Math.max(index, 0), this.numLeafs - 1)) {
-                    height = this.pageH[0];
+                    height = this.pageHeights[0];
                 } else {
-                    height = this.pageH[this.numLeafs - 1];
+                    height = this.pageHeights[this.numLeafs - 1];
                 }
             }
         }

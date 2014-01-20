@@ -125,6 +125,10 @@ class BookReader_Custom
      */
     protected static function _complete_list_of_leaves($leaves)
     {
+        if (count($leaves) <= 1) {
+            return $leaves;
+        }
+
         // Quick preload infos of all leaves and insert missing or non
         // digitalized leaves.
         $infos_leaves = array();
@@ -217,45 +221,20 @@ class BookReader_Custom
         }
 
         // Add "Dos" cover in the first or last position, if present.
-        $first = $result[0]->getElementTexts('Dublin Core', 'Title');
-        $first = $first ? $first[0]->text : '';
-        $last = $result[count($result) - 1]->getElementTexts('Dublin Core', 'Title');
-        $last = $last ? $last[0]->text : '';
-        if ($first == 'Dos' && $last != 'Dos') {
-            $result[] = $result[0];
-        }
-        elseif ($first != 'Dos' && $last == 'Dos') {
-            $result[] = array_unshift($result, $result[count($result) - 1]);
+        if (count($result) > 1) {
+            $first = $result[0]->getElementTexts('Dublin Core', 'Title');
+            $first = $first ? $first[0]->text : '';
+            $last = $result[count($result) - 1]->getElementTexts('Dublin Core', 'Title');
+            $last = $last ? $last[0]->text : '';
+            if ($first == 'Dos' && $last != 'Dos') {
+                $result[] = $result[0];
+            }
+            elseif ($first != 'Dos' && $last == 'Dos') {
+                array_unshift($result, $result[count($result) - 1]);
+            }
         }
 
         return $result;
-    }
-
-    /**
-     * Get the page index of a file in the list of images.
-     *
-     * Generally, the index is the order of the file attached to the item, but
-     * it can be another one for right to left languages, or when it's necessary
-     * to display an image more than once or to insert a special page. This is
-     * specially useful to keep the parity of pages (left / right) when blanck
-     * pages are not digitalized or when a page has more than one views.
-     *
-     * @return integer|null
-     *   Index of the page.
-     */
-    public static function getPageIndex($file)
-    {
-        if (empty($file)) {
-            return null;
-        }
-
-        $leaves = self::getLeaves($file->getItem());
-        foreach($leaves as $key => $leaf) {
-            if ($leaf && $leaf->id == $file->id) {
-                return $key;
-            }
-        }
-        return null;
     }
 
     /**
@@ -265,7 +244,7 @@ class BookReader_Custom
      * page should be 0 if document starts from right, and 1 if document starts
      * from left. Use null for a missing page.
      *
-     * @see getPageIndex()
+     * By default, indexes are simply a list of numbers starting from 0.
      *
      * @return array of integers
      */
@@ -285,44 +264,16 @@ class BookReader_Custom
     }
 
     /**
-     * Get the page number or the name of a page of a file, like "6" or "XIV".
-     * If "null" is returned, the label in viewer will be the page index + 1.
-     *
-     * @see getPageLabel()
-     *
-     * @return string
-     *   Number of the page, empty to use the page label, or 'null' if none.
-     */
-    public static function getPageNumber($file)
-    {
-        static $pageNumbers = array();
-
-        if (empty($file)) {
-            return '';
-        }
-
-        if (!isset($pageNumbers[$file->id])) {
-            $txt = $file->getElementTexts('refNum', 'Numéro de page');
-            if (empty($txt)) {
-                $pageNumbers[$file->id] = '';
-            }
-            else {
-                $pageNumbers[$file->id] = $txt[0]->text;
-            }
-        }
-
-        return $pageNumbers[$file->id];
-    }
-
-    /**
      * Get the list of numbers of pages of an item.
      *
+     * The page number is the name of a page of a file, like "6" or "XIV".
+     * If "null" is returned, the label in viewer will be the page index + 1.
+     *
      * This function is used to get quickly all page numbers of an item.
+     *  If the page number is empty, the label page will be used. If there is no
+     * page number, use 'null'.
      *
-     * In this example, the process is not optimized and this is only a wrapper
-     * for getPageNumber().
-     *
-     * @see getPageNumber()
+     * @see getPageLabels()
      *
      * @return array of strings
      */
@@ -330,43 +281,17 @@ class BookReader_Custom
     {
         $leaves = self::getLeaves($item);
         $numbers = array();
-        foreach ($leaves as $file) {
-            $numbers[] = self::getPageNumber($file);
+        foreach ($leaves as $leaf) {
+            if (empty($leaf)) {
+                $number = '';
+            }
+            else {
+                $txt = $leaf->getElementTexts('refNum', 'Numéro de page');
+                $number = $txt ? $txt[0]->text : '';
+            }
+            $numbers[] = $number;
         }
         return $numbers;
-    }
-
-    /**
-     * Get the page label of a file, like "4th Cover" or "Faux titre".
-     *
-     * This function is first used for pages without pagination, like cover,
-     * summary, title page, index, inserted page, planches, etc. If there is a
-     * page number, this label is not needed, but it can be used to add a
-     * specific information ("Page XIV : Illustration").
-     *
-     * @see getPageNumber()
-     *
-     * @return string
-     *   Label of the page, if needed.
-     */
-    public static function getPageLabel($file)
-    {
-        if (empty($file)) {
-            return __('Blank page');
-        }
-
-        $txt = $file->getElementTexts('Dublin Core', 'Title');
-        if (empty($txt)) {
-            $txt = '';
-        }
-        else {
-            $number = self::getPageNumber($file);
-            $txt = ($txt[0]->text == __('Page') . ' ' . $number)
-                ? ''
-                : $txt[0]->text;
-        }
-
-        return $txt;
     }
 
     /**
@@ -374,35 +299,40 @@ class BookReader_Custom
      *
      * This function is used to get quickly all page labels of an item.
      *
-     *@todo The process is not optimized and this is only a wrapper
-     * for getPageLabel().
+     * A label is used first for pages without pagination, like cover, summary,
+     * title page, index, inserted page, planches, etc. If there is a page
+     * number, this label is not needed, but it can be used to add a specific
+     * information ("Page XIV : Illustration").
      *
-     * @see getPageLabel()
+     * @see getPageNumbers()
      *
      * @return array of strings
      */
     public static function getPageLabels($item)
     {
         $leaves = self::getLeaves($item);
+        // Don't add a label if this is the same than the number.
+        $numbers = self::getPageNumbers($item);
         $labels = array();
-        foreach ($leaves as $file) {
-            $labels[] = self::getPageLabel($file);
+        foreach ($leaves as $key => $leaf) {
+            if (empty($leaf)) {
+                $label = __('Blank page');
+            }
+            else {
+                $txt = $leaf->getElementTexts('Dublin Core', 'Title');
+                if (empty($txt)) {
+                    $label = '';
+                }
+                else {
+                    $label = ($txt[0]->text == __('Page') . ' ' . $numbers[$key])
+                        ? ''
+                        : $txt[0]->text;
+                }
+            }
+
+            $labels[] = $label;
         }
         return $labels;
-    }
-
-    /**
-     * Return the cover file of an item (the leaf to display as a thumbnail).
-     *
-     * Here, we choose to use the page title as cover.
-     *
-     * @return File|null
-     */
-    public static function getCoverFile($item)
-    {
-        $index = self::getTitleLeaf($item);
-        $leaves = self::getLeaves($item);
-        return $leaves[$index];
     }
 
     /**
@@ -441,11 +371,10 @@ class BookReader_Custom
 
         if ($result) {
             $file = get_record_by_id('File', $result);
-            return self::getPageIndex($file);
+            return BookReader::getLeafIndex($file);
         }
-        else {
-            return 0;
-        }
+
+        return 0;
     }
 
     /**
@@ -455,7 +384,7 @@ class BookReader_Custom
      * @return string
      *   Derivative name of the size.
      */
-    public static function sendImage($scale, $item)
+    public static function getSizeType($scale, $item)
     {
         switch ($scale) {
             case ($scale < 1): return 'original';
@@ -599,7 +528,7 @@ class BookReader_Custom
         $results = array();
         foreach ($textsToHighlight as $key => $data) {
             $file = $leaves[$key];
-            $pageIndex = self::getPageIndex($file);
+            $pageIndex = BookReader::getPageIndex($file);
             $pathImg = FILES_DIR . DIRECTORY_SEPARATOR . $imageType . DIRECTORY_SEPARATOR . ($imageType == 'original' ? $file->filename : $file->getDerivativeFilename());
             list($width, $height, $type, $attr) = getimagesize($pathImg);
 

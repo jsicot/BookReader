@@ -84,7 +84,7 @@ class BookReader_IndexController extends Omeka_Controller_AbstractActionControll
         $itemId = $this->getRequest()->getParam('id');
         $item = get_record_by_id('item', $itemId);
 
-        $type = BookReader::sendImage($scale, $item);
+        $type = BookReader::getSizeType($scale, $item);
 
         $this->_sendImage($type);
     }

@@ -142,34 +142,13 @@ class BookReader
     }
 
     /**
-     * Get the page index of a file in the list of images.
-     *
-     * Generally, the index is the order of the file attached to the item, but
-     * it can be another one for right to left languages, or when it's necessary
-     * to display an image more than once or to insert a special page. This is
-     * specially useful to keep the parity of pages (left / right) when blanck
-     * pages are not digitalized or when a page has more than one views.
-     *
-     * @return integer
-     *   Index of the page.
-     */
-    public static function getPageIndex($file = null)
-    {
-        if (empty($file)) {
-            $file = get_current_record('file');
-        }
-
-        return BookReader_Custom::getPageIndex($file);
-    }
-
-    /**
      * Get the list of indexes of pages for an item.
      *
      * This function is used to get quickly all page indexes of an item. First
      * page should be 0 if document starts from right, and 1 if document starts
      * from left. Use null for a missing page.
      *
-     * @see getPageIndex()
+     * By default, indexes are simply a list of numbers starting from 0.
      *
      * @return array of integers
      */
@@ -179,33 +158,30 @@ class BookReader
             $item = get_current_record('item');
         }
 
-        return BookReader_Custom::getPageIndexes($item);
-    }
-
-    /**
-     * Get the page number or the name of a page of a file, like "6" or "XIV".
-     * If "null" is returned, the label in viewer will be the page index + 1.
-     *
-     * @see getPageLabel()
-     *
-     * @return string
-     *   Number of the page, empty to use the page label, or 'null' if none.
-     */
-    public static function getPageNumber($file = null)
-    {
-        if (empty($file)) {
-            $file = get_current_record('file');
+        if (method_exists('BookReader_Custom', 'getPageIndexes')) {
+            return BookReader_Custom::getPageIndexes($item);
         }
 
-        return BookReader_Custom::getPageNumber($file);
+        // Start from 0 by default.
+        $leaves = BookReader::getLeaves($item);
+        $indexes = array();
+        foreach($leaves as $key => $leaf) {
+            $indexes[] = empty($leaf) ? null : $key;
+        }
+        return $indexes;
     }
 
     /**
      * Get the list of numbers of pages of an item.
      *
-     * This function is used to get quickly all page numbers of an item.
+     * The page number is the name of a page of a file, like "6" or "XIV".
+     * If "null" is returned, the label in viewer will be the page index + 1.
      *
-     * @see getPageNumber()
+     * This function is used to get quickly all page numbers of an item.
+     *  If the page number is empty, the label page will be used. If there is no
+     * page number, use 'null'.
+     *
+     * @see getPageLabels()
      *
      * @return array of strings
      */
@@ -219,33 +195,16 @@ class BookReader
     }
 
     /**
-     * Get the page label of a file, like "4th Cover" or "Faux titre".
-     *
-     * This function is first used for pages without pagination, like cover,
-     * summary, title page, index, inserted page, planches, etc. If there is a
-     * page number, this label is not needed, but it can be used to add a
-     * specific information ("Page XIV : Illustration").
-     *
-     * @see getPageNumber()
-     *
-     * @return string
-     *   Label of the page, if needed.
-     */
-    public static function getPageLabel($file = null)
-    {
-        if (empty($file)) {
-            $file = get_current_record('file');
-        }
-
-        return BookReader_Custom::getPageLabel($file);
-    }
-
-    /**
      * Get the list of labels of pages of an item.
      *
      * This function is used to get quickly all page labels of an item.
      *
-     * @see getPageLabels()
+     * A label is used first for pages without pagination, like cover, summary,
+     * title page, index, inserted page, planches, etc. If there is a page
+     * number, this label is not needed, but it can be used to add a specific
+     * information ("Page XIV : Illustration").
+     *
+     * @see getPageNumbers()
      *
      * @return array of strings
      */
@@ -255,7 +214,136 @@ class BookReader
             $item = get_current_record('item');
         }
 
-        return BookReader_Custom::getPageLabels($item);
+        if (method_exists('BookReader_Custom', 'getPageLabels')) {
+            return BookReader_Custom::getPageLabels($item);
+        }
+
+        // No label by default.
+        $leaves = BookReader::getLeaves($item);
+        return array_fill(0, count($leaves), '');
+    }
+
+    /**
+     * Return the cover file of an item (the leaf to display as a thumbnail).
+     *
+     * @return file
+     *   Object file of the cover.
+     */
+    public static function getCoverFile($item = null)
+    {
+        if (empty($item)) {
+            $item = get_current_record('item');
+        }
+
+        if (method_exists('BookReader_Custom', 'getCoverFile')) {
+            return BookReader_Custom::getCoverFile($item);
+        }
+
+        $leaves = self::getLeaves($item);
+        // This could be too:
+        // return reset($leaves);
+        $index = self::getTitleLeaf($item);
+        return $leaves[$index];
+    }
+
+    /**
+     * Return index of the first leaf to display by BookReader.
+     *
+     * @return integer
+     *   Index for bookreader.
+     */
+    public static function getTitleLeaf($item = null)
+    {
+        if (empty($item)) {
+            $item = get_current_record('item');
+        }
+
+        if (method_exists('BookReader_Custom', 'getTitleLeaf')) {
+            return BookReader_Custom::getTitleLeaf($item);
+        }
+
+        return 0;
+    }
+
+    /**
+     * Get the index of a file in the list of leaves.
+     *
+     * @return integer|null
+     */
+    public static function getLeafIndex($file = null)
+    {
+        if (empty($file)) {
+            $file = get_current_record('file');
+        }
+
+        if (empty($file)) {
+            return null;
+        }
+
+        $item = $file->getItem();
+        $leaves = self::getLeaves($item);
+        foreach($leaves as $key => $leaf) {
+            if ($leaf && $leaf->id == $file->id) {
+                return $key;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Get the page index of a file in the list of images.
+     *
+     * @see getPageIndexes()
+     *
+     * @return integer
+     *   Index of the page.
+     */
+    public static function getPageIndex($file = null)
+    {
+        return self::_getLeafData('PageIndexes', $file);
+    }
+
+    /**
+     * Get the page number of a file.
+     *
+     * @see getPageNumbers()
+     *
+     * @return string
+     *   Number of the page, empty to use the page label, or 'null' if none.
+     */
+    public static function getPageNumber($file = null)
+    {
+        return self::_getLeafData('PageNumbers', $file);
+    }
+
+    /**
+     * Get the page label of a file, like "4th Cover" or "Faux titre".
+     *
+     * @see getPageLabels()
+     *
+     * @return string
+     *   Label of the page, if needed.
+     */
+    public static function getPageLabel($file = null)
+    {
+        return self::_getLeafData('PageLabels', $file);
+    }
+
+    /**
+     * Get a specific data of a file in list of leaves.
+     *
+     * @return integer|null
+     */
+    protected static function _getLeafData($dataType, $file = null)
+    {
+        $key = self::getLeafIndex($file);
+        if (empty($key)) {
+            return null;
+        }
+        $callback = 'get' . $dataType;
+        $array = self::$callback($file->getItem());
+        return isset($array[$key]) ? $array[$key] : null;
     }
 
     /**
@@ -300,72 +388,6 @@ class BookReader
     }
 
     /**
-     * Return the cover file of an item (the leaf to display as a thumbnail).
-     *
-     * @return file
-     *   Object file of the cover.
-     */
-    public static function getCoverFile($item = null)
-    {
-        if (empty($item)) {
-            $item = get_current_record('item');
-        }
-
-        return BookReader_Custom::getCoverFile($item);
-    }
-
-    /**
-     * Return index of the first leaf to display by BookReader.
-     *
-     * @return integer
-     *   Index for bookreader.
-     */
-    public static function getTitleLeaf($item = null)
-    {
-        if (empty($item)) {
-            $item = get_current_record('item');
-        }
-
-        return BookReader_Custom::getTitleLeaf($item);
-    }
-
-    /**
-     * Return the image in html format of the cover of the item.
-     *
-     * @todo Put it in a custom library.
-     *
-     * @return string
-     *   Html code of the image of the cover of the item.
-     */
-    public static function itemCover($props = array(), $index = 0, $item = null)
-    {
-        if (empty($item)) {
-            $item = get_current_record('item');
-        }
-
-        $file = BookReader_Custom::getCoverFile($item);
-
-        $img = '';
-        if ($file) {
-            $title = $item->getElementTexts('Dublin Core', 'Title');
-            $title = empty($title) ? '' : $title[0]->text;
-            $defaultProps = array(
-                'alt' => html_escape($title),
-            );
-
-            $props = array_merge($defaultProps, $props);
-
-            // TODO Currently use automatic width.
-            $width = @$props['width'];
-            $height = @$props['height'];
-
-            $img = '<img src="' . $file->getWebPath('thumbnail') . '" ' . self::_tagAttributes($props) . ' width="auto" height="120" />';
-        }
-
-        return $img;
-    }
-
-    /**
      * Get an array of the number, label, witdh and height of each image file of
      *  an item.
      *
@@ -395,7 +417,7 @@ class BookReader
         $indexes = self::getPageIndexes($item);
         $numbers = array_map($json_encode_numbers, self::getPageNumbers($item));
         $labels = array_map($json_encode_labels, self::getPageLabels($item));
-       list($widths, $heights) = self::getImagesSizes($item);
+        list($widths, $heights) = self::getImagesSizes($item, $imageType);
 
         return array(
             $indexes,
@@ -407,19 +429,68 @@ class BookReader
     }
 
     /**
+     * Return the image in html format of the cover of the item.
+     *
+     * @todo Put it in a custom library.
+     *
+     * @return string
+     *   Html code of the image of the cover of the item.
+     */
+    public static function itemCover($props = array(), $index = 0, $item = null)
+    {
+        if (empty($item)) {
+            $item = get_current_record('item');
+        }
+
+        $file = self::getCoverFile($item);
+
+        $img = '';
+        if ($file) {
+            $title = $item->getElementTexts('Dublin Core', 'Title');
+            $title = empty($title) ? '' : $title[0]->text;
+            $defaultProps = array(
+                'alt' => html_escape($title),
+            );
+
+            $props = array_merge($defaultProps, $props);
+
+            // TODO Currently use automatic width.
+            $width = @$props['width'];
+            $height = @$props['height'];
+
+            $img = '<img src="' . $file->getWebPath('thumbnail') . '" ' . self::_tagAttributes($props) . ' width="auto" height="120" />';
+        }
+
+        return $img;
+    }
+
+    /**
      * Returns the derivative size to use for the current image, depending on
      * the scale.
      *
      * @return string
      *   Derivative name of the size.
      */
-    public static function sendImage($scale, $item = null)
+    public static function getSizeType($scale, $item = null)
     {
         if (empty($item)) {
             $item = get_current_record('item');
         }
 
-        return BookReader_Custom::sendImage($scale, $item);
+        if (method_exists('BookReader_Custom', 'getSizeType')) {
+            return BookReader_Custom::getSizeType($scale, $item);
+        }
+
+        // Default scales.
+        switch ($scale) {
+            case ($scale < 1): return 'original';
+            case ($scale < 2): return 'fullsize';
+            case ($scale < 4): return 'fullsize';
+            case ($scale < 8): return 'fullsize';
+            case ($scale < 16): return 'thumbnail';
+            case ($scale < 32): return 'thumbnail';
+        }
+        return 'fullsize';
     }
 
     /**
@@ -468,7 +539,10 @@ class BookReader
             $item = get_current_record('item');
         }
 
-        return BookReader_Custom::hasDataForSearch($item);
+        if (method_exists('BookReader_Custom', 'hasDataForSearch')) {
+            return BookReader_Custom::hasDataForSearch($item);
+        }
+        return false;
     }
 
     /**
@@ -494,7 +568,9 @@ class BookReader
             $item = get_current_record('item');
         }
 
-        return BookReader_Custom::searchFulltext($query, $item);
+        if (method_exists('BookReader_Custom', 'searchFulltext')) {
+            return BookReader_Custom::searchFulltext($query, $item);
+        }
     }
 
     /**
@@ -511,7 +587,9 @@ class BookReader
             $item = get_current_record('item');
         }
 
-        return BookReader_Custom::highlightFiles($texts, $item);
+        if (method_exists('BookReader_Custom', 'highlightFiles')) {
+            return BookReader_Custom::highlightFiles($texts, $item);
+        }
     }
 
     /**

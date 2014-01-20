@@ -24,16 +24,20 @@ class BookReader_IndexController extends Omeka_Controller_AbstractActionControll
      *         ->text = few words to contextualize the result, used in nav bar
      *         ->par = array of par zones (currently, only the [0] is used)
      *             ->t = top limit of global zone
-     *             ->r = right limit of global zone
-     *             ->b = bottom limit of global zone
      *             ->l = left limit of global zone
+     *             ->b = bottom limit of global zone
+     *             ->r = right limit of global zone
      *             ->page = page number
+     *             ->index = page index
      *             ->boxes = array of coordinates of boxes to highlight
-     *                 ->r = right limit of word zone
+     *                 ->t = top limit of word zone
      *                 ->l = left limit of word zone
      *                 ->b = bottom limit of word zone
-     *                 ->t = top limit of word zone
+     *                 ->r = right limit of word zone
      *                 ->page = page number
+     *                 ->index = page index
+     * Note that only one of "page" or "index" is needed. Index is prefered,
+     * because it's generally simpler to manage and more efficient.
      */
     public function fulltextAction()
     {
@@ -59,7 +63,7 @@ class BookReader_IndexController extends Omeka_Controller_AbstractActionControll
             $output['leaf0_missing'] = false;
 
             $answer = BookReader::searchFulltext($query, $item);
-            $output['matches'] = BookReader::highlightFiles($answer);
+            $output['matches'] = BookReader::highlightFiles($answer, $item);
         }
 
         // Send answer.

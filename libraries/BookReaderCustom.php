@@ -254,14 +254,16 @@ class BookReader_Custom
      * @todo Use one query search or xml search or Zend_Search_Lucene.
      *
      * @return array
-     *   Associative array of file ids as keys and an array values for each
-     *   result in the page (words and start position):
+     *   Result can be returned by leaf index or by file id. The custom
+     *   highlightFiles() function should use the same.
+     *   Associative array of leaf indexes or file ids as keys and an array
+     *   values for each result in the page (words and start position):
      * array(
-     *   file_id = array(
-     *      array(
-     *        'answer' => answer, findable in original text,
-     *        'position' => position of the answer in original text,
-     *      ),
+     *   leaf index = array(
+     *     array(
+     *       'answer' => answer, findable in original text,
+     *       'position' => position of the answer in original text,
+     *     ),
      *   ),
      * );
      */
@@ -315,7 +317,7 @@ class BookReader_Custom
      * @return array
      *   Array of matches with coordinates.
      */
-    public static function highlightFiles($textsToHighlight)
+    public static function highlightFiles($textsToHighlight, $item)
     {
         $imageType = 'fullsize';
         $beforeContext = 120;

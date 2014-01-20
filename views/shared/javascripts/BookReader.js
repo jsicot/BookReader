@@ -877,6 +877,7 @@ BookReader.prototype.drawLeafsTwoPage = function() {
     // $$$ should use getwidth2up?
     //var scaledWR = this.twoPage.height*widthR/heightR;
     this.twoPage.scaledWR = this.getPageWidth2UP(indexR);
+
     this.prefetchImg(indexR);
     $(this.prefetchedImgs[indexR]).css({
         position: 'absolute',
@@ -1294,11 +1295,16 @@ BookReader.prototype.jumpToIndex = function(index, pageX, pageY) {
     if (this.constMode2up == this.mode) {
         this.autoStop();
 
+        // Avoid a bug when user goes forward from the last page, generally null.
+        var currentR = this.twoPage.currentIndexR;
+        if (this.twoPage.currentIndexR == null) {
+            currentR = this.numLeafs;
+        }
         // By checking against min/max we do nothing if requested index
         // is current
-        if (index < Math.min(this.twoPage.currentIndexL, this.twoPage.currentIndexR)) {
+        if (index < Math.min(this.twoPage.currentIndexL, currentR)) {
             this.flipBackToIndex(index);
-        } else if (index > Math.max(this.twoPage.currentIndexL, this.twoPage.currentIndexR)) {
+        } else if (index > Math.max(this.twoPage.currentIndexL, currentR)) {
             this.flipFwdToIndex(index);
         }
 
@@ -1544,18 +1550,10 @@ BookReader.prototype.prepareTwoPageView = function(centerPercentageX, centerPerc
 
     this.twoPage.coverDiv = document.createElement('div');
     $(this.twoPage.coverDiv).attr('id', 'BRbookcover').css({
-        width:  this.twoPage.bookCoverDivWidth + 'px',
+        left: this.twoPage.bookCoverDivLeft + 'px',
+        width: this.twoPage.bookCoverDivWidth + 'px',
         height: this.twoPage.bookCoverDivHeight+'px',
         visibility: 'visible'
-    }).appendTo('#BRtwopageview');
-
-    this.leafEdgeR = document.createElement('div');
-    this.leafEdgeR.className = 'BRleafEdgeR';
-    $(this.leafEdgeR).css({
-        width: this.twoPage.leafEdgeWidthR + 'px',
-        height: this.twoPage.height + 'px',
-        left: this.twoPage.gutter+this.twoPage.scaledWR+'px',
-        top: this.twoPage.bookCoverDivTop+this.twoPage.coverInternalPadding+'px'
     }).appendTo('#BRtwopageview');
 
     this.leafEdgeL = document.createElement('div');
@@ -1569,10 +1567,19 @@ BookReader.prototype.prepareTwoPageView = function(centerPercentageX, centerPerc
 
     div = document.createElement('div');
     $(div).attr('id', 'BRgutter').css({
-        width:           this.twoPage.bookSpineDivWidth+'px',
-        height:          this.twoPage.bookSpineDivHeight+'px',
-        left:            (this.twoPage.gutter - this.twoPage.bookSpineDivWidth*0.5)+'px',
-        top:             this.twoPage.bookSpineDivTop+'px'
+        width: this.twoPage.bookSpineDivWidth+'px',
+        height: this.twoPage.bookSpineDivHeight+'px',
+        left: (this.twoPage.gutter - this.twoPage.bookSpineDivWidth*0.5)+'px',
+        top: this.twoPage.bookSpineDivTop+'px'
+    }).appendTo('#BRtwopageview');
+
+    this.leafEdgeR = document.createElement('div');
+    this.leafEdgeR.className = 'BRleafEdgeR';
+    $(this.leafEdgeR).css({
+        width: this.twoPage.leafEdgeWidthR + 'px',
+        height: this.twoPage.height + 'px',
+        left: this.twoPage.gutter+this.twoPage.scaledWR+'px',
+        top: this.twoPage.bookCoverDivTop+this.twoPage.coverInternalPadding+'px'
     }).appendTo('#BRtwopageview');
 
     var self = this; // for closure
@@ -1667,29 +1674,27 @@ BookReader.prototype.prepareTwoPagePopUp = function() {
         e.data.jumpToIndex(jumpIndex);
     });
 
-    $(this.leafEdgeR).bind('mousemove', this, function(e) {
-
-        var jumpIndex = e.data.jumpIndexForRightEdgePageX(e.pageX);
-        $(e.data.twoPagePopUp).text('View ' + e.data.getPageName(jumpIndex));
+    $(this.leafEdgeL).bind('mousemove', this, function(e) {
+        var jumpIndex = e.data.jumpIndexForLeftEdgePageX(e.pageX);
+        $(e.data.twoPagePopUp).text(e.data.getPageName(jumpIndex));
 
         // $$$ TODO: Make sure popup is positioned so that it is in view
         // (https://bugs.edge.launchpad.net/gnubook/+bug/327456)
         $(e.data.twoPagePopUp).css({
-            left: e.pageX- $('#BRcontainer').offset().left + $('#BRcontainer').scrollLeft() - 100 + 'px',
-            top: e.pageY - $('#BRcontainer').offset().top + $('#BRcontainer').scrollTop() + 'px'
+            left: e.pageX - $('#BRcontainer').offset().left + $('#BRcontainer').scrollLeft() - $(e.data.twoPagePopUp).width() + 68 + 'px',
+            top: e.pageY-$('#BRcontainer').offset().top + $('#BRcontainer').scrollTop() + 'px'
         });
     });
 
-    $(this.leafEdgeL).bind('mousemove', this, function(e) {
-
-        var jumpIndex = e.data.jumpIndexForLeftEdgePageX(e.pageX);
-        $(e.data.twoPagePopUp).text('View '+ e.data.getPageName(jumpIndex));
+    $(this.leafEdgeR).bind('mousemove', this, function(e) {
+        var jumpIndex = e.data.jumpIndexForRightEdgePageX(e.pageX);
+        $(e.data.twoPagePopUp).text(e.data.getPageName(jumpIndex));
 
         // $$$ TODO: Make sure popup is positioned so that it is in view
-        //           (https://bugs.edge.launchpad.net/gnubook/+bug/327456)
+        // (https://bugs.edge.launchpad.net/gnubook/+bug/327456)
         $(e.data.twoPagePopUp).css({
-            left: e.pageX - $('#BRcontainer').offset().left + $('#BRcontainer').scrollLeft() - $(e.data.twoPagePopUp).width() + 100 + 'px',
-            top: e.pageY-$('#BRcontainer').offset().top + $('#BRcontainer').scrollTop() + 'px'
+            left: e.pageX - $('#BRcontainer').offset().left + $('#BRcontainer').scrollLeft() - 68 + 'px',
+            top: e.pageY - $('#BRcontainer').offset().top + $('#BRcontainer').scrollTop() + 'px'
         });
     });
 }
@@ -1732,7 +1737,15 @@ BookReader.prototype.calculateSpreadSize = function() {
     // Book cover
     // The width of the book cover div.  The combined width of both pages, twice the width
     // of the book cover internal padding (2*10) and the page edges
-    this.twoPage.bookCoverDivWidth = this.twoPageCoverWidth(this.twoPage.scaledWL + this.twoPage.scaledWR);
+    // But when the book is closed, on the first or last page, the cover may
+    // not include the null page.
+    if (firstIndex == null) {
+        this.twoPage.bookCoverDivWidth = this.twoPageCoverWidth(this.twoPage.scaledWR);
+    } else if (secondIndex == null) {
+        this.twoPage.bookCoverDivWidth = this.twoPageCoverWidth(this.twoPage.scaledWL);
+    }  else {
+        this.twoPage.bookCoverDivWidth = this.twoPageCoverWidth(this.twoPage.scaledWL + this.twoPage.scaledWR);
+    }
     // The height of the book cover div
     this.twoPage.bookCoverDivHeight = this.twoPage.height + 2 * this.twoPage.coverInternalPadding;
 
@@ -2109,9 +2122,7 @@ BookReader.prototype._scrollAmount = function() {
 // to flip back one spread, pass index=null
 BookReader.prototype.flipBackToIndex = function(index) {
 
-    if (1 == this.mode) return;
-
-    var leftIndex = this.twoPage.currentIndexL;
+    if (this.mode == this.constMode1up) return;
 
     if (this.animating) return;
 
@@ -2120,18 +2131,24 @@ BookReader.prototype.flipBackToIndex = function(index) {
         return;
     }
 
+    //console.log('flipBackToIndex - Current: ' + this.twoPage.currentIndexL + '/' + this.twoPage.currentIndexR + ' (first: ' + this.firstDisplayableIndex() + ')');
+    // Don't go back if we are already on the first page.
+    if (this.twoPage.currentIndexL <= 0 || this.twoPage.currentIndexL == null) {
+        return;
+    }
+
     if (null == index) {
-        index = leftIndex-2;
+        index = this.twoPage.currentIndexL - 2; // $$$ assumes indices are continuous
     }
     //if (index<0) return;
 
-    this.willChangeToIndex(index);
-
     var previousIndices = this.getSpreadIndices(index);
-
+    //console.log('flipBackToIndex - Previous ' + previousIndices[0] + '/' + previousIndices[1] + ' (first: ' + this.firstDisplayableIndex() + ')');
     if (previousIndices[0] < this.firstDisplayableIndex() || previousIndices[1] < this.firstDisplayableIndex()) {
         return;
     }
+
+    this.willChangeToIndex(index);
 
     this.animating = true;
 
@@ -2304,6 +2321,8 @@ BookReader.prototype.flipLeftToRight = function(newIndexL, newIndexR) {
 // to flip forward one spread, pass index=null
 BookReader.prototype.flipFwdToIndex = function(index) {
 
+    if (this.mode == this.constMode1up) return;
+
     if (this.animating) return;
 
     if (null != this.leafEdgeTmp) {
@@ -2311,18 +2330,26 @@ BookReader.prototype.flipFwdToIndex = function(index) {
         return;
     }
 
-    if (null == index) {
-        index = this.twoPage.currentIndexR+2; // $$$ assumes indices are continuous
+    //console.log('flipFwdToIndex - Current: ' + this.twoPage.currentIndexL + '/' + this.twoPage.currentIndexR + ' (last: ' + this.lastDisplayableIndex() + ')');
+    // Don't go forward if we are already on the last page.
+    if (this.twoPage.currentIndexR >= this.numLeafs - 1 || this.twoPage.currentIndexR == null) {
+        return;
     }
-    if (index > this.lastDisplayableIndex()) return;
+
+    if (null == index) {
+        index = this.twoPage.currentIndexR + 2; // $$$ assumes indices are continuous
+    }
+    //if (index > this.lastDisplayableIndex()) return;
+
+    var nextIndices = this.getSpreadIndices(index);
+    //console.log('flipFwdToIndex - Next ' + nextIndices[0] + '/' + nextIndices[1] + ' (last: ' + this.lastDisplayableIndex() + ')');
+    if (nextIndices[0] > this.lastDisplayableIndex() || nextIndices[1] > this.lastDisplayableIndex()) {
+        return;
+    }
 
     this.willChangeToIndex(index);
 
     this.animating = true;
-
-    var nextIndices = this.getSpreadIndices(index);
-
-    //console.log('flipfwd to indices ' + nextIndices[0] + ',' + nextIndices[1]);
 
     if ('rl' != this.pageProgression) {
         // We did not specify RTL
@@ -2349,18 +2376,56 @@ BookReader.prototype.willChangeToIndex = function(index)
 //______________________________________________________________________________
 // Flip from left to right and show the nextL and nextR indices on those sides
 BookReader.prototype.flipRightToLeft = function(newIndexL, newIndexR) {
+
+    var leftLeaf = this.twoPage.currentIndexL;
+    var rightLeaf = this.twoPage.currentIndexR;
+
     var oldLeafEdgeWidthL = this.leafEdgeWidth(this.twoPage.currentIndexL);
     var oldLeafEdgeWidthR = this.twoPage.edgeWidth-oldLeafEdgeWidthL;
     var newLeafEdgeWidthL = this.leafEdgeWidth(newIndexL);
     var newLeafEdgeWidthR = this.twoPage.edgeWidth-newLeafEdgeWidthL;
 
-    var leafEdgeTmpW = oldLeafEdgeWidthR - newLeafEdgeWidthR;
+    var leafEdgeTmpW = oldLeafEdgeWidthL - newLeafEdgeWidthL;
 
-    var top = this.twoPageTop();
+    var currWidthL = this.getPageWidth2UP(leftLeaf);
+    var currWidthR = this.getPageWidth2UP(rightLeaf);
+    var newWidthL = this.getPageWidth2UP(newIndexL);
+    var newWidthR = this.getPageWidth2UP(newIndexR);
+
+    var top  = this.twoPageTop();
+    var gutter = this.twoPage.middle + this.gutterOffsetForIndex(newIndexL);
     var scaledW = this.getPageWidth2UP(this.twoPage.currentIndexR);
 
-    var middle = this.twoPage.middle;
-    var gutter = middle + this.gutterOffsetForIndex(newIndexL);
+    //console.log('leftEdgeTmpW ' + leafEdgeTmpW);
+    //console.log('  gutter ' + gutter + ', scaledWL ' + scaledWL + ', newLeafEdgeWL ' + newLeafEdgeWidthL);
+
+    //animation strategy:
+    // 0. remove search highlight, if any.
+    // 1. create a new div, called leafEdgeTmp to represent the leaf edge between the leftmost edge
+    //    of the left leaf and where the user clicked in the leaf edge.
+    //    Note that if this function was triggered by left() and not a
+    //    mouse click, the width of leafEdgeTmp is very small (zero px).
+    // 2. animate both leafEdgeTmp to the gutter (without changing its width) and animate
+    //    leftLeaf to width=0.
+    // 3. When step 2 is finished, animate leafEdgeTmp to right-hand side of new right leaf
+    //    (left=gutter+newWidthR) while also animating the new right leaf from width=0 to
+    //    its new full width.
+    // 4. After step 3 is finished, do the following:
+    //      - remove leafEdgeTmp from the dom.
+    //      - resize and move the right leaf edge (leafEdgeR) to left=gutter+newWidthR
+    //          and width=twoPage.edgeWidth-newLeafEdgeWidthL.
+    //      - resize and move the left leaf edge (leafEdgeL) to left=gutter-newWidthL-newLeafEdgeWidthL
+    //          and width=newLeafEdgeWidthL.
+    //      - resize the back cover (twoPage.coverDiv) to left=gutter-newWidthL-newLeafEdgeWidthL-10
+    //          and width=newWidthL+newWidthR+twoPage.edgeWidth+20
+    //      - move new left leaf (newIndexL) forward to zindex=2 so it can receive clicks.
+    //      - remove old left and right leafs from the dom [pruneUnusedImgs()].
+    //      - prefetch new adjacent leafs.
+    //      - set up click handlers for both new left and right leafs.
+    //      - redraw the search highlight.
+    //      - update the pagenum box and the url.
+
+    var leftEdgeTmpLeft = gutter - currWidthL - leafEdgeTmpW;
 
     this.leafEdgeTmp = document.createElement('div');
     this.leafEdgeTmp.className = 'BRleafEdgeTmp';
@@ -2372,42 +2437,64 @@ BookReader.prototype.flipRightToLeft = function(newIndexL, newIndexR) {
         zIndex:1000
     }).appendTo('#BRtwopageview');
 
-    //var scaledWR = this.getPageWidth2UP(newIndexR); // $$$ should be current instead?
-    //var scaledWL = this.getPageWidth2UP(newIndexL); // $$$ should be current instead?
+    //$(this.leafEdgeL).css('width', newLeafEdgeWidthL+'px');
+    $(this.leafEdgeR).css({
+        width: newLeafEdgeWidthR+'px',
+        left: gutter+newWidthR+'px'
+    });
 
-    var currWidthL = this.getPageWidth2UP(this.twoPage.currentIndexL);
-    var currWidthR = this.getPageWidth2UP(this.twoPage.currentIndexR);
-    var newWidthL = this.getPageWidth2UP(newIndexL);
-    var newWidthR = this.getPageWidth2UP(newIndexR);
+    // Left gets the offset of the current left leaf from the document
+    var left = $(this.prefetchedImgs[leftLeaf]).offset().left;
+    // $$$ This seems very similar to the gutter.  May be able to consolidate the logic.
+    var right = $('#BRtwopageview').attr('clientWidth')-left-$(this.prefetchedImgs[leftLeaf]).width()+$('#BRtwopageview').offset().left-2+'px';
 
-    $(this.leafEdgeR).css({width: newLeafEdgeWidthR+'px', left: gutter+newWidthR+'px' });
+//    // We change the left leaf to right positioning
+    // $$$ This causes animation glitches during resize.  See https://bugs.edge.launchpad.net/gnubook/+bug/328327
+//    $(this.prefetchedImgs[leftLeaf]).css({
+//        right: right,
+//        left: ''
+//    });
+
+    $(this.leafEdgeTmp).animate({left: gutter}, this.flipSpeed, 'easeInSine');
+    //$(this.prefetchedImgs[leftLeaf]).animate({width: '0px'}, 'slow', 'easeInSine');
 
     var self = this; // closure-tastic!
 
-    var speed = this.flipSpeed;
-
     this.removeSearchHilites();
 
-    $(this.leafEdgeTmp).animate({left: gutter}, speed, 'easeInSine');
-    $(this.prefetchedImgs[this.twoPage.currentIndexR]).animate({width: '0px'}, speed, 'easeInSine', function() {
+    //console.log('animating leafLeaf ' + rightLeaf + ' to 0px');
+    $(this.prefetchedImgs[rightLeaf]).animate({width: '0px'}, self.flipSpeed, 'easeInSine', function() {
+
+        //console.log('     and now leafEdgeTmp to left: gutter+newWidthL ' + (gutter + newWidthL));
         $('#BRgutter').css({left: (gutter - self.twoPage.bookSpineDivWidth*0.5)+'px'});
-        $(self.leafEdgeTmp).animate({left: gutter-newWidthL-leafEdgeTmpW+'px'}, speed, 'easeOutSine');
-        $(self.prefetchedImgs[newIndexL]).animate({width: newWidthL+'px'}, speed, 'easeOutSine', function() {
+        $(self.leafEdgeTmp).animate({left: gutter-newWidthL-leafEdgeTmpW+'px'}, self.flipSpeed, 'easeOutSine');
+
+        //console.log('  animating newIndexL ' + newIndexL + ' to ' + newWidthL + ' from ' + $(self.prefetchedImgs[newIndexL]).width());
+        $(self.prefetchedImgs[newIndexL]).animate({width: newWidthL+'px'}, self.flipSpeed, 'easeOutSine', function() {
             $(self.prefetchedImgs[newIndexR]).css('zIndex', 2);
+
+            // $$$ TODO refactor with opposite direction flip
 
             //jquery adds display:block to the element style, which interferes with our print css
             $(self.prefetchedImgs[newIndexL]).css('display', '');
             $(self.prefetchedImgs[newIndexR]).css('display', '');
 
+            $(self.leafEdgeR).css({
+                // Moves the right leaf edge
+                width: self.twoPage.edgeWidth-newLeafEdgeWidthL+'px',
+                left: gutter+newWidthR+'px'
+            });
+
             $(self.leafEdgeL).css({
+                // Moves and resizes the left leaf edge
                 width: newLeafEdgeWidthL+'px',
                 left: gutter-newWidthL-newLeafEdgeWidthL+'px'
             });
 
-            // Resizes the book cover
+            // Resizes the brown border div
             $(self.twoPage.coverDiv).css({
                 width: self.twoPageCoverWidth(newWidthL+newWidthR)+'px',
-                left: gutter - newWidthL - newLeafEdgeWidthL - self.twoPage.coverInternalPadding + 'px'
+                left: gutter-newWidthL-newLeafEdgeWidthL-self.twoPage.coverInternalPadding+'px'
             });
 
             $(self.leafEdgeTmp).remove();
@@ -2502,7 +2589,7 @@ BookReader.prototype.prefetchImg = function(index) {
         //console.log('prefetching ' + index);
         var img = document.createElement("img");
         $(img).addClass('BRpageimage').addClass('BRnoselect');
-        if (index < 0 || index > (this.numLeafs - 1) ) {
+        if (index == null || index < 0 || index > (this.numLeafs - 1)) {
             // Facing page at beginning or end, or beyond
             $(img).css({
                 'background-color': '#efefef'
@@ -2585,42 +2672,41 @@ BookReader.prototype.prepareFlipRightToLeft = function(nextL, nextR) {
     this.prefetchImg(nextL);
     this.prefetchImg(nextR);
 
-    var height  = this._getPageHeight(nextR);
-    var width   = this._getPageWidth(nextR);
+    var width = this._getPageWidth(nextL);
+    var height = this._getPageHeight(nextL);
     var middle = this.twoPage.middle;
-    var top  = this.twoPageTop();
-    var scaledW = this.twoPage.height*width/height;
+    var top = this.twoPageTop();
+    var scaledW = this.twoPage.height*width/height; // $$$ assumes height of page is dominant
 
+    // The gutter is the dividing line between the left and right pages.
+    // It is offset from the middle to create the illusion of thickness to the pages
     var gutter = middle + this.gutterOffsetForIndex(nextL);
-
-    //console.log(' prepareRTL changing nextR ' + nextR + ' to left: ' + gutter);
-    $(this.prefetchedImgs[nextR]).css({
-        position: 'absolute',
-        left:   gutter+'px',
-        top:    top+'px',
-        height: this.twoPage.height,
-        width:  scaledW+'px',
-        zIndex: 1
-    });
-
-    $('#BRtwopageview').append(this.prefetchedImgs[nextR]);
-
-    height  = this._getPageHeight(nextL);
-    width   = this._getPageWidth(nextL);
-    scaledW = this.twoPage.height*width/height;
 
     //console.log(' prepareRTL changing nextL ' + nextL + ' to right: ' + $('#BRcontainer').width()-gutter);
     $(this.prefetchedImgs[nextL]).css({
         position: 'absolute',
-        right:   $('#BRtwopageview').attr('clientWidth')-gutter+'px',
-        top:    top+'px',
+        right: $('#BRtwopageview').attr('clientWidth')-gutter+'px',
+        top: top+'px',
         height: this.twoPage.height,
-        width:  0+'px', // Start at 0 width, then grow to the left
+        width: '0px', // Start at 0 width, then grow to the left
         zIndex: 2
     });
-
     $('#BRtwopageview').append(this.prefetchedImgs[nextL]);
 
+    width = this._getPageWidth(nextR);
+    height = this._getPageHeight(nextR);
+    scaledW = this.twoPage.height*width/height; // $$$ assumes height of page is dominant
+
+    //console.log(' prepareRTL changing nextR ' + nextR + ' to left: ' + gutter);
+    $(this.prefetchedImgs[nextR]).css({
+        position: 'absolute',
+        left: gutter+'px',
+        top: top+'px',
+        height: this.twoPage.height,
+        width: scaledW+'px',
+        zIndex: 1
+    });
+    $('#BRtwopageview').append(this.prefetchedImgs[nextR]);
 }
 
 // getNextLeafs() -- NOT RTL AWARE
@@ -2648,6 +2734,11 @@ BookReader.prototype.prepareFlipRightToLeft = function(nextL, nextR) {
 // pruneUnusedImgs()
 //______________________________________________________________________________
 BookReader.prototype.pruneUnusedImgs = function() {
+    // Avoid a bug when user goes forward from the last page, generally null.
+    var currentR = this.twoPage.currentIndexR;
+    if (this.twoPage.currentIndexR == null) {
+        currentR = this.numLeafs;
+    }
     //console.log('current: ' + this.twoPage.currentIndexL + ' ' + this.twoPage.currentIndexR);
     for (var key in this.prefetchedImgs) {
         //console.log('key is ' + key);
@@ -2655,7 +2746,7 @@ BookReader.prototype.pruneUnusedImgs = function() {
             //console.log('removing key '+ key);
             $(this.prefetchedImgs[key]).remove();
         }
-        if ((key < this.twoPage.currentIndexL-4) || (key > this.twoPage.currentIndexR+4)) {
+        if ((key < this.twoPage.currentIndexL - 4) || (key > currentR + 4)) {
             //console.log('deleting key '+ key);
             delete this.prefetchedImgs[key];
         }
@@ -2714,6 +2805,9 @@ BookReader.prototype.prefetch = function() {
 // getPageWidth2UP()
 //______________________________________________________________________________
 BookReader.prototype.getPageWidth2UP = function(index) {
+    // For a non existing page.
+    if (index == null) return 0;
+
     // We return the width based on the dominant height
     var height  = this._getPageHeight(index);
     var width   = this._getPageWidth(index);
@@ -2768,8 +2862,15 @@ BookReader.prototype.BRSearchCallback = function(results) {
     }
 
     var i;
-    for (i=0; i<results.matches.length; i++) {
-        br.addSearchResult(results.matches[i].text, br.leafNumToIndex(results.matches[i].par[0].page));
+    // Search engine can return leaf index directly, so use it if it is set.
+    if (results.matches[0].par[0].index != undefined) {
+        for (i=0; i<results.matches.length; i++) {
+            br.addSearchResult(results.matches[i].text, results.matches[i].par[0].index);
+        }
+    } else {
+        for (i=0; i<results.matches.length; i++) {
+            br.addSearchResult(results.matches[i].text, br.leafNumToIndex(results.matches[i].par[0].page));
+        }
     }
     br.updateSearchHilites();
     br.removeProgressPopup();
@@ -2952,14 +3053,20 @@ BookReader.prototype.twoPagePlaceFlipAreas = function() {
 // showSearchHilites2UPNew()
 //______________________________________________________________________________
 BookReader.prototype.updateSearchHilites2UP = function() {
-    //console.log('updateSearchHilites2UP results = ' + this.searchResults);
+    //console.log('updateSearchHilites2UP results:');
+    //console.log(this.searchResults);
     var results = this.searchResults;
     if (null == results) return;
     var i, j;
     for (i=0; i<results.matches.length; i++) {
         //console.log(results.matches[i].par[0]);
         //TODO: loop over all par objects
-        var pageIndex = this.leafNumToIndex(results.matches[i].par[0].page);
+        // Search engine can return leaf index directly, so use it if it is set.
+        if (results.matches[i].par[0].index != undefined) {
+            var pageIndex = results.matches[i].par[0].index;
+        } else {
+            var pageIndex = this.leafNumToIndex(results.matches[i].par[0].page);
+        }
         for (j=0; j<results.matches[i].par[0].boxes.length; j++) {
             var box = results.matches[i].par[0].boxes[j];
             if (jQuery.inArray(pageIndex, this.displayedIndices) >= 0) {
@@ -3262,6 +3369,8 @@ BookReader.prototype.gutterOffsetForIndex = function(pindex) {
 // Returns the width of the leaf edge div for the page with index given
 BookReader.prototype.leafEdgeWidth = function(pindex) {
     // $$$ could there be single pixel rounding errors for L vs R?
+    if (pindex <= 0) return 0;
+    if (pindex >= this.numLeafs - 1) return this.twoPage.edgeWidth;
     if ((this.getPageSide(pindex) == 'L') && (this.pageProgression != 'rl')) {
         return parseInt( (pindex/this.numLeafs) * this.twoPage.edgeWidth + 0.5);
     } else {
@@ -4589,6 +4698,10 @@ BookReader.prototype.searchHighlightVisible = function() {
 BookReader.prototype._getPageWidth = function(index) {
     // Synthesize a page width for pages not actually present in book.
     // May or may not be the best approach.
+
+    // For a non existing page.
+    if (index == null) return 0;
+
     // If index is out of range we return the width of first or last page
     index = BookReader.util.clamp(index, 0, this.numLeafs - 1);
     return this.getPageWidth(index);
@@ -4606,7 +4719,7 @@ BookReader.prototype._getPageHeight= function(index) {
 //--------
 // Returns the page URI or transparent image if out of range
 BookReader.prototype._getPageURI = function(index, reduce, rotate) {
-    if (index < 0 || index >= this.numLeafs) { // Synthesize page
+    if (index == null || index < 0 || index >= this.numLeafs) { // Synthesize page
         return this.imagesBaseURL + "transparent.png";
     }
 

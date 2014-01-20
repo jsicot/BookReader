@@ -175,8 +175,8 @@ class BookReader_Custom
         }
 
         // Now, the parity is clean and all infos are available.
-        // So we can insert the regarding leaf in case of multiple views of a
-        // page. The regarding leaf can be a missing page.
+        // So we can insert the facing leaf in case of multiple views of a page.
+        // The facing leaf can be a missing page.
         // No static is used, because multiple are rare and very rarely more
         // than two.
         $result = array();
@@ -185,24 +185,31 @@ class BookReader_Custom
             $result[] = $info['file'];
             if ($info['multiple']) {
                 $current = $key;
-                // If the multiple view is on the left side, the regarding leaf
+                // Check if this is the last multiple view, because no insert is
+                // needed for it.
+                if ($current + 1 <= count($infos_leaves)
+                        && $infos_leaves[$current + 1]['multiple'] != $info['multiple']
+                    ) {
+                    // continue;
+                }
+                // If the multiple view is on the left side, the facing leaf
                 // will be the first view of the next page.
-                if ($info['position'] == 'Gauche') {
-                    while (++$current <= count($infos_leaves)) {
+                elseif ($info['position'] == 'Gauche') {
+                    // Check for next pages.
+                    while (++$current < count($infos_leaves)) {
                         if ($infos_leaves[$current]['multiple'] != $info['multiple']) {
                             $result[] = $infos_leaves[$current]['file'];
                             break;
                         }
                     }
                 }
-                // Else regarding leaf is the last view of previous page.
+                // Else facing leaf is the last view of previous page.
                 else {
-                    if ($info['multiple'] < $info['ordre']) {
-                        while (--$current > 0) {
-                            if ($infos_leaves[$current]['multiple'] != $info['multiple']) {
-                                $result[] = $infos_leaves[$current]['file'];
-                                break;
-                            }
+                    // Check for previous pages.
+                    while (--$current >= 0) {
+                        if ($infos_leaves[$current]['multiple'] != $info['multiple']) {
+                            $result[] = $infos_leaves[$current]['file'];
+                            break;
                         }
                     }
                 }
@@ -242,7 +249,6 @@ class BookReader_Custom
             return null;
         }
 
-        $indexes = self::getPageIndexes($file->getItem());
         $leaves = self::getLeaves($file->getItem());
         foreach($leaves as $key => $leaf) {
             if ($leaf && $leaf->id == $file->id) {
@@ -496,14 +502,16 @@ class BookReader_Custom
      * @todo Use one query search or xml search or Zend_Search_Lucene.
      *
      * @return array
-     *   Associative array of file ids as keys and an array values for each
-     *   result in the page (words and start position):
+     *   Result can be returned by leaf index or by file id. The custom
+     *   highlightFiles() function should use the same.
+     *   Associative array of leaf indexes or file ids as keys and an array
+     *   values for each result in the page (words and start position):
      * array(
-     *   file_id = array(
-     *      array(
-     *        'answer' => answer, findable in original text,
-     *        'position' => position of the answer in original text,
-     *      ),
+     *   leaf index = array(
+     *     array(
+     *       'answer' => answer, findable in original text,
+     *       'position' => position of the answer in original text,
+     *     ),
      *   ),
      * );
      */
@@ -533,7 +541,7 @@ class BookReader_Custom
         $iResult = 0;
         $leaves = self::getLeaves($item);
         // Look for each page of the item.
-        foreach ($leaves as $keyFile => $file) {
+        foreach ($leaves as $key => $file) {
             if (empty($file)) {
                 continue;
             }
@@ -559,7 +567,7 @@ class BookReader_Custom
                     }
 
                     if (!empty($result)) {
-                       $results[$file->id] = $result;
+                        $results[$key] = $result;
                     }
                     if ($iResult > $maxResult) {
                         break;
@@ -579,7 +587,7 @@ class BookReader_Custom
      * @return array
      *   Array of matches with coordinates.
      */
-    public static function highlightFiles($textsToHighlight)
+    public static function highlightFiles($textsToHighlight, $item)
     {
         $imageType = 'fullsize';
         $beforeContext = 120;
@@ -587,10 +595,11 @@ class BookReader_Custom
         // If needed, uncomment the following line.
         mb_internal_encoding('UTF-8');
 
+        $leaves = self::getLeaves($item);
         $results = array();
-        foreach ($textsToHighlight as $file_id => $data) {
-            $file = get_record_by_id('file', $file_id);
-            $label = self::getPageLabel($file);
+        foreach ($textsToHighlight as $key => $data) {
+            $file = $leaves[$key];
+            $pageIndex = self::getPageIndex($file);
             $pathImg = FILES_DIR . DIRECTORY_SEPARATOR . $imageType . DIRECTORY_SEPARATOR . ($imageType == 'original' ? $file->filename : $file->getDerivativeFilename());
             list($width, $height, $type, $attr) = getimagesize($pathImg);
 
@@ -682,7 +691,7 @@ class BookReader_Custom
                                 'l' => round($word_left * $ratio),
                                 'b' => round($word_bottom * $ratio),
                                 'r' => round($word_right * $ratio),
-                                'page' => $label,
+                                'index' => $pageIndex,
                             );
 
                             // Prepare words for next loop.
@@ -702,10 +711,10 @@ class BookReader_Custom
                 $result['par'] = array();
                 $result['par'][] = array(
                     't' => round($zone_top * $ratio),
-                    'r' => round($zone_right * $ratio),
-                    'b' => round($zone_bottom * $ratio),
                     'l' => round($zone_left * $ratio),
-                    'page' => $label,
+                    'b' => round($zone_bottom * $ratio),
+                    'r' => round($zone_right * $ratio),
+                    'index' => $pageIndex,
                     'boxes' => $boxes,
                 );
 

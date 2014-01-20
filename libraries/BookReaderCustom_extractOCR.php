@@ -13,6 +13,10 @@
  *
  * @note La fonction de recherche ne fonctionne plus avec la dernière version
  * du fait que la recherche est désormais distincte du surlignage.
+ * Néanmoins, cela peut être contourné du fait que la fonction highlightFiles()
+ * a désormais pour paramètre $item également. On peut donc faire la recherche
+ * et le surlignage directement dans cette fonction et ne rien renvoyer dans la
+ * fonction searchFulltext().
  *
  * @internal Limites de la recherche :
  * - La recherche se fait via grep ou regex, alors que c'est du xml.
@@ -238,8 +242,21 @@ class BookReader_Custom
     }
 
     /**
-     * This function returns the answer to a query with coordinates of the
-     * matching words.
+     * Returns answers to a query.
+     *
+     * @return array
+     *   Result can be returned by leaf index or by file id. The custom
+     *   highlightFiles() function should use the same.
+     *   Associative array of leaf indexes or file ids as keys and an array
+     *   values for each result in the page (words and start position):
+     * array(
+     *   leaf index = array(
+     *     array(
+     *       'answer' => answer, findable in original text,
+     *       'position' => position of the answer in original text,
+     *     ),
+     *   ),
+     * );
      */
     public static function searchFulltext($query, $item)
     {
@@ -383,7 +400,7 @@ class BookReader_Custom
      * @return array
      *   Array of matches with coordinates.
      */
-    public static function highlightFiles($textsToHighlight)
+    public static function highlightFiles($textsToHighlight, $item)
     {
         return $textsToHighlight;
     }

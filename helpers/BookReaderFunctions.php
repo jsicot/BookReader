@@ -475,14 +475,16 @@ class BookReader
      * Returns answers to a query.
      *
      * @return array
-     *   Associative array of file ids as keys and an array values for each
-     *   result in the page (words and start position):
+     *   Result can be returned by leaf index or by file id. The custom
+     *   highlightFiles() function should use the same.
+     *   Associative array of leaf indexes or file ids as keys and an array
+     *   values for each result in the page (words and start position):
      * array(
-     *   file_id = array(
-     *      array(
-     *        'answer' => answer, findable in original text,
-     *        'position' => position of the answer in original text,
-     *      ),
+     *   leaf index = array(
+     *     array(
+     *       'answer' => answer, findable in original text,
+     *       'position' => position of the answer in original text,
+     *     ),
      *   ),
      * );
      */
@@ -503,9 +505,13 @@ class BookReader
      * @return array
      *   Array of matches with coordinates.
      */
-    public static function highlightFiles($texts)
+    public static function highlightFiles($texts, $item = null)
     {
-        return BookReader_Custom::highlightFiles($texts);
+        if (empty($item)) {
+            $item = get_current_record('item');
+        }
+
+        return BookReader_Custom::highlightFiles($texts, $item);
     }
 
     /**

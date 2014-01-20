@@ -73,10 +73,10 @@
     br.subPrefix = <?php echo $item->id; ?>;
     br.titleLeaf = <?php echo BookReader::getTitleLeaf($item); ?>;
 
-    br.numLeafs = br.pageW.length;
+    br.numLeafs = br.leafMap.length;
 
     // If there is no width, it will be the width of the verso of the current
-    // leaf, else width of first page.
+    // leaf, else width of first or last page.
     br.getPageWidth = function(index) {
         var width = this.pageW[index];
         if (width == undefined) {
@@ -93,9 +93,13 @@
                     width = this.pageW[index - 1];
                 }
             }
-        }
-        if (width == undefined) {
-            width = this.pageW[0];
+            if (width == undefined) {
+                if (Math.min(Math.max(index, 0), this.numLeafs - 1)) {
+                    width = this.pageW[0];
+                } else {
+                    width = this.pageW[this.numLeafs - 1];
+                }
+            }
         }
         return width;
     }
@@ -118,7 +122,11 @@
                 }
             }
             if (height == undefined) {
-                height = this.pageH[0];
+                if (Math.min(Math.max(index, 0), this.numLeafs - 1)) {
+                    height = this.pageH[0];
+                } else {
+                    height = this.pageH[this.numLeafs - 1];
+                }
             }
         }
         return height;
@@ -197,7 +205,7 @@
     // This function is used, for example, to map between search results (that use the
     // leaf numbers) and the displayed pages in the BookReader.
     br.leafNumToIndex = function(leafNum) {
-        for (var index = 0; index < this.leafMap.length; index++) {
+        for (var index = 0; index < this.numLeafs; index++) {
             if (this.leafMap[index] == leafNum) {
                 return index;
             }
@@ -237,7 +245,7 @@
         var leafStr = '0000';
         var imgStr = (index+1).toString();
         var re = new RegExp("0{"+imgStr.length+"}$");
-        var url = '<?php echo WEB_ROOT; ?>/book-reader/index/image-proxy/?image='+leafStr.replace(re, imgStr)+'&id=<?php echo $item->id; ?>&scale='+reduce;
+        var url = '<?php echo WEB_ROOT; ?>/book-reader/index/image-proxy?image='+leafStr.replace(re, imgStr)+'&id=<?php echo $item->id; ?>&scale='+reduce;
         return url;
     }
 
@@ -254,33 +262,49 @@
     }
 
     // This function returns the left and right indices for the user-visible
-    // spread that contains the given index.  The return values may be
+    // spread that contains the given index. The return values may be
     // null if there is no facing page or the index is invalid.
     br.getSpreadIndices = function(pindex) {
         var spreadIndices = [null, null];
-        if (pindex == -1) pindex = 0;
+        if (pindex < 0) pindex = 0;
+        if (pindex >= this.numLeafs) pindex = this.numLeafs - 1;
         if ('rl' != this.pageProgression) {
             // Left to right
             if (this.getPageSide(pindex) == 'L') {
                 spreadIndices[0] = pindex;
-                spreadIndices[1] = pindex + 1;
+                if (pindex + 1 >= this.numLeafs) {
+                    spreadIndices[1] = null;
+                } else {
+                    spreadIndices[1] = pindex + 1;
+                }
             } else {
                 // Given index was right hand side.
-                spreadIndices[0] = pindex - 1;
+                if (pindex - 1 < 0) {
+                    spreadIndices[0] = null;
+                } else {
+                    spreadIndices[0] = pindex - 1;
+                }
                 spreadIndices[1] = pindex;
             }
         } else {
             // Right to Left
             if (this.getPageSide(pindex) == 'R') {
-                spreadIndices[0] = pindex + 1;
+                if (pindex + 1 >= this.numLeafs) {
+                    spreadIndices[0] = null;
+                } else {
+                    spreadIndices[0] = pindex + 1;
+                }
                 spreadIndices[1] = pindex;
             } else {
                 // Given index was left hand side.
                 spreadIndices[0] = pindex;
-                spreadIndices[1] = pindex - 1;
+                if (pindex - 1 < 0) {
+                    spreadIndices[1] = null;
+                } else {
+                    spreadIndices[1] = pindex - 1;
+                }
             }
         }
-
         return spreadIndices;
     }
 
@@ -404,6 +428,7 @@
 
     br.i18n = function(msg) {
         var msgs = {
+            'View':<?php echo json_encode(__('View')); ?>,
             'Search results will appear below...':<?php echo json_encode(__('Search results will appear below...')); ?>,
             'No matches were found.':<?php echo json_encode(__('No matches were found.')); ?>,
             "This book hasn't been indexed for searching yet. We've just started indexing it, so search should be available soon. Please try again later. Thanks!":<?php echo json_encode(__("This book hasn't been indexed for searching yet. We've just started indexing it, so search should be available soon. Please try again later. Thanks!")); ?>,

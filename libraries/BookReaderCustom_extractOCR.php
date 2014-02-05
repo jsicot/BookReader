@@ -183,6 +183,8 @@ class BookReader_Custom
             if (file_exists($xml_file)) {
                 $string = file_get_contents($xml_file);
                 $string = preg_replace('/\s{2,}/ui', ' ', $string);
+                $string = preg_replace('/<\/?b>/ui', '', $string);
+                $string = preg_replace('/<\/?i>/ui', '', $string);
                 $string = str_replace('<!doctype pdf2xml system "pdf2xml.dtd">', '<!DOCTYPE pdf2xml SYSTEM "pdf2xml.dtd">', $string);
                 $xml =  simplexml_load_string($string);
                 if(!$xml) die('{"Error":"Invalid XML!"}');

@@ -99,6 +99,7 @@ class BookReader
                 'jpg' => 'Joint Photographic Experts Group JFIF format',
                 'png' => 'Portable Network Graphics',
                 'gif' => 'Graphics Interchange Format',
+                'tif' => 'Tagged Image File Format',
                 'tiff' => 'Tagged Image File Format',
             );
             // Set the regular expression to match selected/supported formats.
@@ -243,7 +244,7 @@ class BookReader
         // This could be too:
         // return reset($leaves);
         $index = self::getTitleLeaf($item);
-        return $leaves[$index];
+        return isset($leaves[$index]) ? $leaves[$index] : reset($leaves);
     }
 
     /**
@@ -339,7 +340,7 @@ class BookReader
     protected static function _getLeafData($dataType, $file = null)
     {
         $key = self::getLeafIndex($file);
-        if (empty($key)) {
+        if (is_null($key)) {
             return null;
         }
         $callback = 'get' . $dataType;

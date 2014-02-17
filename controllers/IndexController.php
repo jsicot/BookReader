@@ -7,6 +7,15 @@
 class BookReader_IndexController extends Omeka_Controller_AbstractActionController
 {
     /**
+     * Initialize the controller.
+     */
+    public function init()
+    {
+        // No view for these actions.
+        $this->_helper->viewRenderer->setNoRender();
+    }
+
+    /**
      * Returns the answer to a query in order to highlight it via javascript.
      *
      * A result can contain multiple words, multiple matches, multiple pars and

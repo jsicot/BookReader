@@ -73,6 +73,7 @@ class BookReader_Custom
                 'jpg' => 'Joint Photographic Experts Group JFIF format',
                 'png' => 'Portable Network Graphics',
                 'gif' => 'Graphics Interchange Format',
+                'tif' => 'Tagged Image File Format',
                 'tiff' => 'Tagged Image File Format',
             );
             // Set the regular expression to match selected/supported formats.
@@ -624,7 +625,7 @@ class BookReader_Custom
                             );
 
                             // Prepare words for next loop.
-                           $words = trim(mb_substr($words, strlen($mot['c'])));
+                            $words = trim(mb_substr($words, strlen($mot['c'])));
                             $mot = next($motAmot);
                             if ($mot === false || empty($words)) {
                                 break;

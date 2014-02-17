@@ -264,6 +264,7 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
         $item = isset($args['item']) && !empty($args['item'])
             ? $args['item']
             : $view->item;
+        $part = isset($args['part'])? (integer) $args['part'] : 0;
         $page = isset($args['page']) ? $args['page'] : '0';
         // Currently, all or none functions are enabled.
         $embed_functions = isset($args['embed_functions'])
@@ -276,7 +277,8 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
 
         // Build url of the page with iframe.
         $url = WEB_ROOT . '/viewer/show/' . $item->id;
-        $url .= $embed_functions ? '' : '?ui=embed';
+        $url .= ($part > 1) ? '?part=' . $part : '';
+        $url .= $embed_functions ? '' : ((($part > 1) ? '&' : '?') . 'ui=embed');
         $url .= '#';
         $url .= empty($page) ? '' : 'page/n' . $page . '/';
         $url .= 'mode/' . $mode_page . 'up';

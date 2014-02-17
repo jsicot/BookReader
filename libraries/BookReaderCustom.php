@@ -158,7 +158,7 @@ class BookReader_Custom
      *   ),
      * );
      */
-    public static function searchFulltext($query, $item)
+    public static function searchFulltext($query, $item, $part)
     {
         $minimumQueryLength = 4;
         $maxResult = 10;
@@ -208,7 +208,7 @@ class BookReader_Custom
      * @return array
      *   Array of matches with coordinates.
      */
-    public static function highlightFiles($textsToHighlight, $item)
+    public static function highlightFiles($textsToHighlight, $item, $part)
     {
         $imageType = 'fullsize';
         $beforeContext = 120;

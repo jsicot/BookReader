@@ -2790,7 +2790,9 @@ BookReader.prototype.search = function(term) {
     var url = 'http://'+this.server.replace(/:.+/, ''); //remove the port and userdir
     // url    += '/fulltext/inside.php?item_id='+this.bookId;
     url += '/fulltext?item_id='+this.bookId;
-    url += '&doc='+this.subPrefix;   //TODO: test with subitem
+    if (this.subPrefix > 1) {
+        url += '&part='+this.subPrefix;   //TODO: test with subitem
+    }
     url += '&path='+this.bookPath.replace(new RegExp('/'+this.subPrefix+'$'), ''); //remove subPrefix from end of path
     url += '&q='+escape(term);
     //console.log('search url='+url);
@@ -3112,7 +3114,11 @@ BookReader.prototype.getPrintURI = function() {
         indexToPrint = this.firstIndex; // $$$ the index in the middle of the viewport would make more sense
     }
 
-    var options = 'id=' + this.subPrefix + '&server=' + this.server + '&zip=' + this.zip
+    var options = '';
+    if (this.subPrefix > 1) {
+        options += 'part=' + this.subPrefix + '&';
+    }
+    options += 'server=' + this.server + '&zip=' + this.zip
         + '&format=' + this.imageFormat + '&file=' + this._getPageFile(indexToPrint)
         + '&width=' + this._getPageWidth(indexToPrint) + '&height=' + this._getPageHeight(indexToPrint);
 
@@ -3459,7 +3465,9 @@ BookReader.prototype.initNavbar = function() {
 //______________________________________________________________________________
 // Initialize the navigation bar when embedded
 BookReader.prototype.initEmbedNavbar = function() {
-    var thisLink = (window.location + '').replace('?ui=embed',''); // IA-specific
+//    var thisLink = (window.location + '').replace('?ui=embed',''); // IA-specific
+    var thisLink = (window.location + '').replace('?ui=embed','');
+    thisLink = thisLink.replace('&ui=embed','');
 
     $('#BookReader').append(
         '<div id="BRnav">'
@@ -3985,6 +3993,7 @@ BookReader.prototype.bindNavigationHandlers = function() {
         if (self.ui == 'embed') {
             // $$$ bit of a hack, IA-specific
             var url = (window.location + '').replace("?ui=embed","");
+            url = url.replace("&ui=embed","");
             window.open(url);
         }
 

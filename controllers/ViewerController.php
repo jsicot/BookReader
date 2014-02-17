@@ -13,9 +13,11 @@ class BookReader_ViewerController extends Omeka_Controller_AbstractActionControl
         $db = get_db();
         $id = $this->getRequest()->getParam('id');
         $ui = $this->getRequest()->getParam('ui');
+        $part = $this->getRequest()->getParam('part');
         $itemObj = new stdClass();
         $itemObj->id = $id;
         $itemObj->ui = $ui;
+        $itemObj->part = $part;
         $this->view->bookreaderCurrentItem = $itemObj;
     }
 }

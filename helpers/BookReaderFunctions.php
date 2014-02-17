@@ -35,6 +35,17 @@ class BookReader
     }
 
     /**
+     * Get the ui of the current bookreader item.
+     *
+     * @return string
+     *   The ui of the current bookreader item.
+     */
+    public static function currentItemPart()
+    {
+        return get_view()->bookreaderCurrentItem->part;
+    }
+
+    /**
      * Get an array of all images of an item in order to display them with
      * BookReader.
      *
@@ -565,14 +576,14 @@ class BookReader
      *   ),
      * );
      */
-    public static function searchFulltext($query, $item = null)
+    public static function searchFulltext($query, $item = null, $part = null)
     {
         if (empty($item)) {
             $item = get_current_record('item');
         }
 
         if (method_exists('BookReader_Custom', 'searchFulltext')) {
-            return BookReader_Custom::searchFulltext($query, $item);
+            return BookReader_Custom::searchFulltext($query, $item, $part);
         }
     }
 
@@ -584,14 +595,14 @@ class BookReader
      * @return array
      *   Array of matches with coordinates.
      */
-    public static function highlightFiles($texts, $item = null)
+    public static function highlightFiles($texts, $item = null, $part = null)
     {
         if (empty($item)) {
             $item = get_current_record('item');
         }
 
         if (method_exists('BookReader_Custom', 'highlightFiles')) {
-            return BookReader_Custom::highlightFiles($texts, $item);
+            return BookReader_Custom::highlightFiles($texts, $item, $part);
         }
     }
 

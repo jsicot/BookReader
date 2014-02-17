@@ -51,8 +51,7 @@ class BookReader_IndexController extends Omeka_Controller_AbstractActionControll
     public function fulltextAction()
     {
         $item_id = $this->getRequest()->getParam('item_id');
-        // TODO Check if doc is different than item_id.
-        $doc = $this->getRequest()->getParam('doc');
+        $part = $this->getRequest()->getParam('part');
         $query = $this->getRequest()->getParam('q');
         $query = utf8_encode($query);
         $callback = $this->getRequest()->getParam('callback');
@@ -63,13 +62,14 @@ class BookReader_IndexController extends Omeka_Controller_AbstractActionControll
 
         // Check if there are data for search.
         if (BookReader::hasDataForSearch($item)) {
-            $output['ia'] = $doc;
+            $output['id'] = $item_id;
+            $output['part'] = $part;
             $output['q'] = $query;
             // TODO Check if these keys are really needed.
             // $output['page_count'] = 200;
             // $output['body_length'] = 140000;
             // TODO Kezako ?
-            $output['leaf0_missing'] = false;
+            // $output['leaf0_missing'] = false;
 
             $answer = BookReader::searchFulltext($query, $item);
             $output['matches'] = BookReader::highlightFiles($answer, $item);

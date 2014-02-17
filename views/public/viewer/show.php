@@ -12,6 +12,7 @@
     list($pageIndexes, $pageNumbers, $pageLabels, $imgWidths, $imgHeights) = BookReader::imagesData($item);
 
     $ui = BookReader::currentItemUI();
+    $part = BookReader::currentItemPart();
 
     $server = preg_replace('#^https?://#', '', WEB_ROOT);
     $serverFullText = $server . '/book-reader/index/fulltext';
@@ -72,8 +73,11 @@
     br.server = "<?php echo $serverFullText; ?>";
     br.bookPath = "<?php echo WEB_ROOT; ?>";
     br.bookId = <?php echo $item->id; ?>;
-    br.subPrefix = <?php echo $item->id; ?>;
     br.titleLeaf = <?php echo BookReader::getTitleLeaf($item); ?>;
+    <?php // Sub-prefix is the sub-document in BookReader.
+    // Original param is '?doc', but it has been changed to '?part'.
+    ?>
+    br.subPrefix = <?php echo empty($part) ? 0 : $part; ?>;
 
     br.numLeafs = br.leafMap.length;
 
@@ -247,7 +251,7 @@
         var leafStr = '0000';
         var imgStr = (index+1).toString();
         var re = new RegExp("0{"+imgStr.length+"}$");
-        var url = '<?php echo WEB_ROOT; ?>/book-reader/index/image-proxy?image='+leafStr.replace(re, imgStr)+'&id=<?php echo $item->id; ?>&scale='+reduce;
+        var url = '<?php echo WEB_ROOT; ?>/book-reader/index/image-proxy?image='+leafStr.replace(re, imgStr)+'&id=<?php echo $item->id; ?><?php echo ($part <= 1) ? '' : '&part=' . $part; ?>&scale='+reduce;
         return url;
     }
 
@@ -369,10 +373,10 @@
         //var url = 'http://' + window.location.host + '/stream/'+this.bookId;
         var bookId = <?php echo $item->id; ?>;
         var url = '<?php echo WEB_ROOT; ?>/viewer/show/<?php echo $item->id; ?>';
-        if (this.subPrefix != this.bookId) { // Only include if needed
-            url += '/' + this.subPrefix;
-        }
-        url += '?ui=embed';
+        // if (this.subPrefix != this.bookId) { // Only include if needed
+        //    url += '/' + this.subPrefix;
+        // }
+        url += '?<?php echo ($part <= 1) ? '' : 'part=' . $part . '&'; ?>ui=embed';
         if (typeof(viewParams) != 'undefined') {
             url += '#' + this.fragmentFromParams(viewParams);
         }

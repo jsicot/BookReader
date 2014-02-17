@@ -281,7 +281,7 @@ a.logo {
     width: 40px;
     height: 40px;
     margin: 0 5px;
-    background: transparent url(../images/icon_home.png) no-repeat 0 0;
+    background: url(../images/icon_home.png) no-repeat 0 0 transparent;
 }
 a.popOff {
     position: absolute;
@@ -1068,6 +1068,41 @@ div#BRzoombtn {
 }
 #BRnavCntlTop.BRup,#BRnavCntlTop.BRdn {
     background-position: 8px 4px;
+}
+
+/* Hide print and embed functionality */
+#BRtoolbar .embed,
+.print {
+    display: none;
+}
+#BRtoolbar {
+    -webkit-box-shadow:none !important;
+}
+.BRfloatHead {
+    color: #000;
+}
+#BRembedreturn {
+    /* Center text */
+    font-size: 14px;
+    line-height: 40px;
+    height: 40px;
+    font-family: "Lucida Grande","Arial",sans-serif;
+}
+#BRembedreturn a {
+    font-size: 14px;
+    color: #000;
+    text-decoration: none !important
+}
+#BRtoolbar,
+#ToCmenu,
+#BRnav,
+#ToCbutton,
+#BRnavCntlBtm,
+.BRfloatHead,
+#BRfiller,
+#BRzoomer button,
+.BRnavCntl {
+    background-color: #e2dcc5 !important;
 }
 
 /* Table of Contents */

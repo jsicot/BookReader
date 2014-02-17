@@ -47,7 +47,7 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
      * @var array Options and their default values.
      */
     protected $_options = array(
-        'bookreader_custom_css' => 'views/shared/css/BookReaderCustom.css',
+        'bookreader_custom_css' => '',
         'bookreader_favicon_url' => 'your_theme/images/favicon.ico',
         'bookreader_custom_library' => 'BookReaderCustom.php',
         'bookreader_sorting_mode' => false,
@@ -63,7 +63,6 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
      */
     public function hookInstall()
     {
-        $this->_options['bookreader_custom_css'] = WEB_PLUGIN . '/BookReader/' . $this->_options['bookreader_custom_css'];
         $this->_options['bookreader_favicon_url'] = WEB_THEME . '/' . $this->_options['bookreader_favicon_url'];
         $this->_options['bookreader_custom_library'] = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'libraries' . DIRECTORY_SEPARATOR . $this->_options['bookreader_custom_library'];
 

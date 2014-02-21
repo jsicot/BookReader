@@ -62,7 +62,7 @@ Optional plugins
 
 The extract ocr and pdfToc plugins are highly recommended.
 
-- [Extract ocr] allows fulltext searching inside a flip book
+- [Extract ocr] allows fulltext searching inside a flip book. To enable it in BookReader, you need to overwrite Bookreader/libraries/BookReaderCustom.php using Bookreader/libraries/BookReaderCustom_extractOCR.php
 - [PDF Toc] retrieves table of contents from pdf file associated to an item
 
 

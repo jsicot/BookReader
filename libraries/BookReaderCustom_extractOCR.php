@@ -218,11 +218,11 @@ class BookReader_Custom
 										$word_left = $zone_left + ( ($word_start_char * $zone_width) / $zone_width_char);
 										$word_right = $word_left + ( ( ( $word_width_char + 2) * $zone_width) / $zone_width_char );
 
-										$word_left = round($word_left * $widths[$page_number] / $page_width);
-										$word_right = round( $word_right * $widths[$page_number] / $page_width);
+										$word_left = round($word_left * $widths[$page_number-1] / $page_width);
+										$word_right = round( $word_right * $widths[$page_number-1] / $page_width);
 
-										$word_top = round($zone_top * $heights[$page_number] / $page_height);
-										$word_bottom = round($word_top + ( $zone_height * $heights[$page_number] / $page_height ));
+										$word_top = round($zone_top * $heights[$page_number-1] / $page_height);
+										$word_bottom = round($word_top + ( $zone_height * $heights[$page_number-1] / $page_height ));
 										 
 										$boxes[] = array(
 											'r' => $word_right,

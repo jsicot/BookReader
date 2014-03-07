@@ -35,10 +35,10 @@ class BookReader
     }
 
     /**
-     * Get the ui of the current bookreader item.
+     * Get the ui of the current part of the bookreader item.
      *
      * @return string
-     *   The ui of the current bookreader item.
+     *   The ui of the current part of the bookreader item.
      */
     public static function currentItemPart()
     {

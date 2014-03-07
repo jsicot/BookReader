@@ -30,6 +30,7 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
         'config_form',
         'config',
         'define_routes',
+        'after_save_item',
         'admin_items_batch_edit_form',
         'items_batch_edit_custom',
         'book_reader_item_show',
@@ -156,6 +157,18 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
     }
 
     /**
+     * Manages data when an item is saved.
+     */
+    public function hookAfterSaveItem($args)
+    {
+        $item = $args['record'];
+
+        // This is done after insert, update or post and only if a function exists
+        // in the custom library.
+        BookReader::saveData($item);
+    }
+
+    /**
      * Add a partial batch edit form.
      *
      * @return void
@@ -178,14 +191,9 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
         $item = $args['item'];
         $order_by_filename = $args['custom']['bookreader']['orderByFilename'];
         $mix_files_types = $args['custom']['bookreader']['mixFilesTypes'];
-        $save_data = $args['custom']['bookreader']['saveData'];
 
         if ($order_by_filename) {
-            $this->_sortFiles($item, $mix_files_types);
-        }
-
-        if ($save_data) {
-            BookReader::saveData($item);
+            $this->_sortFiles($item, (boolean) $mix_files_types);
         }
     }
 
@@ -211,11 +219,18 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
             // Get leaves and remove blank ones.
             $leaves = array_filter(BookReader::getLeaves($item));
             $non_leaves = array_filter(BookReader::getNonLeaves($item));
-            // Order them separately.
-            usort($leaves, array('BookReader', 'compareFilenames'));
-            usort($non_leaves, array('BookReader', 'compareFilenames'));
-            // Finally, merge them.
-            $list = array_merge($leaves, $non_leaves);
+            // Manage the case where there is no BookReader data.
+            if (empty($leaves) && empty($non_leaves)) {
+                $list = $item->Files;
+                usort($list, array('BookReader', 'compareFilenames'));
+            }
+            else {
+                // Order them separately.
+                usort($leaves, array('BookReader', 'compareFilenames'));
+                usort($non_leaves, array('BookReader', 'compareFilenames'));
+                // Finally, merge them.
+                $list = array_merge($leaves, $non_leaves);
+            }
         }
 
         // To avoid issues with unique index when updating (order should be
@@ -226,7 +241,7 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
             $item->id,
         );
         $sql = "
-            UPDATE `$db->Files` files
+            UPDATE `$db->File` files
             SET files.order = NULL
             WHERE files.item_id = ?
         ";
@@ -239,7 +254,7 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
         // The array is made unique, because a leaf can be repeated.
         $list = implode(',', array_unique($list));
         $sql = "
-            UPDATE `$db->Files` files
+            UPDATE `$db->File` files
             SET files.order = FIND_IN_SET(files.id, '$list')
             WHERE files.id in ($list)
         ";

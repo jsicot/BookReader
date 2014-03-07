@@ -88,7 +88,7 @@ class BookReader_Custom
                 $label = '';
             }
             else {
-                $txt = $file->getElementTexts('Dublin Core', 'Title');
+                $txt = $item->getElementTexts('Dublin Core', 'Title');
                 if (empty($txt)) {
                     $label = '';
                 }

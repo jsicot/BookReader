@@ -151,7 +151,7 @@ class BookReader
             $item = get_current_record('item');
         }
 
-        return BookReader_Custom::sendImage($query, $item);
+        return BookReader_Custom::sendImage($scale, $item);
     }
 
     /**

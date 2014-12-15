@@ -1,20 +1,17 @@
 <?php
 /**
- * @file
- *   All functions of this file must be adapted to your needs, except names and
- *   parameters.
+ * Simple helper for BookReader.
  *
- * @todo Integrate this in the configuration form.
- * @todo Use an abstract model class.
- * @todo Use Omeka 2.0 search functions.
- */
-
-/**
- * Custom helpers for BookReader.
+ * Page numbers or labels are saved in Dublin Core Title of each file.
+ *
+ * Full text is saved in Item Type Metadata Text of item.
+ *
+ * @todo To be finished.
+ * @todo Save text in Dublin Core Description of each file.
  *
  * @package BookReader
  */
-class BookReader_Custom
+class BookReader_Creator_Simple extends BookReader_Creator
 {
     /**
      * Get the list of numbers of pages of an item.
@@ -32,9 +29,13 @@ class BookReader_Custom
      *
      * @return array of strings
      */
-    public static function getPageNumbers($item)
+    public function getPageNumbers()
     {
-        $leaves = BookReader::getLeaves($item);
+        if (empty($this->_item)) {
+            return;
+        }
+
+        $leaves = $this->getLeaves();
         $numbers = array();
         foreach ($leaves as $leaf) {
             if (empty($leaf)) {
@@ -80,9 +81,13 @@ class BookReader_Custom
      *
      * @return array of strings
      */
-    public static function getPageLabels($item)
+    public function getPageLabels()
     {
-        $leaves = BookReader::getLeaves($item);
+        if (empty($this->_item)) {
+            return;
+        }
+
+        $leaves = $this->getLeaves();
         $labels = array();
         foreach ($leaves as $leaf) {
             if (empty($leaf)) {
@@ -107,32 +112,25 @@ class BookReader_Custom
     }
 
     /**
-     * Return index of the title leaf.
-     *
-     * Here, the title is the first leaf of an item.
-     *
-     * @return integer
-     *   Index for bookreader.
-     */
-    public static function getTitleLeaf($item)
-    {
-        return 0;
-    }
-
-    /**
      * Check if there are data for search.
+     *
+     * In this example, search is done inside "Item Type Metadata:Text".
      *
      * @return boolean
      *   True if there are data for search, else false.
      */
-    public static function hasDataForSearch($item)
+    public function hasDataForSearch()
     {
-        $itemType = $item->getItemType();
-        if (empty($itemType) || $itemType->name !== 'Text') {
+        if (empty($this->_item)) {
+            return;
+        }
+
+        $this->_itemType = $this->_item->getItemType();
+        if (empty($this->_itemType) || $this->_itemType->name !== 'Text') {
             return false;
         }
 
-        return $item->hasElementText('Item Type Metadata', 'Text');
+        return $this->_item->hasElementText('Item Type Metadata', 'Text');
     }
 
     /**
@@ -141,7 +139,7 @@ class BookReader_Custom
      * This search is case insensitive and without punctuation. Diacritics are
      * not converted.
      *
-     * @see BookReader_Custom::_alnumString()
+     * @uses BookReader_Creator::_alnumString()
      *
      * @todo Use one query search or xml search or Zend_Search_Lucene.
      *
@@ -159,8 +157,12 @@ class BookReader_Custom
      *   ),
      * );
      */
-    public static function searchFulltext($query, $item, $part)
+    public function searchFulltext($query)
     {
+        if (empty($this->_item)) {
+            return;
+        }
+
         $minimumQueryLength = 4;
         $maxResult = 10;
         // Warning: PREG_OFFSET_CAPTURE is not Unicode safe.
@@ -173,7 +175,7 @@ class BookReader_Custom
         $results = array();
 
         // Normalize query because the search occurs inside a normalized text.
-        $cleanQuery = self::_alnumString($query);
+        $cleanQuery = $this->_alnumString($query);
         if (strlen($cleanQuery) < $minimumQueryLength) {
             return $results;
         }
@@ -183,10 +185,10 @@ class BookReader_Custom
         $pregQuery = '/' . str_replace(' ', '[\p{C}\p{M}\p{P}\p{Z}]*', preg_quote($cleanQuery)) . '/Uui';
 
         // For this example, search is done at item level only.
-        $text = $item->getElementTexts('Item Type Metadata', 'Text');
+        $text = $this->_item->getElementTexts('Item Type Metadata', 'Text');
         if (!empty($text) && preg_match_all($pregQuery, $text[0]->text, $matches, PREG_OFFSET_CAPTURE)) {
             // For this example, the answer is found in the first image only.
-            $files = $item->Files;
+            $files = $this->_item->Files;
             $file = $files[0];
 
             $results[$file->id] = array();
@@ -209,8 +211,12 @@ class BookReader_Custom
      * @return array
      *   Array of matches with coordinates.
      */
-    public static function highlightFiles($textsToHighlight, $item, $part)
+    public function highlightFiles($textsToHighlight)
     {
+        if (empty($this->_item)) {
+            return;
+        }
+
         $imageType = 'fullsize';
         $beforeContext = 120;
         $afterContext = 120;
@@ -220,7 +226,7 @@ class BookReader_Custom
         $results = array();
         foreach ($textsToHighlight as $file_id => $data) {
             $file = get_record_by_id('file', $file_id);
-            $pageIndex = BookReader::getPageIndex($file);
+            $pageIndex = $this->getPageIndex($file);
             $pathImg = FILES_DIR . DIRECTORY_SEPARATOR . $imageType . DIRECTORY_SEPARATOR . ($imageType == 'original' ? $file->filename : $file->getDerivativeFilename());
             list($width, $height, $type, $attr) = getimagesize($pathImg);
 
@@ -232,8 +238,8 @@ class BookReader_Custom
             $ratio = $height / $originalHeight;
 
             // Text is needed only to get context.
-            $item = get_record_by_id('item', $file->item_id);
-            $text = $item->getElementTexts('Item Type Metadata', 'Text');
+            $this->_item = get_record_by_id('item', $file->item_id);
+            $text = $this->_item->getElementTexts('Item Type Metadata', 'Text');
             $text = $text[0]->text;
             $lengthText = mb_strlen($text);
 
@@ -289,22 +295,5 @@ class BookReader_Custom
         }
 
         return $results;
-    }
-
-    /**
-     * Returns a cleaned  string.
-     *
-     * Removes trailing spaces and anything else, except letters, numbers and
-     * symbols.
-     *
-     * @param string $string The string to clean.
-     *
-     * @return string
-     *   The cleaned string.
-     */
-    protected static function _alnumString($string)
-    {
-        $string = preg_replace('/[^\p{L}\p{N}\p{S}]/u', ' ', $string);
-        return trim(preg_replace('/\s+/', ' ', $string));
     }
 }

@@ -4,9 +4,10 @@
         $title .= ' - ' . $creator;
     }
     $title = BookReader::htmlCharacter($title);
-    $coverFile = BookReader::getCoverFile($item);
 
-    list($pageIndexes, $pageNumbers, $pageLabels, $imgWidths, $imgHeights) = BookReader::imagesData($item);
+    $coverFile = $bookreader->getCoverFile();
+
+    list($pageIndexes, $pageNumbers, $pageLabels, $imgWidths, $imgHeights) = $bookreader->imagesData();
 
     $server = preg_replace('#^https?://#', '', WEB_ROOT);
     $serverFullText = $server . '/book-reader/index/fulltext';
@@ -67,7 +68,7 @@
     br.server = "<?php echo $serverFullText; ?>";
     br.bookPath = "<?php echo WEB_ROOT; ?>";
     br.bookId = <?php echo $item->id; ?>;
-    br.titleLeaf = <?php echo BookReader::getTitleLeaf($item); ?>;
+    br.titleLeaf = <?php echo $bookreader->getTitleLeaf(); ?>;
     <?php // Sub-prefix is the sub-document in BookReader.
     // Original param is '?doc', but it has been changed to '?part'.
     ?>
@@ -327,14 +328,14 @@
         // $$$ cover looks weird before it loads
         jInfoDiv.find('.BRfloatCover').append([
             '<div style="height: 140px; min-width: 80px; padding: 0; margin: 0;">',
-            <?php echo json_encode(link_to_item(BookReader::itemCover())); ?>,
+            <?php echo json_encode(link_to_item($bookreader->itemCover())); ?>,
             '</div>'
         ].join(''));
 
         jInfoDiv.find('.BRfloatMeta').append([
             '<h3><?php echo html_escape(__('Other Formats')); ?></h3>',
             '<ul class="links">',
-                '<?php echo BookReader::linksToNonImages($item); ?>',
+                '<?php echo $bookreader->linksToNonImages(); ?>',
             '</ul>',
             '<p class="moreInfo">',
                 '<a href="'+ this.bookUrl + '"><?php echo html_escape(__('More information')); ?></a>',
@@ -468,7 +469,7 @@
 <?php
         // Si jamais la recherche n'est pas disponible (pas de fichier XML), on
         // va masquer les éléments permettant de la lancer (SMA 201210)
-        if (!BookReader::hasDataForSearch()): ?>
+        if (!$bookreader->hasDataForSearch()): ?>
     $('#textSrch').hide();
     $('#btnSrch').hide();
         <?php endif; ?>

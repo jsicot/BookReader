@@ -6,12 +6,10 @@
  * books from the Internet Archive online and can also be used to view other
  * books.
  *
- * @copyright Daniel Berthereau, 2013-2014
  * @copyright Julien Sicot, 2011-2013
+ * @copyright Daniel Berthereau, 2013-2014
  * @license http://www.gnu.org/licenses/gpl-3.0.txt GNU GPLv3
  */
-
-require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'helpers' . DIRECTORY_SEPARATOR . 'BookReaderFunctions.php';
 
 /**
  * The Book Reader plugin.
@@ -50,7 +48,7 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
     protected $_options = array(
         'bookreader_custom_css' => '',
         'bookreader_favicon_url' => 'your_theme/images/favicon.ico',
-        'bookreader_custom_library' => 'BookReaderCustom.php',
+        'bookreader_creator' => 'BookReader_Creator_Default',
         'bookreader_sorting_mode' => false,
         'bookreader_mode_page' => '1',
         'bookreader_embed_functions' => '0',
@@ -65,7 +63,6 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
     public function hookInstall()
     {
         $this->_options['bookreader_favicon_url'] = WEB_THEME . '/' . $this->_options['bookreader_favicon_url'];
-        $this->_options['bookreader_custom_library'] = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'libraries' . DIRECTORY_SEPARATOR . $this->_options['bookreader_custom_library'];
 
         $this->_installOptions();
     }
@@ -82,6 +79,11 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
             set_option('bookreader_custom_css', WEB_PLUGIN .  '/BookReader/' . $this->_options['bookreader_custom_css']);
             delete_option('bookreader_logo_url');
             delete_option('bookreader_toolbar_color');
+        }
+
+        if (version_compare($oldVersion, '2.5', '<=')) {
+            delete_option('bookreader_custom_library');
+            set_option('bookreader_creator', $this->_options['bookreader_creator']);
         }
     }
 
@@ -109,12 +111,7 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
     public function hookConfigForm($args)
     {
         $view = get_view();
-        echo $view->partial(
-            'plugins/bookreader-config-form.php',
-            array(
-                'default_library' => dirname(__FILE__) . DIRECTORY_SEPARATOR . 'libraries' . DIRECTORY_SEPARATOR . 'BookReaderCustom.php',
-            )
-        );
+        echo $view->partial('plugins/bookreader-config-form.php');
     }
 
     /**
@@ -161,7 +158,8 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
 
         // This is done after insert, update or post and only if a function exists
         // in the custom library.
-        BookReader::saveData($item);
+        $bookreader = new BookReader($item);
+        $bookreader->saveData();
     }
 
     /**
@@ -172,7 +170,7 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
     public function hookAdminItemsBatchEditForm($args)
     {
         $view = $args['view'];
-        echo get_view()->partial(
+        echo $view->partial(
             'forms/bookreader-batch-edit.php'
         );
     }
@@ -209,21 +207,22 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
 
         if ($mix_files_types) {
             $list = $item->Files;
-            usort($list, array('BookReader', 'compareFilenames'));
+            BookReader_Creator::sortFilesByOriginalName($list, false);
         }
         else {
+            $bookreader = new BookReader($item);
             // Get leaves and remove blank ones.
-            $leaves = array_filter(BookReader::getLeaves($item));
-            $non_leaves = array_filter(BookReader::getNonLeaves($item));
+            $leaves = array_filter($bookreader->getLeaves());
+            $non_leaves = array_filter($bookreader->getNonLeaves());
             // Manage the case where there is no BookReader data.
             if (empty($leaves) && empty($non_leaves)) {
                 $list = $item->Files;
-                usort($list, array('BookReader', 'compareFilenames'));
+                BookReader_Creator::sortFilesByOriginalName($list, false);
             }
             else {
                 // Order them separately.
-                usort($leaves, array('BookReader', 'compareFilenames'));
-                usort($non_leaves, array('BookReader', 'compareFilenames'));
+                BookReader_Creator::sortFilesByOriginalName($leaves, false);
+                BookReader_Creator::sortFilesByOriginalName($non_leaves, false);
                 // Finally, merge them.
                 $list = array_merge($leaves, $non_leaves);
             }
@@ -271,12 +270,11 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
      */
     public function hookBookReaderItemShow($args)
     {
-        $view = $args['view'];
-        $item = isset($args['item']) && !empty($args['item'])
-            ? $args['item']
-            : $view->item;
-        $part = isset($args['part'])? (integer) $args['part'] : 0;
-        $page = isset($args['page']) ? $args['page'] : '0';
+        $view = empty($args['view']) ? get_view() : $args['view'];
+        $item = empty($args['item']) ? $view->item : $args['item'];
+        $part = empty($args['part'])? 0 : (integer) $args['part'];
+        $page = empty($args['page']) ? '0' : $args['page'];
+
         // Currently, all or none functions are enabled.
         $embed_functions = isset($args['embed_functions'])
             ? $args['embed_functions']

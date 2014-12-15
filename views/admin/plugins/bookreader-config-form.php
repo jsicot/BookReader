@@ -25,15 +25,15 @@
     </div>
     <div class="field">
         <div class="two columns alpha">
-            <?php echo $this->formLabel('bookreader_custom_library',
-                __('Custom library')); ?>
+            <?php echo $this->formLabel('bookreader_creator',
+                __('Creator')); ?>
         </div>
         <div class='inputs five columns omega'>
             <p class="explanation">
-                <?php echo __('Custom functions are used to get infos from your files.'); ?>
-                <?php echo  __('Default file is "%s".', $default_library); ?>
+                <?php echo __('A custom creator can be used to get infos from your files.'); ?>
+                <?php echo  __('Default creator is "BookReader_Creator_Default". Other defaults are "BookReader_Creator_Simple", "BookReader_Creator_ExtractOCR" and "BookReader_Creator_RefnumOCR".'); ?>
             </p>
-            <?php echo $this->formText('bookreader_custom_library', get_option('bookreader_custom_library'), null); ?>
+            <?php echo $this->formText('bookreader_creator', get_option('bookreader_creator'), null); ?>
         </div>
     </div>
     <div class="field">

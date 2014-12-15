@@ -20,8 +20,14 @@ class BookReader_ViewerController extends Omeka_Controller_AbstractActionControl
         $ui = $request->getParam('ui');
         $part = $request->getParam('part');
 
+        $bookreader = new BookReader($item);
+        $bookreader->setUI($ui);
+        $bookreader->setPart($part);
+
+        $this->view->bookreader = $bookreader;
         $this->view->item = $item;
-        $this->view->ui = $ui;
-        $this->view->part = $part;
+        // Values have been checked inside BookReader.
+        $this->view->ui = $bookreader->getUI();
+        $this->view->part = $bookreader->getPart();
     }
 }

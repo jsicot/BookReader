@@ -1,20 +1,12 @@
 <?php
 /**
- * @file
- *   All functions of this file must be adapted to your needs, except names and
- *   parameters.
- *
- * @todo Integrate this in the configuration form.
- * @todo Use an abstract model class.
- * @todo Use Omeka 2.0 search functions.
- *
  * @note These functions are an example used by Université de Rennes 2 and have
- *   not been fully checked.
+ * not been fully checked.
  *
  * @note La fonction de recherche ne fonctionne plus avec la dernière version
  * du fait que la recherche est désormais distincte du surlignage.
  * Néanmoins, cela peut être contourné du fait que la fonction highlightFiles()
- * a désormais pour paramètre $item également. On peut donc faire la recherche
+ * a désormais pour paramètre $this->_item également. On peut donc faire la recherche
  * et le surlignage directement dans cette fonction et ne rien renvoyer dans la
  * fonction searchFulltext().
  *
@@ -25,29 +17,32 @@
  */
 
 /**
- * Custom helpers for BookReader.
+ * Extract OCR helper for BookReader.
  *
  * @package BookReader
  */
-class BookReader_Custom
+class BookReader_Creator_ExtractOCR extends BookReader_Creator
 {
     /**
      * Get the list of numbers of pages of an item.
      *
      * The page number is the name of a page of a file, like "6" or "XIV".
-     * If "null" is returned, the label in viewer will be the page index + 1.
      *
-     * This function is used to get quickly all page numbers of an item.
-     *  If the page number is empty, the label page will be used. If there is no
-     * page number, use 'null'.
+     * This function is used to get quickly all page numbers of an item. If the
+     * page number is empty, the label page will be used. If there is no page
+     * number, use 'null', so the label in viewer will be the page index + 1.
      *
      * @see getPageLabels()
      *
      * @return array of strings
      */
-    public static function getPageNumbers($item)
+    public function getPageNumbers()
     {
-        $leaves = BookReader::getLeaves($item);
+        if (empty($this->_item)) {
+            return;
+        }
+
+        $leaves = $this->getLeaves($this->_item);
         $numbers = array();
         foreach ($leaves as $leaf) {
             if (empty($leaf)) {
@@ -82,7 +77,7 @@ class BookReader_Custom
      * @return string
      *   Derivative name of the size.
      */
-    public static function getSizeType($scale, $item)
+    public function getSizeType($scale)
     {
         switch ($scale) {
             case ($scale < 1.1): return 'original';
@@ -100,11 +95,15 @@ class BookReader_Custom
      * @return boolean
      *   True if there are data for search, else false.
      */
-    public static function hasDataForSearch($item)
+    public function hasDataForSearch()
     {
+        if (empty($this->_item)) {
+            return;
+        }
+
         $xml_file = false;
 
-        set_loop_records('files', $item->getFiles());
+        set_loop_records('files', $this->_item->getFiles());
         if (has_loop_records('files')) {
             foreach (loop('files') as $file) {
                 if (strtolower($file->getExtension()) == 'xml') {
@@ -134,8 +133,12 @@ class BookReader_Custom
      *   ),
      * );
      */
-    public static function searchFulltext($query, $item, $part)
+    public function searchFulltext($query)
     {
+        if (empty($this->_item)) {
+            return;
+        }
+
         $minimumQueryLength = 3;
         $maxResult = 10;
 
@@ -145,7 +148,7 @@ class BookReader_Custom
         $results = array();
 
         // Normalize query because the search occurs inside a normalized text.
-        $cleanQuery = self::_alnumString($query);
+        $cleanQuery = $this->_alnumString($query);
         if (strlen($cleanQuery) < $minimumQueryLength) {
                 return $results;
         }
@@ -157,7 +160,7 @@ class BookReader_Custom
 
         $iResult = 0;
         $list = array();
-        set_loop_records('files', $item->getFiles());
+        set_loop_records('files', $this->_item->getFiles());
         foreach (loop('files') as $file) {
             if (strtolower(pathinfo($file->original_filename, PATHINFO_EXTENSION)) == 'xml') {
                 $xml_file = FILES_DIR . DIRECTORY_SEPARATOR . 'original' . DIRECTORY_SEPARATOR . $file->filename;
@@ -275,17 +278,17 @@ class BookReader_Custom
      *
      * @see BookReader_IndexController::fulltextAction()
      *
+     * @todo To be updated.
+     *
      * @return array
      *   Array of matches with coordinates.
      */
-    public static function highlightFiles($textsToHighlight, $item, $part)
+    public function highlightFiles($textsToHighlight)
     {
-        return $textsToHighlight;
-    }
+        if (empty($this->_item)) {
+            return;
+        }
 
-    protected static function _alnumString($string)
-    {
-        $string = preg_replace('/[^\p{L}\p{N}\p{S}]/u', ' ', $string);
-        return trim(preg_replace('/\s+/', ' ', $string));
+        return $textsToHighlight;
     }
 }

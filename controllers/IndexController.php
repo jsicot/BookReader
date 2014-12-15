@@ -50,18 +50,23 @@ class BookReader_IndexController extends Omeka_Controller_AbstractActionControll
      */
     public function fulltextAction()
     {
-        $item_id = $this->getRequest()->getParam('item_id');
-        $part = $this->getRequest()->getParam('part');
-        $query = $this->getRequest()->getParam('q');
-        $query = utf8_encode($query);
-        $callback = $this->getRequest()->getParam('callback');
+        $request = $this->getRequest();
+        $item_id = $request->getParam('item_id');
+        $item = get_record_by_id('Item', $item_id);
+        if (empty($item)) {
+            throw new Omeka_Controller_Exception_404;
+        }
 
-        $item = get_record_by_id('item', $item_id);
+        $part = $request->getParam('part');
+        $query = $request->getParam('q');
+        $query = utf8_encode($query);
+        $callback = $request->getParam('callback');
 
         $output = array();
 
         // Check if there are data for search.
-        if (BookReader::hasDataForSearch($item)) {
+        $bookreader = new BookReader($item);
+        if ($bookreader->hasDataForSearch()) {
             $output['id'] = $item_id;
             $output['part'] = $part;
             $output['q'] = $query;
@@ -71,8 +76,8 @@ class BookReader_IndexController extends Omeka_Controller_AbstractActionControll
             // TODO Kezako ?
             // $output['leaf0_missing'] = false;
 
-            $answer = BookReader::searchFulltext($query, $item);
-            $output['matches'] = BookReader::highlightFiles($answer, $item);
+            $answer = $bookreader->searchFulltext($query);
+            $output['matches'] = $bookreader->highlightFiles($answer);
         }
 
         // Send answer.
@@ -89,13 +94,18 @@ class BookReader_IndexController extends Omeka_Controller_AbstractActionControll
      */
     public function imageProxyAction()
     {
-        $scale = $this->getRequest()->getParam('scale');
-        $itemId = $this->getRequest()->getParam('id');
+        $request = $this->getRequest();
+        $itemId = $request->getParam('id');
         $item = get_record_by_id('item', $itemId);
+        if (empty($item)) {
+            throw new Omeka_Controller_Exception_404;
+        }
+        $scale = $request->getParam('scale');
 
-        $type = BookReader::getSizeType($scale, $item);
+        $bookreader = new BookReader($item);
+        $type = $bookreader->getSizeType($scale);
 
-        $this->_sendImage($type);
+        $this->_sendImage($item, $type);
     }
 
     /**
@@ -103,18 +113,22 @@ class BookReader_IndexController extends Omeka_Controller_AbstractActionControll
      */
     public function thumbProxyAction()
     {
-        $this->_sendImage('thumbnail');
+        $request = $this->getRequest();
+        $id = $request->getParam('id');
+        $item = get_record_by_id('item', $id);
+        if (empty($item)) {
+            throw new Omeka_Controller_Exception_404;
+        }
+        $this->_sendImage($item, 'thumbnail');
     }
 
     /**
      * Helper to return image of the current image.
      */
-    protected function _sendImage($type = 'fullsize')
+    protected function _sendImage($item, $type = 'fullsize')
     {
-        $id = $this->getRequest()->getParam('id');
-        $item = get_record_by_id('item', $id);
-
-        $index = $this->getRequest()->getParam('image');
+        $request = $this->getRequest();
+        $index = $request->getParam('image');
         // Get the index.
         if ($index != '000') {
             $index = preg_replace('`^[0]*`', '', $index);
@@ -124,7 +138,8 @@ class BookReader_IndexController extends Omeka_Controller_AbstractActionControll
             $index = 0;
         }
 
-        $imagesFiles = BookReader::getLeaves($item);
+        $bookreader = new BookReader($item);
+        $imagesFiles = $bookreader->getLeaves();
         $image = $imagesFiles[$index];
         $image = empty($image)
             ? dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR . 'shared' . DIRECTORY_SEPARATOR . 'images' . DIRECTORY_SEPARATOR . 'blank.png'

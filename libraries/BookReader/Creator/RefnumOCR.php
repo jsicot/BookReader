@@ -5,46 +5,18 @@
  *
  * @see http://bibnum.bnf.fr/refNum
  *
- * @todo Integrate this in the configuration form.
- * @todo Use an abstract model class.
- * @todo Use Omeka 2.0 search functions.
- *
  * @internal Limites de la recherche :
  * - La recherche échoue si les mots sont sur plusieurs pages (utiliser
  * la recherche générale dans ce cas).
  */
 
 /**
- * Custom helpers for BookReader.
+ * refNum helper for BookReader.
  *
  * @package BookReader
  */
-class BookReader_Custom
+class BookReader_Creator_RefnumOCR extends BookReader_Creator
 {
-    /**
-     * Get an array of all images of an item in order to display them with
-     * BookReader.
-     *
-     * @return array
-     *   Array of filenames associated to original filenames.
-     */
-    public static function getLeaves($item)
-    {
-        return self::_get_list_of_leaves($item, false);
-    }
-
-    /**
-     * Get an array of all non-images of an item in order to display them as
-     * links.
-     *
-     * @return array
-     *   Array of filenames associated to original filenames.
-     */
-    public static function getNonLeaves($item)
-    {
-        return self::_get_list_of_leaves($item, true);
-    }
-
     /**
      * Get an array of all leaves (or all non-leaves) of an item in order to
      * display them with BookReader.
@@ -52,21 +24,20 @@ class BookReader_Custom
      * Difference with the default method is that multiple views and missing
      * pages are added when needed, so the parity remains clean.
      *
-     * @param Item $item
      * @param boolean $invert
      *
      * @return array
      *   Array of files or nulls.
      */
-    protected static function _get_list_of_leaves($item, $invert)
+    protected function _get_list_of_leaves($invert = false)
     {
-        static $leaves = array();
+        if (empty($this->_item)) {
+            return;
+        }
 
-        if (!isset($leaves[$item->id])) {
-            $leaves[$item->id] = array(
-                'leaves' => array(),
-                'non-leaves' => array(),
-            );
+        if (is_null($this->_leaves)) {
+            $this->_leaves = array();
+            $this->_nonleaves = array();
 
             $supportedFormats = array(
                 'jpeg' => 'JPEG Joint Photographic Experts Group JFIF format',
@@ -80,33 +51,33 @@ class BookReader_Custom
             $supportedFormatRegEx = '/\.' . implode('|', array_keys($supportedFormats)) . '$/i';
 
             // Retrieve image files from the item.
-            set_loop_records('files', $item->getFiles());
+            set_loop_records('files', $this->_item->getFiles());
             foreach (loop('files') as $file) {
                 if ($file->hasThumbnail() && preg_match($supportedFormatRegEx, $file->filename)) {
-                    $leaves[$item->id]['leaves'][] = $file;
+                    $this->_leaves[] = $file;
                 }
                 else {
-                    $leaves[$item->id]['non-leaves'][] = $file;
+                    $this->_nonleaves[] = $file;
                 }
             }
 
             // Sorting by original filename or keep attachment order.
             if (get_option('bookreader_sorting_mode')) {
-                uasort($leaves[$item->id]['leaves'], array('BookReader', 'compareFilenames'));
-                uasort($leaves[$item->id]['non-leaves'], array('BookReader', 'compareFilenames'));
+                $this->sortFilesByOriginalName($this->_leaves);
+                $this->sortFilesByOriginalName($this->_nonleaves);
             }
 
             // Insert missing pages and multiple views.
-            $leaves[$item->id]['leaves'] = self::_complete_list_of_leaves($leaves[$item->id]['leaves']);
+            $this->_leaves = $this->_complete_list_of_leaves();
 
             // Reset keys, because the important is to get files by order.
-            $leaves[$item->id]['leaves'] = array_values($leaves[$item->id]['leaves']);
-            $leaves[$item->id]['non-leaves'] = array_values($leaves[$item->id]['non-leaves']);
+            $this->_leaves = array_values($this->_leaves);
+            $this->_nonleaves = array_values($this->_nonleaves);
         }
 
         return $invert
-            ? $leaves[$item->id]['non-leaves']
-            : $leaves[$item->id]['leaves'];
+            ? $this->_nonleaves
+            : $this->_leaves;
     }
 
     /**
@@ -124,8 +95,9 @@ class BookReader_Custom
      * @return array
      *   Array of files or nulls.
      */
-    protected static function _complete_list_of_leaves($leaves)
+    private function _complete_list_of_leaves()
     {
+        $leaves = $this->_leaves;
         if (count($leaves) <= 1) {
             return $leaves;
         }
@@ -245,13 +217,15 @@ class BookReader_Custom
      * page should be 0 if document starts from right, and 1 if document starts
      * from left. Use null for a missing page.
      *
-     * By default, indexes are simply a list of numbers starting from 0.
-     *
      * @return array of integers
      */
-    public static function getPageIndexes($item)
+    public function getPageIndexes()
     {
-        $leaves = self::getLeaves($item);
+        if (empty($this->_item)) {
+            return;
+        }
+
+        $leaves = $this->getLeaves();
         $indexes = array();
         $first = true;
         foreach($leaves as $key => $leaf) {
@@ -268,19 +242,22 @@ class BookReader_Custom
      * Get the list of numbers of pages of an item.
      *
      * The page number is the name of a page of a file, like "6" or "XIV".
-     * If "null" is returned, the label in viewer will be the page index + 1.
      *
-     * This function is used to get quickly all page numbers of an item.
-     *  If the page number is empty, the label page will be used. If there is no
-     * page number, use 'null'.
+     * This function is used to get quickly all page numbers of an item. If the
+     * page number is empty, the label page will be used. If there is no page
+     * number, use 'null', so the label in viewer will be the page index + 1.
      *
      * @see getPageLabels()
      *
      * @return array of strings
      */
-    public static function getPageNumbers($item)
+    public function getPageNumbers()
     {
-        $leaves = self::getLeaves($item);
+        if (empty($this->_item)) {
+            return;
+        }
+
+        $leaves = $this->getLeaves();
         $numbers = array();
         foreach ($leaves as $leaf) {
             if (empty($leaf)) {
@@ -309,11 +286,15 @@ class BookReader_Custom
      *
      * @return array of strings
      */
-    public static function getPageLabels($item)
+    public function getPageLabels()
     {
-        $leaves = self::getLeaves($item);
+        if (empty($this->_item)) {
+            return;
+        }
+
+        $leaves = $this->getLeaves();
         // Don't add a label if this is the same than the number.
-        $numbers = self::getPageNumbers($item);
+        $numbers = $this->getPageNumbers();
         $labels = array();
         foreach ($leaves as $key => $leaf) {
             if (empty($leaf)) {
@@ -342,15 +323,19 @@ class BookReader_Custom
      * @return integer
      *   Index for bookreader.
      */
-    public static function getTitleLeaf($item)
+    public function getTitleLeaf()
     {
+        if (empty($this->_item)) {
+            return;
+        }
+
         $db = get_db();
 
         $element = $db->getTable('Element')->findByElementSetNameAndElementName('refNum', 'Type de page');
 
         $bind = array(
             $element->id,
-            $item->id,
+            $this->_item->id,
         );
 
         // Order: "Première page à afficher" before "Page de titre".
@@ -372,30 +357,10 @@ class BookReader_Custom
 
         if ($result) {
             $file = get_record_by_id('File', $result);
-            return BookReader::getLeafIndex($file);
+            return $this->getLeafIndex($file);
         }
 
         return 0;
-    }
-
-    /**
-     * Returns the derivative size to use for the current image, depending on
-     * the scale.
-     *
-     * @return string
-     *   Derivative name of the size.
-     */
-    public static function getSizeType($scale, $item)
-    {
-        switch ($scale) {
-            case ($scale < 1): return 'original';
-            case ($scale < 2): return 'fullsize';
-            case ($scale < 4): return 'fullsize';
-            case ($scale < 8): return 'fullsize';
-            case ($scale < 16): return 'thumbnail';
-            case ($scale < 32): return 'thumbnail';
-        }
-        return 'fullsize';
     }
 
     /**
@@ -404,15 +369,19 @@ class BookReader_Custom
      * @return boolean
      *   True if there are data for search, else false.
      */
-    public static function hasDataForSearch($item)
+    public function hasDataForSearch()
     {
-        $itemType = $item->getItemType();
-        if (empty($itemType) || $itemType->name !== 'Text') {
+        if (empty($this->_item)) {
+            return;
+        }
+
+        $this->_itemType = $this->_item->getItemType();
+        if (empty($this->_itemType) || $this->_itemType->name !== 'Text') {
             return false;
         }
 
         // TODO Use one query.
-        foreach ($item->Files as $file) {
+        foreach ($this->_item->Files as $file) {
             if ($file->hasElementText('OCR', 'Texte auto')) {
                 return true;
             }
@@ -427,7 +396,7 @@ class BookReader_Custom
      * This search is case insensitive and without punctuation. Diacritics are
      * not converted.
      *
-     * @see BookReader_Custom::_alnumString()
+     * @uses BookReader_Creator::_alnumString()
      *
      * @todo Use one query search or xml search or Zend_Search_Lucene.
      *
@@ -445,8 +414,12 @@ class BookReader_Custom
      *   ),
      * );
      */
-    public static function searchFulltext($query, $item, $part)
+    public function searchFulltext($query)
     {
+        if (empty($this->_item)) {
+            return;
+        }
+
         $minimumQueryLength = 4;
         $maxResult = 100;
         // Warning: PREG_OFFSET_CAPTURE is not Unicode safe.
@@ -459,7 +432,7 @@ class BookReader_Custom
         $results = array();
 
         // Normalize query because the search occurs inside a normalized text.
-        $cleanQuery = self::_alnumString($query);
+        $cleanQuery = $this->_alnumString($query);
         if (strlen($cleanQuery) < $minimumQueryLength) {
             return $results;
         }
@@ -469,7 +442,7 @@ class BookReader_Custom
         $pregQuery = '/' . str_replace(' ', '[\p{C}\p{M}\p{P}\p{Z}]*', preg_quote($cleanQuery)) . '/Uui';
         // Search results.
         $iResult = 0;
-        $leaves = self::getLeaves($item);
+        $leaves = $this->getLeaves();
         // Look for each page of the item.
         foreach ($leaves as $key => $file) {
             if (empty($file)) {
@@ -517,19 +490,23 @@ class BookReader_Custom
      * @return array
      *   Array of matches with coordinates.
      */
-    public static function highlightFiles($textsToHighlight, $item, $part)
+    public function highlightFiles($textsToHighlight)
     {
+        if (empty($this->_item)) {
+            return;
+        }
+
         $imageType = 'fullsize';
         $beforeContext = 120;
         $afterContext = 120;
         // If needed, uncomment the following line.
         mb_internal_encoding('UTF-8');
 
-        $leaves = self::getLeaves($item);
+        $leaves = $this->getLeaves();
         $results = array();
         foreach ($textsToHighlight as $key => $data) {
             $file = $leaves[$key];
-            $pageIndex = BookReader::getPageIndex($file);
+            $pageIndex = $this->getPageIndex($file);
             $pathImg = FILES_DIR . DIRECTORY_SEPARATOR . $imageType . DIRECTORY_SEPARATOR . ($imageType == 'original' ? $file->filename : $file->getDerivativeFilename());
             list($width, $height, $type, $attr) = getimagesize($pathImg);
 
@@ -547,6 +524,9 @@ class BookReader_Custom
             // Convert words to array in order to get next cell simply (and avoid
             // the integer key as string bug).
             $motAmot = $file->getElementTexts('OCR', 'Mot-à-mot');
+            if (!isset($motAmot[0])) {
+                continue;
+            }
             $motAmot = json_decode($motAmot[0]->text, true);
             $motAmot = $motAmot['String'];
             $offsetStartPosition = 0;
@@ -653,22 +633,5 @@ class BookReader_Custom
         }
 
         return $results;
-    }
-
-    /**
-     * Returns a cleaned  string.
-     *
-     * Removes trailing spaces and anything else, except letters, numbers and
-     * symbols.
-     *
-     * @param string $string The string to clean.
-     *
-     * @return string
-     *   The cleaned string.
-     */
-    protected static function _alnumString($string)
-    {
-        $string = preg_replace('/[^\p{L}\p{N}\p{S}]/u', ' ', $string);
-        return trim(preg_replace('/\s+/', ' ', $string));
     }
 }

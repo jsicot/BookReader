@@ -106,11 +106,14 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
      *
      * @return void
      */
-    public function hookConfigForm()
+    public function hookConfigForm($args)
     {
-        echo get_view()->partial(
+        $view = get_view();
+        echo $view->partial(
             'plugins/bookreader-config-form.php',
-            array()
+            array(
+                'default_library' => dirname(__FILE__) . DIRECTORY_SEPARATOR . 'libraries' . DIRECTORY_SEPARATOR . 'BookReaderCustom.php',
+            )
         );
     }
 
@@ -122,16 +125,9 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
     public function hookConfig($args)
     {
         $post = $args['post'];
-
-        set_option('bookreader_custom_css', trim($post['bookreader_custom_css']));
-        set_option('bookreader_favicon_url', trim($post['bookreader_favicon_url']));
-        set_option('bookreader_custom_library', realpath($post['bookreader_custom_library']));
-        set_option('bookreader_sorting_mode', (boolean) $post['bookreader_sorting_mode']);
-        set_option('bookreader_mode_page', (($post['bookreader_mode_page'] == '1') ? '1' : '2'));
-        set_option('bookreader_embed_functions', (($post['bookreader_embed_functions'] == '1') ? '1' : '0'));
-        set_option('bookreader_class', trim($post['bookreader_class']));
-        set_option('bookreader_width', trim($post['bookreader_width']));
-        set_option('bookreader_height', trim($post['bookreader_height']));
+        foreach ($post as $key => $value) {
+            set_option($key, $value);
+        }
     }
 
     /**

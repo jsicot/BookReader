@@ -30,11 +30,16 @@ Installation
     - The height of the inline frame (Embedded Simple Viewer)
 
 The viewer is always available at `http://www.example.com/viewer/show/{item id}`.
-If you want to embed it, add this code in the `items/show.php` file of your theme:
+Furthermore, it is automatically embedded in items/show page. This can be
+disabled in the config of the plugin.
+
+If you want more control on the BookReader, add this code in the `items/show.php`
+file of your theme:
 
 ```
     <?php
-    fire_plugin_hook('book_reader_item_show', array(
+    echo get_specific_plugin_hook_output('BookReader', 'public_items_show', array(
+        'direct' => true,
         'view' => $this,
         'item' => $item,
         'page' => '0',

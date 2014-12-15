@@ -31,7 +31,7 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
         'after_save_item',
         'admin_items_batch_edit_form',
         'items_batch_edit_custom',
-        'book_reader_item_show',
+        'public_items_show',
     );
 
     /**
@@ -51,6 +51,7 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
         'bookreader_creator' => 'BookReader_Creator_Default',
         'bookreader_sorting_mode' => false,
         'bookreader_mode_page' => '1',
+        'bookreader_append_items_show' => true,
         'bookreader_embed_functions' => '0',
         'bookreader_class' => '',
         'bookreader_width' => '100%',
@@ -81,9 +82,10 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
             delete_option('bookreader_toolbar_color');
         }
 
-        if (version_compare($oldVersion, '2.5', '<=')) {
+        if (version_compare($oldVersion, '2.6', '<=')) {
             delete_option('bookreader_custom_library');
             set_option('bookreader_creator', $this->_options['bookreader_creator']);
+            set_option('bookreader_append_items_show', $this->_options['bookreader_append_items_show']);
         }
     }
 
@@ -268,8 +270,12 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
      *
      * @return void
      */
-    public function hookBookReaderItemShow($args)
+    public function hookPublicItemsShow($args)
     {
+        if (!get_option('bookreader_append_items_show') && empty($args['direct'])) {
+            return;
+        }
+
         $view = empty($args['view']) ? get_view() : $args['view'];
         $item = empty($args['item']) ? $view->item : $args['item'];
         $part = empty($args['part'])? 0 : (integer) $args['part'];

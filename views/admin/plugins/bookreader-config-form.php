@@ -39,7 +39,7 @@
     <div class="field">
         <div class="two columns alpha">
             <?php echo $this->formLabel('bookreader_sorting_mode',
-                __('Sorting by original filename?')); ?>
+                __('Sorting by original filename')); ?>
         </div>
         <div class='inputs five columns omega'>
             <p class="explanation">
@@ -53,6 +53,19 @@
     </div>
 </fieldset>
 <fieldset id="fieldset-embed"><legend><?php echo __('Embed mode'); ?></legend>
+    <div class="field">
+        <div class="two columns alpha">
+            <?php echo $this->formLabel('bookreader_append_items_show',
+                __('Append to "item show" page')); ?>
+        </div>
+        <div class='inputs five columns omega'>
+            <p class="explanation">
+                <?php echo __('If checked, the viewer will be automatically appended to the items/show page.'); ?>
+            </p>
+            <?php echo $this->formCheckbox('bookreader_append_items_show', true,
+                array('checked' => (boolean) get_option('bookreader_append_items_show'))); ?>
+        </div>
+    </div>
     <div class="field">
         <div class="two columns alpha">
             <?php echo $this->formLabel('bookreader_mode_page',

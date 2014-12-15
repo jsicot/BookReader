@@ -2787,7 +2787,8 @@ BookReader.prototype.search = function(term) {
 
     $('#textSrch').blur(); //cause mobile safari to hide the keyboard
 
-    var url = 'http://'+this.server.replace(/:.+/, ''); //remove the port and userdir
+    // Avoid to mix http and https.
+    var url = (("https:" == document.location.protocol) ? "https" : "http") + '://' + this.server.replace(/:.+/, ''); //remove the port and userdir
     // url    += '/fulltext/inside.php?item_id='+this.bookId;
     url += '/fulltext?item_id='+this.bookId;
     if (this.subPrefix > 1) {

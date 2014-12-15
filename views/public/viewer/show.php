@@ -33,7 +33,7 @@
     <!-- Stylesheets -->
     <link rel="stylesheet" href="<?php echo $sharedUrl . '/css/BookReader.css'; ?>" />
     <?php if ($custom_css = get_option('bookreader_custom_css')): ?>
-    <link rel="stylesheet" href="<?php echo $custom_css; ?>" />
+    <link rel="stylesheet" href="<?php echo url($custom_css); ?>" />
     <?php endif; ?>
     <!-- JavaScripts -->
     <script type="text/javascript" src="<?php echo $sharedUrl . '/javascripts/jquery-1.4.2.min.js'; ?>" charset="utf-8"></script>
@@ -316,10 +316,10 @@
 
     br.ui = '<?php echo BookReader::currentItemUI(); ?>';
     // Book title and the URL used for the book title link
-    br.bookTitle= '<?php echo $title; ?>';
-    br.bookUrl  = "<?php echo record_url($item); ?>";
+    br.bookTitle = <?php echo json_encode($title); ?>;
+    br.bookUrl = "<?php echo record_url($item); ?>";
     br.logoURL = "<?php echo WEB_ROOT; ?>";
-    br.siteName = "<?php echo option('site_title');?>";
+    br.siteName = <?php echo json_encode(option('site_title'));?>;
     // Override the path used to find UI images
     br.imagesBaseURL = '<?php echo $imgDir; ?>';
 
@@ -336,7 +336,9 @@
 
         // $$$ cover looks weird before it loads
         jInfoDiv.find('.BRfloatCover').append([
-            '<div style="height: 140px; min-width: 80px; padding: 0; margin: 0;"><?php echo link_to_item(BookReader::itemCover()); ?></div>'
+            '<div style="height: 140px; min-width: 80px; padding: 0; margin: 0;">',
+            <?php echo json_encode(link_to_item(BookReader::itemCover())); ?>,
+            '</div>'
         ].join(''));
 
         jInfoDiv.find('.BRfloatMeta').append([

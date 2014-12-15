@@ -388,6 +388,8 @@ class BookReader
             }
             else {
                 // Don't use the webpath to avoid the transfer through server.
+                // TODO WARNING: Image type is not the image path, except for
+                // original and fullsize...
                 $pathImg = FILES_DIR . DIRECTORY_SEPARATOR . $imageType . DIRECTORY_SEPARATOR . ($imageType == 'original' ? $file->filename : $file->getDerivativeFilename());
                 list($width, $height, $type, $attr) = getimagesize($pathImg);
                 $widths[] = $width;
@@ -403,11 +405,11 @@ class BookReader
 
     /**
      * Get an array of the number, label, witdh and height of each image file of
-     *  an item.
+     *  an item. Individual data are json encoded.
      *
      * @return array
-     *   Array of the index, number, label, width and height of images (leaves)
-     *  files of an item.
+     *   Array of the json encoded index, number, label, width and height of
+     * images (leaves) files of an item.
      */
     public static function imagesData($item = null, $imageType = 'fullsize')
     {
@@ -417,20 +419,15 @@ class BookReader
 
         // Some arrays need to be encoded in json for javascript. This function
         // produces a lighter array.
-        $json_encode_numbers = function($txt) {
-            return ((int) $txt == $txt)
+        $json_encode_value = function($txt) {
+            return (empty($txt) || (string) (integer) $txt == $txt)
                 ? $txt
-                : json_encode($txt);
-        };
-        $json_encode_labels = function($txt) {
-            return empty($txt)
-                ? ''
                 : json_encode($txt);
         };
 
         $indexes = self::getPageIndexes($item);
-        $numbers = array_map($json_encode_numbers, self::getPageNumbers($item));
-        $labels = array_map($json_encode_labels, self::getPageLabels($item));
+        $numbers = array_map($json_encode_value, self::getPageNumbers($item));
+        $labels = array_map($json_encode_value, self::getPageLabels($item));
         list($widths, $heights) = self::getImagesSizes($item, $imageType);
 
         return array(

@@ -20,13 +20,13 @@ class BookReader_Custom
      * Get the list of numbers of pages of an item.
      *
      * The page number is the name of a page of a file, like "6" or "XIV".
-     * If "null" is returned, the label in viewer will be the page index + 1.
      *
-     * This function is used to get quickly all page numbers of an item.
-     *  If the page number is empty, the label page will be used. If there is no
-     * page number, use 'null'.
+     * This function is used to get quickly all page numbers of an item. If the
+     * page number is empty, the label page will be used. If there is no page
+     * number, use 'null', so the label in viewer will be the page index + 1.
      *
      * In this example, numbers are saved in Dublin Core:Title as 'Page 1', etc.
+     * in metadata of each file.
      *
      * @see getPageLabels()
      *
@@ -47,7 +47,7 @@ class BookReader_Custom
                 }
                 else {
                     $firstSpace = strrpos($txt[0]->text, ' ');
-                    if (substr($txt[0]->text, 0, $firstSpace) == 'Page') {
+                    if (strtolower(substr($txt[0]->text, 0, $firstSpace)) == 'page') {
                         $txt = trim(substr($txt[0]->text, $firstSpace + 1));
                         $number = ((int) $txt == $txt)
                             ? $txt
@@ -74,6 +74,7 @@ class BookReader_Custom
      * information ("Page XIV : Illustration").
      *
      * In this example, numbers are saved in Dublin Core:Title as 'Cover', etc.
+     * in metadata of each file.
      *
      * @see getPageNumbers()
      *
@@ -88,14 +89,14 @@ class BookReader_Custom
                 $label = '';
             }
             else {
-                $txt = $item->getElementTexts('Dublin Core', 'Title');
+                $txt = $leaf->getElementTexts('Dublin Core', 'Title');
                 if (empty($txt)) {
                     $label = '';
                 }
                 else {
                     // Don't add a label if the label is like a page number.
                     $firstSpace = strrpos($txt[0]->text, ' ');
-                    $label = (substr($txt[0]->text, 0, $firstSpace) == 'Page')
+                    $label = strtolower(substr($txt[0]->text, 0, $firstSpace)) == 'page'
                         ? ''
                         : $txt[0]->text;
                 }

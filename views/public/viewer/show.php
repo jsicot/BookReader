@@ -142,34 +142,30 @@
     // This is used only to build the url to a specific page.
     br.getPageNum = function(index) {
         var pageNum = this.pageNums[index];
-        if (pageNum) {
+        if (pageNum && pageNum != 'null') {
             return pageNum;
-        } else {
-            var pageLabel = this.pageLabels[index];
-            if (pageLabel) {
-                return pageLabel;
-            } else {
-                // Accessible index starts at 0 so we add 1 to make human.
-                index++;
-                return 'n' + index;
-            }
         }
+        var pageLabel = this.pageLabels[index];
+        if (pageLabel) {
+            return pageLabel;
+        }
+        // Accessible index starts at 0 so we add 1 to make human.
+        index++;
+        return 'n' + index;
     }
 
     br.getPageLabel = function(index) {
         var pageLabel = this.pageLabels[index];
         if (pageLabel) {
             return pageLabel;
-        } else {
-            var pageNum = this.pageNums[index];
-            if (pageNum) {
-                return '<?php echo html_escape(__('Page')); ?> ' + pageNum;
-            } else {
-                // Accessible index starts at 0 so we add 1 to make human.
-                index++;
-                return 'n' + index;
-            }
         }
+        var pageNum = this.pageNums[index];
+        if (pageNum) {
+            return '<?php echo html_escape(__('Page')); ?> ' + pageNum;
+        }
+        // Accessible index starts at 0 so we add 1 to make human.
+        index++;
+        return 'n' + index;
     }
 
     // This is used only to get the page num from the url of a specific page.

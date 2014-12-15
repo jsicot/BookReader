@@ -2,16 +2,14 @@ BookReader (plugin for Omeka)
 =============================
 
 
-Summary
------------
-
 This plugin adds [Internet Archive BookReader] into [Omeka].
 The IA BookReader is used to view books from the Internet Archive online and can
 also be used to view other books.
 BookReader plugin for Omeka allows you to create online flip book from image
 files constituting an item.
 
-See demo of the [embedded version] or use in [fullscreen mode].
+See demo of the [embedded version] of [Mines ParisTech] or in [fullscreen mode]
+with highlighted results of a search in the OCR text ([Université Rennes 2]).
 
 
 Installation
@@ -22,7 +20,7 @@ Installation
 - Click the Configure link to add the following
     - URL for custom CSS
     - Favicon URL for viewer (reader) pages
-    - Path to custom php library (default is BookReaderCustom.php)
+    - Name of to custom class (default is `BookReader_Creator_Default`)
     - Sorting mode for the viewer (omeka default order or original filename order)
     - Number of pages in Embed mode (1 or 2)
     - Embed all functions (0 for none or 1 for all)
@@ -33,9 +31,13 @@ The viewer is always available at `http://www.example.com/viewer/show/{item id}`
 Furthermore, it is automatically embedded in items/show page. This can be
 disabled in the config of the plugin.
 
-If you want more control on the BookReader, add this code in the `items/show.php`
-file of your theme:
+To embed the BookReader with more control, three mechanisms are provided. So,
+according to your needs, you may add this code in the `items/show.php` file of
+your theme or anywhere else, as long as the item is defined (as variable or as
+current record 'item').
 
+- Hook
+    - With all options:
 ```
     <?php
     echo get_specific_plugin_hook_output('BookReader', 'public_items_show', array(
@@ -49,15 +51,32 @@ file of your theme:
     ?>
 ```
 
-If an option is not set, the parameters in the config page will be used.
-Image number starts from '0' with default functions.
+* Helper
+    - With no option:
+```
+     echo $this->getBookReader();
+```
+
+* Shortcode
+    - In a field that can be shortcoded: `[bookreader]`.
+    - Default in theme: `<?php echo $this->shortcodes('[bookreader]'); ?>`
+    - With all options:
+```
+    <?php
+        echo $this->shortcodes('[bookreader item=1 page=0 embed_functions=0 mode_page=1]');
+    ?>
+```
+
+All options are optional. If one is not defined, the parameters set in the
+config page will be used.
+The image number starts from '0' with default functions.
 
 
 Customing
 ---------
 
-There are several way to store data about items in Omeka, so the BookReader can
-be customized via a file in the libraries folder.
+There are several ways to store data about items in Omeka, so the BookReader can
+be customized via a class that extends `BookReader_Creator`.
 
 BookReader uses several arrays to get images and infos about them. Take a
 document of twelve pages as an example. In Javascript, we have these arrays:
@@ -123,8 +142,8 @@ Optional plugins
 The extract ocr and pdfToc plugins are highly recommended.
 
 - [Extract ocr] allows fulltext searching inside a flip book. To enable it in
-BookReader, you need to overwrite Bookreader/libraries/BookReaderCustom.php
-using Bookreader/libraries/BookReaderCustom_extractOCR.php or to set the path
+BookReader, you need to overwrite Bookreader/libraries/BookReader/Creator/Default.php
+using Bookreader/libraries/BookReader/Creator/ExtractOCR.php or to set the path
 in configuration panel of the extension.
 - [PDF Toc] retrieves table of contents from pdf file associated to an item.
 
@@ -186,13 +205,13 @@ BookReader Omeka plugin:
 [Omeka]: https://omeka.org
 [Internet Archive BookReader]: http://openlibrary.org/dev/docs/bookreader
 [source of IA BookReader]: http://github.com/openlibrary/bookreader
-[embedded version]: http://bibnum.univ-rennes2.fr/items/show/566
-[fullscreen mode]: http://bibnum.univ-rennes2.fr/viewer/show/566
+[embedded version]: https://patrimoine.mines-paristech.fr/document/Brochant_MS_39
+[fullscreen mode]: http://bibnum.univ-rennes2.fr/viewer/show/566#page/5/mode/1up
 [Extract ocr]: https://github.com/symac/Plugin-Extractocr
 [PDF Toc]: https://github.com/symac/Plugin-PdfToc
-[BookReader issues]: https://github.com/jsicot/BookReader/Issues "GitHub BookReader"
-[GNU/GPL]: https://www.gnu.org/licenses/gpl-3.0.html "GNU/GPL v3"
+[BookReader issues]: https://github.com/jsicot/BookReader/Issues
+[GNU/GPL]: https://www.gnu.org/licenses/gpl-3.0.html
 [Daniel Berthereau]: https://github.com/Daniel-KM
 [Julien Sicot]: https://github.com/jsicot
 [Université Rennes 2]: http://bibnum.univ-rennes2.fr
-[Mines ParisTech]: http://bib.mines-paristech.fr "Mines ParisTech / ENSMP"
+[Mines ParisTech]: http://bib.mines-paristech.fr

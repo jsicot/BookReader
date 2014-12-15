@@ -5,6 +5,13 @@
     }
     $title = BookReader::htmlCharacter($title);
 
+    if (!$bookreader->itemLeafsCount()) {
+        echo '<html><head></head><body>';
+        echo __('This item has no viewable files.');
+        echo '</body></html>';
+        return;
+    }
+
     $coverFile = $bookreader->getCoverFile();
 
     list($pageIndexes, $pageNumbers, $pageLabels, $imgWidths, $imgHeights) = $bookreader->imagesData();

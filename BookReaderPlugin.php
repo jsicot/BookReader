@@ -98,11 +98,12 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
     }
 
     /**
-     * Add the translations.
+     * Initialize the plugin.
      */
     public function hookInitialize()
     {
         add_translation_source(dirname(__FILE__) . '/languages');
+        add_shortcode('bookreader', array($this, 'shortcodeBookReader'));
     }
 
     /**
@@ -262,11 +263,6 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
      * Hook to display viewer.
      *
      * @param array $args
-     *   Two specific arguments:
-     *   - (integer) 'page': set the page to be shown when including the iframe,
-     *   - (boolean) 'embed_functions': allow user to include an iframe with all
-     *   functions (Zoom, Search...). Can be used to include a better viewer
-     *   into items/views.php without requiring user to use the full viewer.
      *
      * @return void
      */
@@ -277,41 +273,19 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
         }
 
         $view = empty($args['view']) ? get_view() : $args['view'];
-        $item = empty($args['item']) ? $view->item : $args['item'];
-        $part = empty($args['part'])? 0 : (integer) $args['part'];
-        $page = empty($args['page']) ? '0' : $args['page'];
+        echo $view->getBookReader($args);
+    }
 
-        // Currently, all or none functions are enabled.
-        $embed_functions = isset($args['embed_functions'])
-            ? $args['embed_functions']
-            : get_option('bookreader_embed_functions');
-
-        $mode_page = isset($args['mode_page'])
-            ? $args['mode_page']
-            : get_option('bookreader_mode_page');
-
-        // Build url of the page with iframe.
-        $url = WEB_ROOT . '/viewer/show/' . $item->id;
-        $url .= ($part > 1) ? '?part=' . $part : '';
-        $url .= $embed_functions ? '' : ((($part > 1) ? '&' : '?') . 'ui=embed');
-        $url .= '#';
-        $url .= empty($page) ? '' : 'page/n' . $page . '/';
-        $url .= 'mode/' . $mode_page . 'up';
-
-        $class = get_option('bookreader_class');
-        if (!empty($class)) {
-            $class = ' class="' . $class . '"';
-        }
-        $width = get_option('bookreader_width');
-        if (!empty($width)) {
-            $width = ' width="' . $width . '"';
-        }
-        $height = get_option('bookreader_height');
-        if (!empty($height)) {
-            $height = ' height="' . $height . '"';
-        }
-
-        $html = '<div><iframe src="' . $url . '"' . $class . $width . $height . ' frameborder="0"></iframe></div>';
-        echo $html;
+    /**
+     * Shortcode to display viewer.
+     *
+     * @param array $args
+     * @param Omeka_View $view
+     * @return string
+     */
+    public static function shortcodeBookReader($args, $view)
+    {
+        $args['view'] = $view;
+        return $view->getBookReader($args);
     }
 }

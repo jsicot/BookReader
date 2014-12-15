@@ -1,18 +1,12 @@
 <?php
-    $item = get_record_by_id('item', BookReader::currentItemId());
-    set_current_record('item', $item);
-
-    $title = metadata('item', array('Dublin Core', 'Title'));
-    if ($creator = metadata('item', array('Dublin Core', 'Creator'))) {
+    $title = metadata($item, array('Dublin Core', 'Title'));
+    if ($creator = metadata($item, array('Dublin Core', 'Creator'))) {
         $title .= ' - ' . $creator;
     }
     $title = BookReader::htmlCharacter($title);
     $coverFile = BookReader::getCoverFile($item);
 
     list($pageIndexes, $pageNumbers, $pageLabels, $imgWidths, $imgHeights) = BookReader::imagesData($item);
-
-    $ui = BookReader::currentItemUI();
-    $part = BookReader::currentItemPart();
 
     $server = preg_replace('#^https?://#', '', WEB_ROOT);
     $serverFullText = $server . '/book-reader/index/fulltext';
@@ -310,7 +304,7 @@
         return spreadIndices;
     }
 
-    br.ui = '<?php echo BookReader::currentItemUI(); ?>';
+    br.ui = '<?php echo $ui; ?>';
     // Book title and the URL used for the book title link
     br.bookTitle = <?php echo json_encode($title); ?>;
     br.bookUrl = "<?php echo record_url($item); ?>";

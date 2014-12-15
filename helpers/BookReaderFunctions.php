@@ -13,39 +13,6 @@ require_once get_option('bookreader_custom_library');
 class BookReader
 {
     /**
-     * Get the id of the current bookreader item.
-     *
-     * @return integer
-     *   The id of the current bookreader item.
-     */
-    public static function currentItemId()
-    {
-        return get_view()->bookreaderCurrentItem->id;
-    }
-
-    /**
-     * Get the ui of the current bookreader item.
-     *
-     * @return string
-     *   The ui of the current bookreader item.
-     */
-    public static function currentItemUI()
-    {
-        return get_view()->bookreaderCurrentItem->ui;
-    }
-
-    /**
-     * Get the ui of the current part of the bookreader item.
-     *
-     * @return string
-     *   The ui of the current part of the bookreader item.
-     */
-    public static function currentItemPart()
-    {
-        return get_view()->bookreaderCurrentItem->part;
-    }
-
-    /**
      * Get an array of all images of an item in order to display them with
      * BookReader.
      *

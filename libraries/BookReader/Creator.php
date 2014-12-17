@@ -279,9 +279,9 @@ abstract class BookReader_Creator
     {
         if (empty($file)) {
             $file = get_current_record('file');
-        }
-        if (empty($file)) {
-            return null;
+            if (empty($file)) {
+                return null;
+            }
         }
 
         $leaves = $this->getLeaves();

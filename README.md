@@ -36,8 +36,9 @@ according to your needs, you may add this code in the `items/show.php` file of
 your theme or anywhere else, as long as the item is defined (as variable or as
 current record 'item').
 
-- Hook
+* Hook
     - With all options:
+
 ```
     <?php
     echo get_specific_plugin_hook_output('BookReader', 'public_items_show', array(
@@ -53,6 +54,7 @@ current record 'item').
 
 * Helper
     - With no option:
+
 ```
      echo $this->getBookReader();
 ```
@@ -61,6 +63,7 @@ current record 'item').
     - In a field that can be shortcoded: `[bookreader]`.
     - Default in theme: `<?php echo $this->shortcodes('[bookreader]'); ?>`
     - With all options:
+
 ```
     <?php
         echo $this->shortcodes('[bookreader item=1 page=0 embed_functions=0 mode_page=1]');
@@ -83,8 +86,8 @@ document of twelve pages as an example. In Javascript, we have these arrays:
 - br.leafMap : mapping of pages, as [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
 - br.pageNums : number of pages, as [,, "i", "ii", "iii", "iv", 1, 2, 3, 4, 5,]
 - br.pageLabels : label of pages, as ["Cover", "Blank",,,,, "Page 1 (unnumbered)",,,,, "Back cover"]
-- br.pageWidths : default width of each image, as [500, 500, 500, 500, 500, 500, 500, 500, 500, 500, 500, 500]
-- br.pageHeights : default height of each image, as [800, 800, 800, 800, 800, 800, 800, 800, 800, 800, 800, 800]
+- br.pageWidths : width of each image, as [500, 500, 500, 500, 500, 500, 500, 500, 500, 500, 500, 500]
+- br.pageHeights : height of each image, as [800, 800, 800, 800, 800, 800, 800, 800, 800, 800, 800, 800]
 
 With the default files of BookReader, all images of an item are displayed, so
 the leafMap indexes are always a simple list of numbers like above (starting

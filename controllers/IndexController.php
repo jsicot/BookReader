@@ -24,27 +24,27 @@ class BookReader_IndexController extends Omeka_Controller_AbstractActionControll
      * The resulted javascript/json is echoed and sent via Ajax.
      *
      * The structure of the json object is:
-     *     ->ia = item id
-     *     ->q = query
-     *      ->page_count = page count (useless)
-     *      ->body_length = body lenght (useless)
-     *      ->leaf0_missing = generally empty
-     *     ->matches = results as array of objects
-     *         ->text = few words to contextualize the result, used in nav bar
-     *         ->par = array of par zones (currently, only the [0] is used)
-     *             ->t = top limit of global zone
-     *             ->l = left limit of global zone
-     *             ->b = bottom limit of global zone
-     *             ->r = right limit of global zone
+     * ->ia = item id
+     * ->q = query
+     * ->page_count = page count (useless)
+     * ->body_length = body lenght (useless)
+     * ->leaf0_missing = generally empty
+     * ->matches = results as array of objects
+     *     ->text = few words to contextualize the result, used in nav bar
+     *     ->par = array of parallel images (currently, only the [0] is used)
+     *         ->t = top limit of global zone
+     *         ->l = left limit of global zone
+     *         ->b = bottom limit of global zone
+     *         ->r = right limit of global zone
+     *         ->page = page number
+     *         ->index = page index
+     *         ->boxes = array of coordinates of boxes to highlight
+     *             ->t = top limit of word zone
+     *             ->l = left limit of word zone
+     *             ->b = bottom limit of word zone
+     *             ->r = right limit of word zone
      *             ->page = page number
      *             ->index = page index
-     *             ->boxes = array of coordinates of boxes to highlight
-     *                 ->t = top limit of word zone
-     *                 ->l = left limit of word zone
-     *                 ->b = bottom limit of word zone
-     *                 ->r = right limit of word zone
-     *                 ->page = page number
-     *                 ->index = page index
      * Note that only one of "page" or "index" is needed. Index is prefered,
      * because it's generally simpler to manage and more efficient.
      */
@@ -140,12 +140,13 @@ class BookReader_IndexController extends Omeka_Controller_AbstractActionControll
 
         $bookreader = new BookReader($item);
         $imagesFiles = $bookreader->getLeaves();
-        $image = $imagesFiles[$index];
-        $image = empty($image)
+        $file = $imagesFiles[$index];
+        $filepath = empty($file)
             ? dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR . 'shared' . DIRECTORY_SEPARATOR . 'images' . DIRECTORY_SEPARATOR . 'blank.png'
-            : $image->getWebPath($type);
+            : FILES_DIR . DIRECTORY_SEPARATOR . $file->getStoragePath($type);
 
-        $image = file_get_contents($image);
+        $image = file_get_contents($filepath);
+
         $this->getResponse()->clearBody ();
         $this->getResponse()->setHeader('Content-Type', 'image/jpeg');
         $this->getResponse()->setBody($image);

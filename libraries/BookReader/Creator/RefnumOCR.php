@@ -116,9 +116,9 @@ class BookReader_Creator_RefnumOCR extends BookReader_Creator
             }
             // We don't use the type of page, because here, the list contains
             // only the digitalized leaves.
-            $multiple = $file-> getElementTexts('refNum', 'Vue multiple');
+            $multiple = $file-> getElementTexts('refNum', 'Nombre vues');
             $multiple = $multiple ? $multiple[0]->text : '';
-            $position = $file->getElementTexts('refNum', 'Position de la vue');
+            $position = $file->getElementTexts('refNum', 'Position de la page');
             $position = $position ? $position[0]->text : '';
 
             // Insert missing or non digitalized leaves as null.
@@ -230,7 +230,7 @@ class BookReader_Creator_RefnumOCR extends BookReader_Creator
         $first = true;
         foreach($leaves as $key => $leaf) {
             if ($first === true) {
-                $position = $leaf->getElementTexts('refNum', 'Position de la vue');
+                $position = $leaf->getElementTexts('refNum', 'Position de la page');
                 $first = ($position && $position[0]->text == 'Gauche') ? 1 : 0;
             }
             $indexes[] = $first + $key;

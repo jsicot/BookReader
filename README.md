@@ -154,7 +154,7 @@ in configuration panel of the extension.
 Troubleshooting
 ---------------
 
-See online [BookReader issues].
+See online issues on the [plugin issues] page on GitHub.
 
 
 License
@@ -202,17 +202,17 @@ described in the LICENSE file.
 BookReader Omeka plugin:
 
 * Copyright Julien Sicot, 2011-2013
-* Copyright Daniel Berthereau, 2013-2014 (upgrade for Omeka 2.0)
+* Copyright Daniel Berthereau, 2013-2015 (upgrade for Omeka 2.0)
 
 
 [Omeka]: https://omeka.org
 [Internet Archive BookReader]: http://openlibrary.org/dev/docs/bookreader
-[source of IA BookReader]: http://github.com/openlibrary/bookreader
+[source of IA BookReader]: https://github.com/openlibrary/bookreader
 [embedded version]: https://patrimoine.mines-paristech.fr/document/Brochant_MS_39
 [fullscreen mode]: http://bibnum.univ-rennes2.fr/viewer/show/566#page/5/mode/1up
 [Extract ocr]: https://github.com/symac/Plugin-Extractocr
 [PDF Toc]: https://github.com/symac/Plugin-PdfToc
-[BookReader issues]: https://github.com/jsicot/BookReader/Issues
+[plugin issues]: https://github.com/jsicot/BookReader/issues
 [GNU/GPL]: https://www.gnu.org/licenses/gpl-3.0.html
 [Daniel Berthereau]: https://github.com/Daniel-KM
 [Julien Sicot]: https://github.com/jsicot

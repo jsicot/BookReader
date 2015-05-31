@@ -16,7 +16,7 @@ This file is part of BookReader.
     You should have received a copy of the GNU Affero General Public License
     along with BookReader.  If not, see <http://www.gnu.org/licenses/>.
 
-    The BookReader source is hosted at http://github.com/openlibrary/bookreader/
+    The BookReader source is hosted at https://github.com/openlibrary/bookreader/
 
 */
 

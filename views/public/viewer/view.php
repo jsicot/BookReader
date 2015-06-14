@@ -110,8 +110,8 @@ function spreadsheetLoaded(json) {
 
     br.imagesBaseURL = <?php echo json_encode($imgDir); ?>;
     br.leafMap = [];
-    br.server = "<?php echo $serverFullText; ?>";
-    br.bookPath = "<?php echo WEB_ROOT; ?>";
+    br.server = <?php echo json_encode($serverFullText); ?>;
+    br.bookPath = <?php echo json_encode(WEB_ROOT); ?>;
     br.bookId = <?php echo $item->id; ?>;
     br.titleLeaf = <?php echo $bookreader->getTitleLeaf(); ?>;
     <?php // Sub-prefix is the sub-document in BookReader.
@@ -120,6 +120,15 @@ function spreadsheetLoaded(json) {
     br.subPrefix = <?php echo empty($part) ? 0 : $part; ?>;
 
     br.numLeafs = imagesArray.length;
+
+    br.ui = <?php echo json_encode($ui); ?>;
+    // Book title and the URL used for the book title link
+    br.bookTitle = json["feed"]["title"]["$t"];
+    br.bookUrl = <?php echo json_encode(record_url($item)); ?>;
+    br.logoURL = <?php echo json_encode(WEB_ROOT); ?>;
+    br.siteName = <?php echo json_encode(option('site_title')); ?>;
+    // Override the path used to find UI images
+    br.imagesBaseURL = <?php echo json_encode($imgDir); ?>;
 
     // Return the width of a given page, else we assume all images are 800
     // pixels wide.
@@ -303,15 +312,6 @@ function spreadsheetLoaded(json) {
         }
         return spreadIndices;
     }
-
-    br.ui = <?php echo json_encode($ui); ?>;
-    // Book title and the URL used for the book title link
-    br.bookTitle = json["feed"]["title"]["$t"];
-    br.bookUrl = <?php echo json_encode(record_url($item)); ?>;
-    br.logoURL = <?php echo json_encode(WEB_ROOT); ?>;
-    br.siteName = <?php echo json_encode(option('site_title')); ?>;
-    // Override the path used to find UI images
-    br.imagesBaseURL = <?php echo json_encode($imgDir); ?>;
 
     br.buildInfoDiv = function(jInfoDiv) {
         // $$$ it might make more sense to have a URL on openlibrary.org that returns this info

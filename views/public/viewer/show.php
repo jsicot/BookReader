@@ -63,13 +63,13 @@
     // Create the BookReader object
     br = new BookReader();
 
-    br.leafMap = [<?php echo implode(',', $pageIndexes); ?>];
-    br.pageNums = [<?php echo implode(',', $pageNumbers); ?>];
-    br.pageLabels = [<?php echo implode(',', $pageLabels); ?>];
-    br.pageWidths = [<?php echo implode(',', $imgWidths); ?>];
-    br.pageHeights = [<?php echo implode(',', $imgHeights); ?>];
-    br.server = "<?php echo $serverFullText; ?>";
-    br.bookPath = "<?php echo WEB_ROOT; ?>";
+    br.leafMap = <?php echo json_encode($pageIndexes); ?>;
+    br.pageNums = <?php echo json_encode($pageNumbers); ?>;
+    br.pageLabels = <?php echo json_encode($pageLabels); ?>;
+    br.pageWidths = <?php echo json_encode($imgWidths); ?>;
+    br.pageHeights = <?php echo json_encode($imgHeights); ?>;
+    br.server = <?php echo json_encode($serverFullText); ?>;
+    br.bookPath = <?php echo json_encode(WEB_ROOT); ?>;
     br.bookId = <?php echo $item->id; ?>;
     br.titleLeaf = <?php echo $bookreader->getTitleLeaf(); ?>;
     <?php // Sub-prefix is the sub-document in BookReader.
@@ -78,6 +78,15 @@
     br.subPrefix = <?php echo empty($part) ? 0 : $part; ?>;
 
     br.numLeafs = br.leafMap.length;
+
+    br.ui = <?php echo json_encode($ui); ?>;
+    // Book title and the URL used for the book title link
+    br.bookTitle = <?php echo json_encode($title); ?>;
+    br.bookUrl = <?php echo json_encode(record_url($item)); ?>;
+    br.logoURL = <?php echo json_encode(WEB_ROOT); ?>;
+    br.siteName = <?php echo json_encode(option('site_title')); ?>;
+    // Override the path used to find UI images
+    br.imagesBaseURL = <?php echo json_encode($imgDir); ?>;
 
     // If there is no width, it will be the width of the verso of the current
     // leaf, else width of first or last page.
@@ -309,15 +318,6 @@
         }
         return spreadIndices;
     }
-
-    br.ui = <?php echo json_encode($ui); ?>;
-    // Book title and the URL used for the book title link
-    br.bookTitle = <?php echo json_encode($title); ?>;
-    br.bookUrl = <?php echo json_encode(record_url($item)); ?>;
-    br.logoURL = <?php echo json_encode(WEB_ROOT); ?>;
-    br.siteName = <?php echo json_encode(option('site_title')); ?>;
-    // Override the path used to find UI images
-    br.imagesBaseURL = <?php echo json_encode($imgDir); ?>;
 
     br.buildInfoDiv = function(jInfoDiv) {
         // $$$ it might make more sense to have a URL on openlibrary.org that returns this info

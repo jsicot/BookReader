@@ -1,19 +1,20 @@
 <?php
-    //retrieve item id
-    $id = BookReader::bookreaderCurrItemId();
-    $item = get_record_by_id('item', $id);
-    set_current_record('item', $item);
-
-    $title = metadata('item', array('Dublin Core', 'Title'));
-    if ($creator = metadata('item', array('Dublin Core', 'Creator'))) {
+    $title = metadata($item, array('Dublin Core', 'Title'));
+    if ($creator = metadata($item, array('Dublin Core', 'Creator'))) {
         $title .= ' - ' . $creator;
     }
     $title = BookReader::htmlCharacter($title);
-    $coverFile = BookReader::getCoverFile($item);
 
-    list($imgNums, $imgLabels, $imgWidths, $imgHeights) = BookReader::imagesData();
+    if (!$bookreader->itemLeafsCount()) {
+        echo '<html><head></head><body>';
+        echo __('This item has no viewable files.');
+        echo '</body></html>';
+        return;
+    }
 
-    $ui = BookReader::bookreaderCurrItemUI();
+//    $coverFile = $bookreader->getCoverFile();
+
+    list($pageIndexes, $pageNumbers, $pageLabels, $imgWidths, $imgHeights) = $bookreader->imagesData();
 
     $server = preg_replace('#^https?://#', '', WEB_ROOT);
     $serverFullText = $server . '/book-reader/index/fulltext';
@@ -28,12 +29,14 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
     <base target="_parent" />
-  <!--   <link rel="apple-touch-icon" href="<?php //echo WEB_FILES . '/thumbnails/' . $coverFile->getDerivativeFilename(); ?>" /> -->
+<!--    <link rel="apple-touch-icon" href="<?php // echo $coverFile->getWebPath('thumbnail'); ?>" /> -->
     <link rel="shortcut icon" href="<?php echo get_option('bookreader_favicon_url'); ?>" type="image/x-icon" />
     <title><?php echo $title; ?></title>
     <!-- Stylesheets -->
     <link rel="stylesheet" href="<?php echo $sharedUrl . '/css/BookReader.css'; ?>" />
-    <link rel="stylesheet" href="<?php echo get_option('bookreader_custom_css'); ?>" />
+    <?php if ($custom_css = get_option('bookreader_custom_css')): ?>
+    <link rel="stylesheet" href="<?php echo url($custom_css); ?>" />
+    <?php endif; ?>
     <!-- JavaScripts -->
     <script type="text/javascript" src="<?php echo $sharedUrl . '/javascripts/jquery-1.4.2.min.js'; ?>" charset="utf-8"></script>
     <script type="text/javascript" src="<?php echo $sharedUrl . '/javascripts/jquery-ui-1.8.5.custom.min.js'; ?>" charset="utf-8"></script>
@@ -84,13 +87,12 @@ function spreadsheetLoaded(json) {
     var externalArray = [];
     var htmlstring = "";
 
-    // Let's go!
-    //br.init();
-
     // Read-aloud and search need backend compenents and are not supported in
     // the demo.
     br = new BookReader();
-    br.imagesBaseURL = '../BookReader/images/';
+    br.imagesBaseURL = <?php echo json_encode($imgDir); ?>;
+    br.pageNums = [];
+    br.pageLabels = [];
 
     // Return the width of a given page, else we assume all images are 800
     // pixels wide.
@@ -110,6 +112,64 @@ function spreadsheetLoaded(json) {
         } else {
             return 1200;
         }
+    }
+
+    // TODO Bug if page num starts with a "n" (rarely used as page number).
+    // This is used only to build the url to a specific page.
+    br.getPageNum = function(index) {
+        var pageNum = this.pageNums[index];
+        if (pageNum && pageNum != 'null') {
+            return pageNum;
+        }
+        var pageLabel = this.pageLabels[index];
+        if (pageLabel) {
+            return pageLabel;
+        }
+        // Accessible index starts at 0 so we add 1 to make human.
+        index++;
+        return 'n' + index;
+    }
+
+    br.getPageLabel = function(index) {
+        var pageLabel = this.pageLabels[index];
+        if (pageLabel) {
+            return pageLabel;
+        }
+        var pageNum = this.pageNums[index];
+        if (pageNum) {
+            return '<?php echo html_escape(__('Page')); ?> ' + pageNum;
+        }
+        // Accessible index starts at 0 so we add 1 to make human.
+        index++;
+        return 'n' + index;
+    }
+
+    // This is used only to get the page num from the url of a specific page.
+    // This is needed because the hash can be the number or the label.
+    // Practically, it does a simple check of the page hash.
+    br.getPageNumFromHash = function(pageHash) {
+        // Check if this is a page number.
+        for (var index = 0; index < this.pageNums.length; index++) {
+            if (this.pageNums[index] == pageHash) {
+                return pageHash;
+            }
+        }
+        // Check if this is a page label.
+        for (var index = 0; index < this.pageLabels.length; index++) {
+            if (this.pageLabels[index] == pageHash) {
+                return pageHash;
+            }
+        }
+        // Check if this is an index.
+        if (pageHash.slice(0,1) == 'n') {
+            var pageIndex = pageHash.slice(1, pageHash.length);
+            // Index starts at 0 so we make it internal.
+            pageIndex = parseInt(pageIndex) - 1;
+            if (this.getPageNum(pageIndex) == pageHash) {
+                return pageHash;
+            }
+        }
+        return undefined;
     }
 
     // We load the images from archive.org.
@@ -191,11 +251,100 @@ function spreadsheetLoaded(json) {
     br.getEmbedCode = function(frameWidth, frameHeight, viewParams) {
         return "Embed code not supported in bookreader demo.";
     }
+
+    br.initUIStrings = function() {
+        var titles = {
+            '.logo': <?php echo json_encode(__('Go to %s', option('site_title'))); ?>, // $$$ update after getting OL record
+            '.zoom_in': <?php echo json_encode(__('Zoom in')); ?>,
+            '.zoom_out': <?php echo json_encode(__('Zoom out')); ?>,
+            '.onepg': <?php echo json_encode(__('One-page view')); ?>,
+            '.twopg': <?php echo json_encode(__('Two-page view')); ?>,
+            '.thumb': <?php echo json_encode(__('Thumbnail view')); ?>,
+            '.print': <?php echo json_encode(__('Print this page')); ?>,
+            '.embed': <?php echo json_encode(__('Embed BookReader')); ?>,
+            '.link': <?php echo json_encode(__('Link to this document and page')); ?>,
+            '.bookmark': <?php echo json_encode(__('Bookmark this page')); ?>,
+            '.read': <?php echo json_encode(__('Read this document aloud')); ?>,
+            '.share': <?php echo json_encode(__('Share this document')); ?>,
+            '.info': <?php echo json_encode(__('About this document')); ?>,
+            '.full': <?php echo json_encode(__('Show fullscreen')); ?>,
+            '.book_left': <?php echo json_encode(__('Flip left')); ?>,
+            '.book_right': <?php echo json_encode(__('Flip right')); ?>,
+            '.book_up': <?php echo json_encode(__('Page up')); ?>,
+            '.book_down': <?php echo json_encode(__('Page down')); ?>,
+            '.play': <?php echo json_encode(__('Play')); ?>,
+            '.pause': <?php echo json_encode(__('Pause')); ?>,
+            '.BRdn': <?php echo json_encode(__('Show/hide nav bar')); ?>, // Would have to keep updating on state change to have just "Hide nav bar"
+            '.BRup': <?php echo json_encode(__('Show/hide nav bar')); ?>,
+            '.book_top': <?php echo json_encode(__('First page')); ?>,
+            '.book_bottom': <?php echo json_encode(__('Last page')); ?>
+        };
+        if ('rl' == this.pageProgression) {
+            titles['.book_leftmost'] = <?php echo json_encode(__('Last page')); ?>;
+            titles['.book_rightmost'] = <?php echo json_encode(__('First page')); ?>;
+        } else { // LTR
+            titles['.book_leftmost'] = <?php echo json_encode(__('First page')); ?>;
+            titles['.book_rightmost'] = <?php echo json_encode(__('Last page')); ?>;
+        }
+
+        for (var icon in titles) {
+            if (titles.hasOwnProperty(icon)) {
+                $('#BookReader').find(icon).attr('title', titles[icon]);
+            }
+        }
+    }
+
+    br.i18n = function(msg) {
+        var msgs = {
+            'View':<?php echo json_encode(__('View')); ?>,
+            'Search results will appear below...':<?php echo json_encode(__('Search results will appear below...')); ?>,
+            'No matches were found.':<?php echo json_encode(__('No matches were found.')); ?>,
+            "This book hasn't been indexed for searching yet. We've just started indexing it, so search should be available soon. Please try again later. Thanks!":<?php echo json_encode(__("This book hasn't been indexed for searching yet. We've just started indexing it, so search should be available soon. Please try again later. Thanks!")); ?>,
+            'Embed Bookreader':<?php echo json_encode(__('Embed Bookreader')); ?>,
+            'The bookreader uses iframes for embedding. It will not work on web hosts that block iframes. The embed feature has been tested on blogspot.com blogs as well as self-hosted Wordpress blogs. This feature will NOT work on wordpress.com blogs.':<?php echo json_encode(__('The bookreader uses iframes for embedding. It will not work on web hosts that block iframes. The embed feature has been tested on blogspot.com blogs as well as self-hosted Wordpress blogs. This feature will NOT work on wordpress.com blogs.')); ?>,
+            'Close':<?php echo json_encode(__('Close')); ?>,
+            'Add a bookmark':<?php echo json_encode(__('Add a bookmark')); ?>,
+            'You can add a bookmark to any page in any book. If you elect to make your bookmark public, other readers will be able to see it.':<?php echo json_encode(__('You can add a bookmark to any page in any book. If you elect to make your bookmark public, other readers will be able to see it.')); ?>,
+            'You must be logged in to your <a href="">Open Library account</a> to add bookmarks.':<?php echo json_encode(__('You must be logged in to your <a href="">Open Library account</a> to add bookmarks.')); ?>,
+            'Make this bookmark public.':<?php echo json_encode(__('Make this bookmark public.')); ?>,
+            'Keep this bookmark private.':<?php echo json_encode(__('Keep this bookmark private.')); ?>,
+            'Add a bookmark':<?php echo json_encode(__('Add a bookmark')); ?>,
+            'Search result':<?php echo json_encode(__('Search result')); ?>,
+            'Search inside':<?php echo json_encode(__('Search inside')); ?>,
+            'GO':<?php echo json_encode(__('GO')); ?>,
+            "Go to this book's page on Open Library":<?php echo json_encode(__("Go to this book's page on Open Library")); ?>,
+            'Loading audio...':<?php echo json_encode(__('Loading audio...')); ?>,
+            'Could not load soundManager2, possibly due to FlashBlock. Audio playback is disabled':<?php echo json_encode(__('Could not load soundManager2, possibly due to FlashBlock. Audio playback is disabled')); ?>,
+            'About this book':<?php echo json_encode(__('About this book')); ?>,
+            'About the BookReader':<?php echo json_encode(__('About the BookReader')); ?>,
+            'Copy and paste one of these options to share this book elsewhere.':<?php echo json_encode(__('Copy and paste one of these options to share this book elsewhere.')); ?>,
+            'Link to this page view:':<?php echo json_encode(__('Link to this page view:')); ?>,
+            'Link to the book:':<?php echo json_encode(__('Link to the book:')); ?>,
+            'Embed a mini Book Reader:':<?php echo json_encode(__('Embed a mini Book Reader:')); ?>,
+            '1 page':<?php echo json_encode(__('1 page')); ?>,
+            '2 pages':<?php echo json_encode(__('2 pages')); ?>,
+            'Open to this page?':<?php echo json_encode(__('Open to this page?')); ?>,
+            'NOTE:':<?php echo json_encode(__('NOTE:')); ?>,
+            "We've tested EMBED on blogspot.com blogs as well as self-hosted Wordpress blogs. This feature will NOT work on wordpress.com blogs.":<?php echo json_encode(__("We've tested EMBED on blogspot.com blogs as well as self-hosted Wordpress blogs. This feature will NOT work on wordpress.com blogs.")); ?>,
+            'Finished':<?php echo json_encode(__('Finished')); ?>
+        };
+        return msgs[msg];
+    }
+
+    // Let's go!
     br.init();
+
     $('#BRtoolbar').find('.read').hide();
     $('#BRreturn').html($('#BRreturn').text());
-    //$('#textSrch').hide();
-    //$('#btnSrch').hide();
+
+<?php
+        // Si jamais la recherche n'est pas disponible (pas de fichier XML), on
+        // va masquer les éléments permettant de la lancer (SMA 201210)
+        if (!$bookreader->hasDataForSearch()): ?>
+    $('#textSrch').hide();
+    $('#btnSrch').hide();
+        <?php endif;
+?>
     return;
 }
 
@@ -218,17 +367,9 @@ $(document).ready(function() {
     console.log(window.location + "; " + key);
     loadData();
 });
-
-<?php
-    // Si jamais la recherche n'est pas disponible (pas de fichier XML), on
-    // va masquer les éléments permettant de la lancer (SMA 201210)
-    if (!BookReader::hasDataForSearch()): ?>
-$('#textSrch').hide();
-$('#btnSrch').hide();
-    <?php endif; ?>
     </script>
 
- <?php
+<?php
     // Table of Contents if exist, plugin PdfToc required.
     echo fire_plugin_hook('toc_for_bookreader', array(
          'view' => $this,

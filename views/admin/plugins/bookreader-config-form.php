@@ -1,18 +1,6 @@
 <fieldset id="fieldset-bookreader-general"><legend><?php echo __('General parameters'); ?></legend>
     <div class="field">
         <div class="two columns alpha">
-            <?php echo $this->formLabel('bookreader_favicon_url',
-                __('Favicon')); ?>
-        </div>
-        <div class='inputs five columns omega'>
-            <p class="explanation">
-                <?php echo __('Favicon URL for viewer pages.'); ?>
-            </p>
-            <?php echo $this->formText('bookreader_favicon_url', get_option('bookreader_favicon_url'), null); ?>
-        </div>
-    </div>
-    <div class="field">
-        <div class="two columns alpha">
             <?php echo $this->formLabel('bookreader_creator',
                 __('Creator')); ?>
         </div>

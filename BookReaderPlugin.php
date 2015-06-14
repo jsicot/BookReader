@@ -46,7 +46,6 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
      * @var array Options and their default values.
      */
     protected $_options = array(
-        'bookreader_favicon_url' => 'your_theme/images/favicon.ico',
         'bookreader_creator' => 'BookReader_Creator_Default',
         'bookreader_sorting_mode' => false,
         'bookreader_mode_page' => '1',
@@ -62,8 +61,6 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
      */
     public function hookInstall()
     {
-        $this->_options['bookreader_favicon_url'] = WEB_THEME . '/' . $this->_options['bookreader_favicon_url'];
-
         $this->_installOptions();
     }
 
@@ -89,6 +86,7 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
 
         if (version_compare($oldVersion, '2.7', '<')) {
             delete_option('bookreader_custom_css');
+            delete_option('bookreader_favicon_url');
         }
     }
 

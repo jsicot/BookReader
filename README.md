@@ -23,7 +23,6 @@ Installation
 - Upload the BookReader plugin folder into your plugins folder on the server;
 - Activate it from the admin → Settings → Plugins page
 - Click the Configure link to add the following
-    - Favicon URL for viewer (reader) pages
     - Name of to custom class (default is `BookReader_Creator_Default`)
     - Sorting mode for the viewer (omeka default order or original filename order)
     - Number of pages in Embed mode (1 or 2)

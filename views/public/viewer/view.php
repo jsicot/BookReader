@@ -1,5 +1,10 @@
 <?php
-    $spreadsheetUrl = 'https://spreadsheets.google.com/feeds/list/0Ag7PrlWT3aWadDdVODJLVUs0a1AtUVlUWlhnXzdwcGc/od6/public/values?alt=json-in-script&callback=spreadsheetLoaded';
+    if (empty($tableUrl)) {
+        echo '<html><head></head><body>';
+        echo __('This item has no viewable files.');
+        echo '</body></html>';
+        return;
+    }
 
     $title = metadata($item, array('Dublin Core', 'Title'));
     if ($creator = metadata($item, array('Dublin Core', 'Creator'))) {
@@ -305,7 +310,7 @@ function spreadsheetLoaded(json) {
     br.ui = <?php echo json_encode($ui); ?>;
     // Book title and the URL used for the book title link
     br.bookTitle = json["feed"]["title"]["$t"];
-    br.bookUrl = "proba" //BookReaderConfig.bookUrl;
+    br.bookUrl = <?php echo json_encode(record_url($item)); ?>;
     br.logoURL = <?php echo json_encode(WEB_ROOT); ?>;
     br.siteName = <?php echo json_encode(option('site_title')); ?>;
     // Override the path used to find UI images
@@ -477,7 +482,7 @@ function spreadsheetLoaded(json) {
 }
 
 function loadData() {
-    var dataurl = <?php echo json_encode($spreadsheetUrl); ?>;
+    var dataurl = <?php echo json_encode($tableUrl); ?>;
     $.ajax({
         url: dataurl,
         dataType: 'jsonP',
@@ -489,8 +494,8 @@ function loadData() {
 }
 
 $(document).ready(function() {
-    key = window.location.search.split("key=")[0];
-    console.log(window.location + "; " + key);
+    // key = window.location.search.split("key=")[0];
+    // console.log(window.location + "; " + key);
     loadData();
 });
     </script>

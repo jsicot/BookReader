@@ -141,15 +141,20 @@ too the first time a viewer is displayed for an item.
 Spreadsheet use
 ---------------
 
-- To test it, simply go to `items/view/1` (the id should exists, but is not
-really used).
+To test it, create an item with this value in Dublin Core : Relation:
+`https://spreadsheets.google.com/feeds/list/0Ag7PrlWT3aWadDdVODJLVUs0a1AtUVlUWlhnXzdwcGc/od6/public/values`.
+This is the public Atom feed of a Google Spreadsheet with five columns. These
+columns are `image`, `height`, `width`,`num` and `label`. Only the first one,
+that is the url to the image, is required. See [gDoc explanation] for more info.
+Then go to `http://example.org/items/view/{item id}`.
+
+Remarks:
+
+- Because data are not in the local database, the build of the Book Reader can
+take some seconds when the page is loaded.
 - Thumbs are not set because files are not in database but on custom server
-place listed in gDoc.The image 182 is set in the spreadsheet, but is empty.
-- Link to individual spreadsheet is hardcoded for testing, it needs to be
-extracted from item metadata.
-- Plugin now messes up Zoom.it plugin, so separation is needed.
-- Desired behaviour: user uploads PDF, pages are extracted but not added to
-item, pages converted to jpgs, and linked to plugin to feed bookreader.
+place listed in gDoc.
+- In the default example, the image 182 is set in the spreadsheet, but is empty.
 
 
 Optional plugins

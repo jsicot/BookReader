@@ -34,9 +34,6 @@
     <title><?php echo $title; ?></title>
     <!-- Stylesheets -->
     <link rel="stylesheet" href="<?php echo $sharedUrl . '/css/BookReader.css'; ?>" />
-    <?php if ($custom_css = get_option('bookreader_custom_css')): ?>
-    <link rel="stylesheet" href="<?php echo url($custom_css); ?>" />
-    <?php endif; ?>
     <!-- JavaScripts -->
     <script type="text/javascript" src="<?php echo $sharedUrl . '/javascripts/jquery-1.4.2.min.js'; ?>" charset="utf-8"></script>
     <script type="text/javascript" src="<?php echo $sharedUrl . '/javascripts/jquery-ui-1.8.5.custom.min.js'; ?>" charset="utf-8"></script>

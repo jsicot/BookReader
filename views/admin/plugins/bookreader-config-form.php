@@ -1,18 +1,6 @@
 <fieldset id="fieldset-bookreader-general"><legend><?php echo __('General parameters'); ?></legend>
     <div class="field">
         <div class="two columns alpha">
-            <?php echo $this->formLabel('bookreader_custom_css',
-                __('Custom css')); ?>
-        </div>
-        <div class='inputs five columns omega'>
-            <p class="explanation">
-                <?php echo __('Url (without root of the site) to a custom css for BookReader (let empty if none).'); ?>
-            </p>
-            <?php echo $this->formText('bookreader_custom_css', get_option('bookreader_custom_css'), null); ?>
-        </div>
-    </div>
-    <div class="field">
-        <div class="two columns alpha">
             <?php echo $this->formLabel('bookreader_favicon_url',
                 __('Favicon')); ?>
         </div>

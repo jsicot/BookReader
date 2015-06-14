@@ -46,7 +46,6 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
      * @var array Options and their default values.
      */
     protected $_options = array(
-        'bookreader_custom_css' => '',
         'bookreader_favicon_url' => 'your_theme/images/favicon.ico',
         'bookreader_creator' => 'BookReader_Creator_Default',
         'bookreader_sorting_mode' => false,
@@ -86,6 +85,10 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
             delete_option('bookreader_custom_library');
             set_option('bookreader_creator', $this->_options['bookreader_creator']);
             set_option('bookreader_append_items_show', $this->_options['bookreader_append_items_show']);
+        }
+
+        if (version_compare($oldVersion, '2.7', '<')) {
+            delete_option('bookreader_custom_css');
         }
     }
 

@@ -23,7 +23,6 @@ Installation
 - Upload the BookReader plugin folder into your plugins folder on the server;
 - Activate it from the admin → Settings → Plugins page
 - Click the Configure link to add the following
-    - URL for custom CSS
     - Favicon URL for viewer (reader) pages
     - Name of to custom class (default is `BookReader_Creator_Default`)
     - Sorting mode for the viewer (omeka default order or original filename order)
@@ -31,6 +30,9 @@ Installation
     - Embed all functions (0 for none or 1 for all)
     - The width of the inline frame (Embedded Simple Viewer)
     - The height of the inline frame (Embedded Simple Viewer)
+
+If you want to change more options, copy the file `views/public/viewer/show.php`
+in the subdirectory `book-reader/viewer/`of your theme and update it.
 
 The viewer is always available at `http://www.example.com/items/viewer/{item id}`.
 Furthermore, it is automatically embedded in items/show page. This can be

@@ -27,9 +27,12 @@ Installation
     - The width of the inline frame (Embedded Simple Viewer)
     - The height of the inline frame (Embedded Simple Viewer)
 
-The viewer is always available at `http://www.example.com/viewer/show/{item id}`.
+The viewer is always available at `http://www.example.com/items/viewer/{item id}`.
 Furthermore, it is automatically embedded in items/show page. This can be
 disabled in the config of the plugin.
+
+The url for the default page `items/viewer/:id` can be replaced by the old one
+`viewer/show/:id` or any other url via the file `routes.ini`.
 
 To embed the BookReader with more control, three mechanisms are provided. So,
 according to your needs, you may add this code in the `items/show.php` file of

@@ -45,9 +45,10 @@ class BookReader_View_Helper_GetBookReader extends Zend_View_Helper_Abstract
             : get_option('bookreader_mode_page');
 
         // Build url of the page with iframe.
-        $url = WEB_ROOT . '/viewer/show/' . $item->id;
-        $url .= ($part > 1) ? '?part=' . $part : '';
-        $url .= $embed_functions ? '' : ((($part > 1) ? '&' : '?') . 'ui=embed');
+        $queryParams = array();
+        if ($part > 1) $queryParams['part'] = $part;
+        if (empty($embed_functions)) $queryParams['ui'] = 'embed';
+        $url = absolute_url(array('id' => $item->id), 'bookreader_viewer', $queryParams);
         $url .= '#';
         $url .= empty($page) ? '' : 'page/n' . $page . '/';
         $url .= 'mode/' . $mode_page . 'up';

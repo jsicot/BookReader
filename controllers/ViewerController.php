@@ -8,6 +8,16 @@
  */
 class BookReader_ViewerController extends Omeka_Controller_AbstractActionController
 {
+    /**
+     * Forward to the 'browse' action
+     *
+     * @see self::browseAction()
+     */
+    public function indexAction()
+    {
+        $this->_forward('show');
+    }
+
     public function showAction()
     {
         $request = $this->getRequest();

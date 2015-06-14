@@ -139,19 +139,11 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
      */
     public function hookDefineRoutes($args)
     {
-        $router = $args['router'];
-
         if (is_admin_theme()) {
             return;
         }
 
-        $router->addRoute('bookreader_action', new Zend_Controller_Router_Route(
-            'viewer/:action/:id',
-            array(
-                'controller' => 'viewer',
-                'module' => 'book-reader',
-                'id' => '/d+',
-        )));
+        $args['router']->addConfig(new Zend_Config_Ini(dirname(__FILE__) . '/routes.ini', 'routes'));
     }
 
     /**

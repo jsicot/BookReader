@@ -372,7 +372,7 @@
         // We could generate a URL hash fragment here but for now we just leave at defaults
         //var url = 'http://' + window.location.host + '/stream/'+this.bookId;
         var bookId = <?php echo $item->id; ?>;
-        var url = '<?php echo WEB_ROOT; ?>/viewer/show/<?php echo $item->id; ?>';
+        var url = '<?php absolute_url(array('id' => $item->id), 'bookreader_viewer'); ?>';
         // if (this.subPrefix != this.bookId) { // Only include if needed
         //    url += '/' + this.subPrefix;
         // }

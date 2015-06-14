@@ -1,16 +1,16 @@
 <?php
-    $title = metadata($item, array('Dublin Core', 'Title'));
-    if ($creator = metadata($item, array('Dublin Core', 'Creator'))) {
-        $title .= ' - ' . $creator;
-    }
-    $title = BookReader::htmlCharacter($title);
-
     if (!$bookreader->itemLeafsCount()) {
         echo '<html><head></head><body>';
         echo __('This item has no viewable files.');
         echo '</body></html>';
         return;
     }
+
+    $title = metadata($item, array('Dublin Core', 'Title'));
+    if ($creator = metadata($item, array('Dublin Core', 'Creator'))) {
+        $title .= ' - ' . $creator;
+    }
+    $title = BookReader::htmlCharacter($title);
 
     $coverFile = $bookreader->getCoverFile();
 
@@ -59,10 +59,9 @@
     </div>
 
     <script type="text/javascript">
-    //
-    // This file shows the minimum you need to provide to BookReader to display a book
-    //
-    // Copyright (c) 2008-2009 Internet Archive. Software license AGPL version 3.
+// This file shows the minimum you need to provide to BookReader to display a book
+//
+// Copyright (c) 2008-2009 Internet Archive. Software license AGPL version 3.
 
     // Create the BookReader object
     br = new BookReader();
@@ -163,7 +162,7 @@
         }
         var pageNum = this.pageNums[index];
         if (pageNum) {
-            return '<?php echo html_escape(__('Page')); ?> ' + pageNum;
+            return <?php echo json_encode(__('Page')); ?> + ' ' + pageNum;
         }
         // Accessible index starts at 0 so we add 1 to make human.
         index++;
@@ -187,7 +186,7 @@
             }
         }
         // Check if this is an index.
-        if (pageHash.slice(0,1) == 'n') {
+        if (pageHash.slice(0, 1) == 'n') {
             var pageIndex = pageHash.slice(1, pageHash.length);
             // Index starts at 0 so we make it internal.
             pageIndex = parseInt(pageIndex) - 1;
@@ -240,8 +239,9 @@
         br.uniquifyPageNums();
     }
 
-    // We load the images from archive.org -- you can modify this function to retrieve images
-    // using a different URL structure
+    // We load the images from archive.org.
+    // You can modify this function to retrieve images using a different URL
+    // structure.
     br.getPageURI = function(index, reduce, rotate) {
         // reduce and rotate are ignored in this simple implementation, but we
         // could e.g. look at reduce and load images from a different directory
@@ -253,7 +253,8 @@
         return url;
     }
 
-    // Return which side, left or right, that a given page should be displayed on.
+    // Return which side, left or right, that a given page should be displayed
+    // on.
     br.getPageSide = function(index) {
         var leafNum = this.leafMap[index];
         if (0 == (leafNum & 0x1)) {
@@ -312,14 +313,14 @@
         return spreadIndices;
     }
 
-    br.ui = '<?php echo $ui; ?>';
+    br.ui = <?php echo json_encode($ui); ?>;
     // Book title and the URL used for the book title link
     br.bookTitle = <?php echo json_encode($title); ?>;
-    br.bookUrl = "<?php echo record_url($item); ?>";
-    br.logoURL = "<?php echo WEB_ROOT; ?>";
-    br.siteName = <?php echo json_encode(option('site_title'));?>;
+    br.bookUrl = <?php echo json_encode(record_url($item)); ?>;
+    br.logoURL = <?php echo json_encode(WEB_ROOT); ?>;
+    br.siteName = <?php echo json_encode(option('site_title')); ?>;
     // Override the path used to find UI images
-    br.imagesBaseURL = '<?php echo $imgDir; ?>';
+    br.imagesBaseURL = <?php echo json_encode($imgDir); ?>;
 
     br.buildInfoDiv = function(jInfoDiv) {
         // $$$ it might make more sense to have a URL on openlibrary.org that returns this info
@@ -372,7 +373,7 @@
         // We could generate a URL hash fragment here but for now we just leave at defaults
         //var url = 'http://' + window.location.host + '/stream/'+this.bookId;
         var bookId = <?php echo $item->id; ?>;
-        var url = '<?php absolute_url(array('id' => $item->id), 'bookreader_viewer'); ?>';
+        var url = '<?php echo absolute_url(array('id' => $item->id), 'bookreader_viewer'); ?>';
         // if (this.subPrefix != this.bookId) { // Only include if needed
         //    url += '/' + this.subPrefix;
         // }
@@ -471,6 +472,7 @@
 
     // Let's go!
     br.init();
+
     $('#BRtoolbar').find('.read').hide();
     $('#BRreturn').html($('#BRreturn').text());
 <?php
@@ -479,16 +481,16 @@
         if (!$bookreader->hasDataForSearch()): ?>
     $('#textSrch').hide();
     $('#btnSrch').hide();
-        <?php endif; ?>
+        <?php endif;
+?>
     </script>
 
-     <?php
-     // Table of Contents if exist, plugin PdfToc required.
-     echo fire_plugin_hook('toc_for_bookreader', array(
+<?php
+    // Table of Contents if exist, plugin PdfToc required.
+    echo fire_plugin_hook('toc_for_bookreader', array(
          'view' => $this,
          'item' => $item,
-     ));
-    ?>
-
+    ));
+?>
     </body>
 </html>

@@ -62,7 +62,6 @@
 
 // Create the BookReader object via spreadsheet data instead of Omeka database.
 
-imagesArray = [];
 function spreadsheetLoaded(json) {
     imagesArray = [];
 
@@ -74,10 +73,29 @@ function spreadsheetLoaded(json) {
 
     for (n in parts) {
         if (parts[n]["gsx$image"] != undefined) {
+            var image =parts[n]["gsx$image"]["$t"];
+            var height = null;
+            var width = null;
+            var num = null;
+            var label = null;
+            if (parts[n]["gsx$height"] != undefined) {
+                height = parts[n]["gsx$height"]["$t"];
+            }
+            if (parts[n]["gsx$width"] != undefined) {
+                width = parts[n]["gsx$width"]["$t"];
+            }
+            if (parts[n]["gsx$num"] != undefined) {
+                num = parts[n]["gsx$num"]["$t"];
+            }
+            if (parts[n]["gsx$label"] != undefined) {
+                label = parts[n]["gsx$label"]["$t"];
+            }
             imagesArray.push({
-                "image": parts[n]["gsx$image"]["$t"],
-                "height": parts[n]["gsx$height"]["$t"],
-                "width": parts[n]["gsx$width"]["$t"]
+                "image": image,
+                "height": height,
+                "width": width,
+                "num": num,
+                "label": label
             });
         }
     }
@@ -90,8 +108,6 @@ function spreadsheetLoaded(json) {
 
     br.imagesBaseURL = <?php echo json_encode($imgDir); ?>;
     br.leafMap = [];
-    br.pageNums = [];
-    br.pageLabels = [];
     br.server = "<?php echo $serverFullText; ?>";
     br.bookPath = "<?php echo WEB_ROOT; ?>";
     br.bookId = <?php echo $item->id; ?>;
@@ -131,11 +147,11 @@ function spreadsheetLoaded(json) {
     // TODO Bug if page num starts with a "n" (rarely used as page number).
     // This is used only to build the url to a specific page.
     br.getPageNum = function(index) {
-        var pageNum = this.pageNums[index];
-        if (pageNum && pageNum != 'null') {
+        var pageNum = imagesArray[index].num;
+        if (pageNum && pageNum != undefined) {
             return pageNum;
         }
-        var pageLabel = this.pageLabels[index];
+        var pageLabel = imagesArray[index].label;
         if (pageLabel) {
             return pageLabel;
         }
@@ -145,13 +161,13 @@ function spreadsheetLoaded(json) {
     }
 
     br.getPageLabel = function(index) {
-        var pageLabel = this.pageLabels[index];
+        var pageLabel = imagesArray[index].label;
         if (pageLabel) {
             return pageLabel;
         }
-        var pageNum = this.pageNums[index];
+        var pageNum = imagesArray[index].num;
         if (pageNum) {
-            return '<?php echo html_escape(__('Page')); ?> ' + pageNum;
+            return <?php echo json_encode(__('Page')); ?> + ' ' + pageNum;
         }
         // Accessible index starts at 0 so we add 1 to make human.
         index++;
@@ -163,19 +179,19 @@ function spreadsheetLoaded(json) {
     // Practically, it does a simple check of the page hash.
     br.getPageNumFromHash = function(pageHash) {
         // Check if this is a page number.
-        for (var index = 0; index < this.pageNums.length; index++) {
-            if (this.pageNums[index] == pageHash) {
+        for (var index = 0; index < br.numLeafs; index++) {
+            if (imagesArray[index].num == pageHash) {
                 return pageHash;
             }
         }
         // Check if this is a page label.
-        for (var index = 0; index < this.pageLabels.length; index++) {
-            if (this.pageLabels[index] == pageHash) {
+        for (var index = 0; index < br.numLeafs; index++) {
+            if (imagesArray[index].label == pageHash) {
                 return pageHash;
             }
         }
         // Check if this is an index.
-        if (pageHash.slice(0,1) == 'n') {
+        if (pageHash.slice(0, 1) == 'n') {
             var pageIndex = pageHash.slice(1, pageHash.length);
             // Index starts at 0 so we make it internal.
             pageIndex = parseInt(pageIndex) - 1;
@@ -213,12 +229,12 @@ function spreadsheetLoaded(json) {
     br.uniquifyPageNums = function() {
         var seen = {};
 
-        for (var i = br.pageNums.length - 1; i--; i >= 0) {
-            var pageNum = br.pageNums[i];
+        for (var i = br.numLeafs - 1; i--; i >= 0) {
+            var pageNum = imagesArray[i].num;
             if ( !seen[pageNum] ) {
                 seen[pageNum] = true;
             } else {
-                br.pageNums[i] = null;
+                imagesArray[i].num = null;
             }
         }
     }

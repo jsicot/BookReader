@@ -1,4 +1,4 @@
-<fieldset id="fieldset-embed"><legend><?php echo __('General parameters'); ?></legend>
+<fieldset id="fieldset-bookreader-general"><legend><?php echo __('General parameters'); ?></legend>
     <div class="field">
         <div class="two columns alpha">
             <?php echo $this->formLabel('bookreader_custom_css',
@@ -52,7 +52,7 @@
         </div>
     </div>
 </fieldset>
-<fieldset id="fieldset-embed"><legend><?php echo __('Embed mode'); ?></legend>
+<fieldset id="fieldset-bookreader-embed"><legend><?php echo __('Embed mode'); ?></legend>
     <div class="field">
         <div class="two columns alpha">
             <?php echo $this->formLabel('bookreader_append_items_show',

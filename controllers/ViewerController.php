@@ -20,6 +20,19 @@ class BookReader_ViewerController extends Omeka_Controller_AbstractActionControl
 
     public function showAction()
     {
+        $this->_prepareViewer();
+    }
+
+    public function viewAction()
+    {
+        $this->_prepareViewer();
+    }
+
+    /**
+     * Helpert to prepare the viewer (only the javascript differs in view).
+     */
+    protected function _prepareViewer()
+    {
         $request = $this->getRequest();
         $id = $request->getParam('id');
         $item = get_record_by_id('Item', $id);

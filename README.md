@@ -1,15 +1,20 @@
 BookReader (plugin for Omeka)
 =============================
 
-
-This plugin adds [Internet Archive BookReader] into [Omeka].
+[BookReader] is a plugin for [Omeka] that adds [Internet Archive BookReader].
 The IA BookReader is used to view books from the Internet Archive online and can
 also be used to view other books.
-BookReader plugin for Omeka allows you to create online flip book from image
-files constituting an item.
+
+So you can create online flip book from image files constituting an item or from
+files listed in a gDoc spreadsheet.
 
 See demo of the [embedded version] of [Mines ParisTech] or in [fullscreen mode]
 with highlighted results of a search in the OCR text ([Université Rennes 2]).
+
+For the spreasheet use, see [gDoc explanation]. The javascript included comes
+from [BookReader spreadsheet] via [Dušan Ranđelović fork]. Main benefit is that item
+doesn't need to have all pages/images uploaded to Omeka and that there is no
+need for composit PDF, so presentation is completely parted from metadata.
 
 
 Installation
@@ -133,13 +138,18 @@ should check if these data are available and use them. This function can be used
 too the first time a viewer is displayed for an item.
 
 
-Using the BookReader Plugin
----------------------------
+Spreadsheet use
+---------------
 
-- Create an item
-- Add some image files to this item
-- Add eventually PDF file to this item (PDF file should be consist of the same
-images uploaded in previous step)
+- To test it, simply go to `items/view/1` (the id should exists, but is not
+really used).
+- Thumbs are not set because files are not in database but on custom server
+place listed in gDoc.The image 182 is set in the spreadsheet, but is empty.
+- Link to individual spreadsheet is hardcoded for testing, it needs to be
+extracted from item metadata.
+- Plugin now messes up Zoom.it plugin, so separation is needed.
+- Desired behaviour: user uploads PDF, pages are extracted but not added to
+item, pages converted to jpgs, and linked to plugin to feed bookreader.
 
 
 Optional plugins
@@ -207,9 +217,18 @@ BookReader Omeka plugin:
 * Copyright Julien Sicot, 2011-2013
 * Copyright Daniel Berthereau, 2013-2015 (upgrade for Omeka 2.0)
 
+BookReader Spreadsheet:
 
+* Copyright Doug Reside, 2013
+* Copyright Dušan Ranđelović, 2013
+
+
+[BookReader]: https://github.com/Daniel-KM/BookReader
 [Omeka]: https://omeka.org
 [Internet Archive BookReader]: http://openlibrary.org/dev/docs/bookreader
+[BookReader spreadsheet]: https://github.com/dougreside/bookreaderspreadsheet
+[Dušan Ranđelović fork]: https://github.com/duxan/BookReader-PDF
+[gDoc explanation]: http://www.nypl.org/blog/2013/06/25/binding-your-own-ebooks-pt-1-bookreader
 [source of IA BookReader]: https://github.com/openlibrary/bookreader
 [embedded version]: https://patrimoine.mines-paristech.fr/document/Brochant_MS_39
 [fullscreen mode]: http://bibnum.univ-rennes2.fr/viewer/show/566#page/5/mode/1up

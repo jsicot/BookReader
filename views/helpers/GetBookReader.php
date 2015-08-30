@@ -8,8 +8,8 @@ class BookReader_View_Helper_GetBookReader extends Zend_View_Helper_Abstract
      * Get the specified BookReader.
      *
      * @param array $args Associative array of optional values:
-     *   - (integer|Item) item
-     *   - (integer) page: set the page to be shown when including the iframe,
+     *   - (integer|Item) item: The item is the current one if not set.
+     *   - (integer) page: set the page to be shown when including the iframe.
      *   - (boolean) embed_functions: include buttons (Zoom, Search...).
      *   - (integer) mode_page: allow to display 1 or 2 pages side-by-side.
      *   - (integer) part: can be used to display the specified part of a book.

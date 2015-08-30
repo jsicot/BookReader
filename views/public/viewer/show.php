@@ -30,7 +30,9 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
     <base target="_parent" />
     <link rel="shortcut icon" href="<?php echo WEB_ROOT . '/favicon.ico'; ?>" type="image/x-icon" />
+    <?php if ($coverFile): ?>
     <link rel="apple-touch-icon" href="<?php echo $coverFile->getWebPath('thumbnail'); ?>" />
+    <?php endif; ?>
     <title><?php echo $title; ?></title>
     <!-- Stylesheets -->
     <link rel="stylesheet" href="<?php echo $sharedUrl . '/css/BookReader.css'; ?>" />

@@ -94,40 +94,32 @@ class BookReader_IndexController extends Omeka_Controller_AbstractActionControll
      */
     public function imageProxyAction()
     {
+        $this->_sendImage();
+    }
+
+    /**
+     * Returns thumbnail image of the current image.
+     */
+    public function thumbProxyAction()
+    {
+        $this->_sendImage('thumbnail');
+    }
+
+    /**
+     * Helper to return image of the current image.
+     *
+     * @param string $type Derivative type of the image.
+     * @return void
+     */
+    protected function _sendImage($type = null)
+    {
         $request = $this->getRequest();
         $itemId = $request->getParam('id');
         $item = get_record_by_id('item', $itemId);
         if (empty($item)) {
             throw new Omeka_Controller_Exception_404;
         }
-        $scale = $request->getParam('scale');
 
-        $bookreader = new BookReader($item);
-        $type = $bookreader->getSizeType($scale);
-
-        $this->_sendImage($item, $type);
-    }
-
-    /**
-     * Returns image of the current image.
-     */
-    public function thumbProxyAction()
-    {
-        $request = $this->getRequest();
-        $id = $request->getParam('id');
-        $item = get_record_by_id('item', $id);
-        if (empty($item)) {
-            throw new Omeka_Controller_Exception_404;
-        }
-        $this->_sendImage($item, 'thumbnail');
-    }
-
-    /**
-     * Helper to return image of the current image.
-     */
-    protected function _sendImage($item, $type = 'fullsize')
-    {
-        $request = $this->getRequest();
         $index = $request->getParam('image');
         // Get the index.
         if ($index != '000') {
@@ -139,6 +131,17 @@ class BookReader_IndexController extends Omeka_Controller_AbstractActionControll
         }
 
         $bookreader = new BookReader($item);
+
+        $part = $request->getParam('part');
+        $bookreader->setPart($part);
+
+        if (is_null($type)) {
+            $scale = $request->getParam('scale');
+            $type = $bookreader->getSizeType($scale);
+            // Set a default, even it's normally useless.
+            $type = $type ?: 'fullsize';
+        }
+
         $imagesFiles = $bookreader->getLeaves();
         $file = $imagesFiles[$index];
         $filepath = empty($file)

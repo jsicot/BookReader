@@ -1,4 +1,4 @@
-<?php
+<?php // For data in a spreadsheet.
     if (empty($tableUrl)) {
         echo '<html><head></head><body>';
         echo __('This item has no viewable files.');

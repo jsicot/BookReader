@@ -40,9 +40,16 @@ class BookReader_View_Helper_GetBookReader extends Zend_View_Helper_Abstract
             ? $args['embed_functions']
             : get_option('bookreader_embed_functions');
 
-        $mode_page = isset($args['mode_page'])
-            ? $args['mode_page']
-            : get_option('bookreader_mode_page');
+        // TODO Count leaves, not files.
+        if ($item->fileCount() > 1) {
+            $mode_page = isset($args['mode_page'])
+                ? $args['mode_page']
+                : get_option('bookreader_mode_page');
+        }
+        // Unique page.
+        else {
+            $mode_page = 1;
+        }
 
         // Build url of the page with iframe.
         $queryParams = array();

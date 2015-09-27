@@ -383,7 +383,7 @@ class BookReader_Creator_RefnumOCR extends BookReader_Creator
 
         // TODO Use one query.
         foreach ($this->_item->Files as $file) {
-            if ($file->hasElementText('OCR', 'Texte auto')) {
+            if ($file->hasElementText('OCR', 'Text')) {
                 return true;
             }
         }
@@ -449,16 +449,16 @@ class BookReader_Creator_RefnumOCR extends BookReader_Creator
             if (empty($file)) {
                 continue;
             }
-            $textAuto = $file->getElementTexts('OCR', 'Texte auto');
-            if (!empty($textAuto)) {
-                $textAuto = $textAuto[0]->text;
+            $ocrText = $file->getElementTexts('OCR', 'Text');
+            if (!empty($ocrText)) {
+                $ocrText = $ocrText[0]->text;
                 // Look for all answers on this page.
-                if (preg_match_all($pregQuery, $textAuto, $matches)) {
+                if (preg_match_all($pregQuery, $ocrText, $matches)) {
                     $result = array();
                     $offset = 0;
                     foreach ($matches[0] as $match) {
-                        $offsetTextAuto = mb_substr($textAuto, $offset);
-                        $position = mb_strpos($offsetTextAuto, $match);
+                        $offsetOcrText = mb_substr($ocrText, $offset);
+                        $position = mb_strpos($offsetOcrText, $match);
                         $result[] = array(
                             'answer' => $match,
                             'position' => $offset + $position,
@@ -518,18 +518,19 @@ class BookReader_Creator_RefnumOCR extends BookReader_Creator
             list($originalWidth, $originalHeight, $type, $attr) = getimagesize($pathImg);
             $ratio = $height / $originalHeight;
 
-            // Text auto is needed only to get context.
-            $textAuto = $file->getElementTexts('OCR', 'Texte auto');
-            $textAuto = $textAuto[0]->text;
-            $lengthTextAuto = mb_strlen($textAuto);
+            // Text is needed only to get context.
+            $ocrText = $file->getElementTexts('OCR', 'Text');
+            $ocrText = $ocrText[0]->text;
+            $lengthOcrText = mb_strlen($ocrText);
             // Convert words to array in order to get next cell simply (and avoid
             // the integer key as string bug).
-            $motAmot = $file->getElementTexts('OCR', 'Mot-à-mot');
-            if (!isset($motAmot[0])) {
+            $ocrData = $file->getElementTexts('OCR', 'Data');
+            if (!isset($ocrData[0])) {
                 continue;
             }
-            $motAmot = json_decode($motAmot[0]->text, true);
-            $motAmot = $motAmot['String'];
+            $ocrData = json_decode($ocrData[0]->text, true);
+            $ocrData = $ocrData['String'];
+
             $offsetStartPosition = 0;
             foreach ($data as $dataToHighlight) {
                 $answer = $dataToHighlight['answer'];
@@ -540,7 +541,7 @@ class BookReader_Creator_RefnumOCR extends BookReader_Creator
                 // word, because positions are recorded by word.
                 // Warning: PREG_OFFSET_CAPTURE is not Unicode safe.
                 $regex = '/' . '[\p{C}\p{M}\p{P}\p{Z}]{1}[\p{L}\p{N}\p{S}]*' . preg_quote($answer) . '/ui';
-                $haystack = mb_substr($textAuto, $offsetStartPosition, $position + $length - $offsetStartPosition);
+                $haystack = mb_substr($ocrText, $offsetStartPosition, $position + $length - $offsetStartPosition);
                 $startPosition = (preg_match($regex, $haystack, $match) == 0)
                     ? $offsetStartPosition
                     : $offsetStartPosition + mb_strpos($haystack, $match[0]) + 1;
@@ -549,34 +550,37 @@ class BookReader_Creator_RefnumOCR extends BookReader_Creator
                 $offsetStartPosition = $startPosition + $length;
 
                 // Quick check.
-                if (!isset($motAmot[$startPosition]) || empty($motAmot[$startPosition])) {
+                if (!isset($ocrData[$startPosition]) || empty($ocrData[$startPosition])
+                        // Check end of line too.
+                        || !is_array($ocrData[$startPosition])
+                    ) {
                     continue;
                 }
 
                 $regex = '/' . '[\p{L}\p{N}\p{S}]*[\p{C}\p{M}\p{P}\p{Z}]{1}' . '/ui';
-                $haystack = mb_substr($textAuto, $position + $length);
+                $haystack = mb_substr($ocrText, $position + $length);
                 $endPosition = (preg_match($regex, $haystack, $match) == 0)
-                    ? mb_strlen($textAuto)
+                    ? mb_strlen($ocrText)
                     : $position + $length + mb_strlen($match[0]) - 1;
 
-                $words = mb_substr($textAuto, $startPosition, $endPosition - $startPosition);
+                $words = mb_substr($ocrText, $startPosition, $endPosition - $startPosition);
                 // Get the context of the answer.
                 $startContext = ($startPosition - $beforeContext) < 0
                     ? 0
                     : $startPosition - $beforeContext;
                 $lengthContext = $beforeContext + $length + $afterContext;
                 $context = ($startContext === 0 ? '' : '...' )
-                    . mb_substr($textAuto, $startContext, $lengthContext)
-                    . ($startContext + $lengthContext > $lengthTextAuto ? '' : '...');
+                    . mb_substr($ocrText, $startContext, $lengthContext)
+                    . ($startContext + $lengthContext > $lengthOcrText ? '' : '...');
                 // Create the parallel zone.
                 // TODO Currently, the parallel zone is not really used, so the
                 // first word coordinates is taken as zone coordinates.
                 // Here, the start position is always an array.
-                $mot = $motAmot[$startPosition];
-                $zone_left = $mot['x'];
-                $zone_top = $mot['y'];
-                $zone_width = $mot['w'];
-                $zone_height = $mot['h'];
+                $word = $ocrData[$startPosition];
+                $zone_left = $word[1];
+                $zone_top = $word[2];
+                $zone_width = $word[3];
+                $zone_height = $word[4];
                 $zone_right = $zone_left + $zone_width;
                 $zone_bottom = $zone_top + $zone_height;
 
@@ -584,31 +588,30 @@ class BookReader_Creator_RefnumOCR extends BookReader_Creator
                 $boxes = array();
 
                 // Set the internal pointer to current position before getting
-                //  values.
-                while (list($key, $mot) = each($motAmot)) {
+                // values.
+                while (list($key, $word) = each($ocrData)) {
                     if ($key == $startPosition) {
-                         prev($motAmot);
+                        prev($ocrData);
 
-                        while (!empty($mot)) {
-                            $word_left = $mot['x'];
-                            $word_top = $mot['y'];
-                            $word_width = $mot['w'];
-                            $word_height = $mot['h'];
-                            $word_right = $word_left + $word_width;
-                            $word_bottom = $word_top + $word_height;
+                        while (!empty($word)) {
+                            if (is_array($word)) {
+                                // Check if the string is hyphenated.
+                                if (is_array($word[1])) {
+                                    foreach ($word[1] as $subWord) {
+                                        $boxes[] = $this->_getStringBox($subWord, $ratio, $pageIndex);
+                                    }
+                                }
+                                // Normal string.
+                                else {
+                                    $boxes[] = $this->_getStringBox($word, $ratio, $pageIndex);
+                                }
 
-                            $boxes[] = array(
-                                't' => round($word_top * $ratio),
-                                'l' => round($word_left * $ratio),
-                                'b' => round($word_bottom * $ratio),
-                                'r' => round($word_right * $ratio),
-                                'index' => $pageIndex,
-                            );
+                                // Prepare words for next loop.
+                                $words = trim(mb_substr($words, strlen($word[0])));
+                            }
 
-                            // Prepare words for next loop.
-                            $words = trim(mb_substr($words, strlen($mot['c'])));
-                            $mot = next($motAmot);
-                            if ($mot === false || empty($words)) {
+                            $word = next($ocrData);
+                            if ($word === false || empty($words)) {
                                 break;
                             }
                         }
@@ -634,5 +637,25 @@ class BookReader_Creator_RefnumOCR extends BookReader_Creator
         }
 
         return $results;
+    }
+
+    protected function _getStringBox($word, $ratio, $pageIndex)
+    {
+        $word_left = $word[1];
+        $word_top = $word[2];
+        $word_width = $word[3];
+        $word_height = $word[4];
+        $word_right = $word_left + $word_width;
+        $word_bottom = $word_top + $word_height;
+
+        $box = array(
+            't' => round($word_top * $ratio),
+            'l' => round($word_left * $ratio),
+            'b' => round($word_bottom * $ratio),
+            'r' => round($word_right * $ratio),
+            'index' => $pageIndex,
+        );
+
+        return $box;
     }
 }

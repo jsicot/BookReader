@@ -9,9 +9,9 @@
 class BookReader_ViewerController extends Omeka_Controller_AbstractActionController
 {
     /**
-     * Forward to the 'browse' action
+     * Forward to the 'show' action
      *
-     * @see self::browseAction()
+     * @see self::showAction()
      */
     public function indexAction()
     {
@@ -67,7 +67,7 @@ class BookReader_ViewerController extends Omeka_Controller_AbstractActionControl
     }
 
     /**
-     * Helpert to prepare the viewer (only the javascript differs in view).
+     * Helper to prepare the viewer (only the javascript differs in view).
      */
     protected function _prepareViewer($item)
     {

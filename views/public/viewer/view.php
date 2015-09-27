@@ -18,7 +18,6 @@
 
     $server = preg_replace('#^https?://#', '', WEB_ROOT);
     $serverFullText = $server . '/book-reader/index/fulltext';
-    $sharedUrl = WEB_PLUGIN . '/BookReader/views/shared';
     $imgDir = WEB_PLUGIN . '/BookReader/views/shared/images/';
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
@@ -29,22 +28,24 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
     <base target="_parent" />
-    <link rel="shortcut icon" href="<?php echo WEB_ROOT . '/favicon.ico'; ?>" type="image/x-icon" />
+    <link rel="shortcut icon" href="<?php echo src('favicon.ico'); ?>" type="image/x-icon" />
     <?php if ($coverFile): ?>
     <link rel="apple-touch-icon" href="<?php echo $coverFile->getWebPath('thumbnail'); ?>" />
     <?php endif; ?>
     <title><?php echo $title; ?></title>
     <!-- Stylesheets -->
-    <link rel="stylesheet" href="<?php echo $sharedUrl . '/css/BookReader.css'; ?>" />
+    <link rel="stylesheet" href="<?php echo css_src('BookReader'); ?>" />
     <!-- JavaScripts -->
-    <script type="text/javascript" src="<?php echo $sharedUrl . '/javascripts/jquery-1.4.2.min.js'; ?>" charset="utf-8"></script>
-    <script type="text/javascript" src="<?php echo $sharedUrl . '/javascripts/jquery-ui-1.8.5.custom.min.js'; ?>" charset="utf-8"></script>
-    <script type="text/javascript" src="<?php echo $sharedUrl . '/javascripts/dragscrollable.js'; ?>" charset="utf-8"></script>
-    <script type="text/javascript" src="<?php echo $sharedUrl . '/javascripts/jquery.colorbox-min.js'; ?>" charset="utf-8"></script>
-    <script type="text/javascript" src="<?php echo $sharedUrl . '/javascripts/jquery.ui.ipad.js'; ?>" charset="utf-8"></script>
-    <script type="text/javascript" src="<?php echo $sharedUrl . '/javascripts/jquery.bt.min.js'; ?>" charset="utf-8"></script>
-    <script type="text/javascript" src="<?php echo $sharedUrl . '/javascripts/BookReader.js'; ?>" charset="utf-8"></script>
-    <script type="text/javascript" src="<?php echo $sharedUrl . '/javascripts/ToCmenu.js'; ?>" charset="utf-8"></script>
+    <?php
+        echo js_tag('jquery-1.4.2.min');
+        echo js_tag('jquery-ui-1.8.5.custom.min');
+        echo js_tag('dragscrollable');
+        echo js_tag('jquery.colorbox-min');
+        echo js_tag('jquery.ui.ipad');
+        echo js_tag('jquery.bt.min');
+        echo js_tag('BookReader');
+        echo js_tag('ToCmenu');
+    ?>
 </head>
 <body>
     <div></div>
@@ -52,7 +53,7 @@
         <br />
         <noscript>
             <p>
-                The BookReader requires JavaScript to be enabled. Please check that your browser supports JavaScript and that it is enabled in the browser settings.
+                <?php echo __('The BookReader requires JavaScript to be enabled. Please check that your browser supports JavaScript and that it is enabled in the browser settings.'); ?>
             </p>
         </noscript>
     </div>

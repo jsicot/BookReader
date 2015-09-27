@@ -30,7 +30,8 @@ class BookReader_Creator_ExtractOCR extends BookReader_Creator
      *
      * This function is used to get quickly all page numbers of an item. If the
      * page number is empty, the label page will be used. If there is no page
-     * number, use 'null', so the label in viewer will be the page index + 1.
+     * number, a null value or an empty string is used, so the label in viewer
+     * will be the page index + 1.
      *
      * @see getPageLabels()
      *
@@ -62,7 +63,7 @@ class BookReader_Creator_ExtractOCR extends BookReader_Creator
                     $number = $int1;
                 }
                 else {
-                    $number = 'null';
+                    $number = null;
                 }
             }
             $numbers[] = $number;
@@ -127,8 +128,8 @@ class BookReader_Creator_ExtractOCR extends BookReader_Creator
      * array(
      *   leaf index = array(
      *     array(
-     *       'answer' => answer, findable in original text,
-     *       'position' => position of the answer in original text,
+     *       'answer' => answer, findable in the original text,
+     *       'position' => position of the answer in the original text,
      *     ),
      *   ),
      * );

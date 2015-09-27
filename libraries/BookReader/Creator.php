@@ -192,7 +192,8 @@ abstract class BookReader_Creator
      *
      * This function is used to get quickly all page numbers of an item. If the
      * page number is empty, the label page will be used. If there is no page
-     * number, use 'null', so the label in viewer will be the page index + 1.
+     * number, a null value or an empty string is used, so the label in viewer
+     * will be the page index + 1.
      *
      * No page number by default.
      *
@@ -207,7 +208,7 @@ abstract class BookReader_Creator
         }
 
         $leaves = $this->getLeaves();
-        return array_fill(0, count($leaves), 'null');
+        return array_fill(0, count($leaves), null);
     }
 
     /**
@@ -404,17 +405,9 @@ abstract class BookReader_Creator
             return;
         }
 
-        // Some arrays need to be encoded in json for javascript. This function
-        // produces a lighter array.
-        $json_encode_value = function($txt) {
-            return (empty($txt) || (string) (integer) $txt == $txt)
-                ? $txt
-                : json_encode($txt);
-        };
-
         $indexes = $this->getPageIndexes();
-        $numbers = array_map($json_encode_value, $this->getPageNumbers());
-        $labels = array_map($json_encode_value, $this->getPageLabels());
+        $numbers = $this->getPageNumbers();
+        $labels = $this->getPageLabels();
         list($widths, $heights) = $this->getImagesSizes($imageType);
 
         return array(

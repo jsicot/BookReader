@@ -245,7 +245,8 @@ class BookReader_Creator_RefnumOCR extends BookReader_Creator
      *
      * This function is used to get quickly all page numbers of an item. If the
      * page number is empty, the label page will be used. If there is no page
-     * number, use 'null', so the label in viewer will be the page index + 1.
+     * number, a null value or an empty string is used, so the label in viewer
+     * will be the page index + 1.
      *
      * @see getPageLabels()
      *
@@ -408,8 +409,8 @@ class BookReader_Creator_RefnumOCR extends BookReader_Creator
      * array(
      *   leaf index = array(
      *     array(
-     *       'answer' => answer, findable in original text,
-     *       'position' => position of the answer in original text,
+     *       'answer' => answer, findable in the original text,
+     *       'position' => position of the answer in the original text,
      *     ),
      *   ),
      * );
@@ -567,10 +568,10 @@ class BookReader_Creator_RefnumOCR extends BookReader_Creator
                 $context = ($startContext === 0 ? '' : '...' )
                     . mb_substr($textAuto, $startContext, $lengthContext)
                     . ($startContext + $lengthContext > $lengthTextAuto ? '' : '...');
-                // Create the par zone.
-                // TODO Currently, the par zone is not really used by
-                // BookReader, so we take the first word coordinates as zone
-                // coordinates.
+                // Create the parallel zone.
+                // TODO Currently, the parallel zone is not really used, so the
+                // first word coordinates is taken as zone coordinates.
+                // Here, the start position is always an array.
                 $mot = $motAmot[$startPosition];
                 $zone_left = $mot['x'];
                 $zone_top = $mot['y'];

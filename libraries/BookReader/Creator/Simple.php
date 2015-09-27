@@ -20,7 +20,8 @@ class BookReader_Creator_Simple extends BookReader_Creator
      *
      * This function is used to get quickly all page numbers of an item. If the
      * page number is empty, the label page will be used. If there is no page
-     * number, use 'null', so the label in viewer will be the page index + 1.
+     * number, a null value or an empty string is used, so the label in viewer
+     * will be the page index + 1.
      *
      * In this example, numbers are saved in Dublin Core:Title as 'Page 1', etc.
      * in metadata of each file.
@@ -44,15 +45,15 @@ class BookReader_Creator_Simple extends BookReader_Creator
             else {
                 $txt = $leaf->getElementTexts('Dublin Core', 'Title');
                 if (empty($txt)) {
-                    $number = 'null';
+                    $number = null;
                 }
                 else {
                     $firstSpace = strrpos($txt[0]->text, ' ');
                     if (strtolower(substr($txt[0]->text, 0, $firstSpace)) == 'page') {
                         $txt = trim(substr($txt[0]->text, $firstSpace + 1));
                         $number = ((int) $txt == $txt)
-                            ? $txt
-                            : json_encode($txt);
+                            ? (integer) $txt
+                            : (string) $txt;
                     }
                     else {
                         $number = '';
@@ -151,8 +152,8 @@ class BookReader_Creator_Simple extends BookReader_Creator
      * array(
      *   leaf index = array(
      *     array(
-     *       'answer' => answer, findable in original text,
-     *       'position' => position of the answer in original text,
+     *       'answer' => answer, findable in the original text,
+     *       'position' => position of the answer in the original text,
      *     ),
      *   ),
      * );
@@ -253,10 +254,9 @@ class BookReader_Creator_Simple extends BookReader_Creator
                 // Get the context of the answer.
                 $context = '...' . $answer . '...';
 
-                // Create the par zone.
-                // TODO Currently, the par zone is not really used by
-                // BookReader, so we take the first word coordinates as zone
-                // coordinates.
+                // Create the parallel zone.
+                // TODO Currently, the parallel zone is not really used, so the
+                // first word coordinates is taken as zone coordinates.
                 $zone_left = $originalWidth / 3;
                 $zone_top = $originalHeight / 3;
                 $zone_right = $originalWidth * 2 / 3;

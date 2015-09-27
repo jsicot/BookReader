@@ -83,7 +83,7 @@
 
     br.ui = <?php echo json_encode($ui); ?>;
     // Book title and the URL used for the book title link
-    br.bookTitle = <?php echo json_encode($title); ?>;
+    br.bookTitle = '<?php echo $title; ?>';
     br.bookUrl = <?php echo json_encode(record_url($item)); ?>;
     br.logoURL = <?php echo json_encode(WEB_ROOT); ?>;
     br.siteName = <?php echo json_encode(option('site_title')); ?>;

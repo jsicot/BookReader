@@ -19,6 +19,12 @@
     $server = preg_replace('#^https?://#', '', WEB_ROOT);
     $serverFullText = $server . '/book-reader/index/fulltext';
     $imgDir = WEB_PLUGIN . '/BookReader/views/shared/images/';
+
+    try {
+        $favicon = src('favicon.ico');
+    } catch (Exception $e) {
+        $favicon = '';
+    }
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html <?php echo ($ui == 'embed') ? 'id="embedded" ' : ''; ?>lang="fr">
@@ -28,7 +34,9 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
     <base target="_parent" />
-    <link rel="shortcut icon" href="<?php echo src('favicon.ico'); ?>" type="image/x-icon" />
+    <?php if (!empty($favicon)): ?>
+    <link rel="shortcut icon" href="<?php echo $favicon; ?>" type="image/x-icon" />
+    <?php endif; ?>
     <?php if ($coverFile): ?>
     <link rel="apple-touch-icon" href="<?php echo $coverFile->getWebPath('thumbnail'); ?>" />
     <?php endif; ?>

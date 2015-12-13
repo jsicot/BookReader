@@ -228,18 +228,21 @@ class BookReader_Creator_Simple extends BookReader_Creator
         foreach ($textsToHighlight as $file_id => $data) {
             $file = get_record_by_id('file', $file_id);
             $pageIndex = $this->getPageIndex($file);
-            $pathImg = FILES_DIR . DIRECTORY_SEPARATOR . $imageType . DIRECTORY_SEPARATOR . ($imageType == 'original' ? $file->filename : $file->getDerivativeFilename());
-            list($width, $height, $type, $attr) = getimagesize($pathImg);
+
+            $imageSize = $this->getImageSize($file, $imageType);
+            $width = $imageSize['width'];
+            $height = $imageSize['height'];
 
             // Get the ratio between original widths and heights and fullsize
             // ones, because highlight is done first on a fullsize image, but
             // data are set for original image.
-            $pathImg = FILES_DIR . DIRECTORY_SEPARATOR . 'original' . DIRECTORY_SEPARATOR . $file->filename;
-            list($originalWidth, $originalHeight, $type, $attr) = getimagesize($pathImg);
+            $imageSize = $this->getImageSize($file, 'original');
+            $originalWidth = $imageSize['width'];
+            $originalHeight = $imageSize['height'];
             $ratio = $height / $originalHeight;
 
             // Text is needed only to get context.
-            $this->_item = get_record_by_id('item', $file->item_id);
+            $this->_item = $file->getItem();
             $text = $this->_item->getElementTexts('Item Type Metadata', 'Text');
             $text = $text[0]->text;
             $lengthText = mb_strlen($text);

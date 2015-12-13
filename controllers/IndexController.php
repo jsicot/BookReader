@@ -144,14 +144,17 @@ class BookReader_IndexController extends Omeka_Controller_AbstractActionControll
 
         $imagesFiles = $bookreader->getLeaves();
         $file = $imagesFiles[$index];
-        $filepath = empty($file)
-            ? dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR . 'shared' . DIRECTORY_SEPARATOR . 'images' . DIRECTORY_SEPARATOR . 'blank.png'
-            : FILES_DIR . DIRECTORY_SEPARATOR . $file->getStoragePath($type);
-
-        $image = file_get_contents($filepath);
-
-        $this->getResponse()->clearBody();
-        $this->getResponse()->setHeader('Content-Type', 'image/jpeg');
-        $this->getResponse()->setBody($image);
+        // No file, so a blank image
+        if (empty($file)) {
+            $filepath = 'images/blank.png';
+            $image = file_get_contents(physical_path_to($filepath));
+            $this->getResponse()->clearBody();
+            $this->getResponse()->setHeader('Content-Type', 'image/jpeg');
+            $this->getResponse()->setBody($image);
+        }
+        // Else, redirect (302/307) to the url of the file.
+        else {
+            $this->_helper->redirector->gotoUrlAndExit($file->getWebPath($type));
+        }
     }
 }

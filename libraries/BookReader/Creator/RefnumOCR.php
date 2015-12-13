@@ -48,12 +48,12 @@ class BookReader_Creator_RefnumOCR extends BookReader_Creator
                 'tiff' => 'Tagged Image File Format',
             );
             // Set the regular expression to match selected/supported formats.
-            $supportedFormatRegEx = '/\.' . implode('|', array_keys($supportedFormats)) . '$/i';
+            $supportedFormatRegex = '/\.(' . implode('|', array_keys($supportedFormats)) . ')$/i';
 
             // Retrieve image files from the item.
             set_loop_records('files', $this->_item->getFiles());
             foreach (loop('files') as $file) {
-                if ($file->hasThumbnail() && preg_match($supportedFormatRegEx, $file->filename)) {
+                if ($file->hasThumbnail() && preg_match($supportedFormatRegex, $file->filename)) {
                     $this->_leaves[] = $file;
                 }
                 else {
@@ -246,8 +246,7 @@ class BookReader_Creator_RefnumOCR extends BookReader_Creator
      *
      * This function is used to get quickly all page numbers of an item. If the
      * page number is empty, the label page will be used. If there is no page
-     * number, a null value or an empty string is used, so the label in viewer
-     * will be the page index + 1.
+     * number, use 'null', so the label in viewer will be the page index + 1.
      *
      * @see getPageLabels()
      *
@@ -509,14 +508,17 @@ class BookReader_Creator_RefnumOCR extends BookReader_Creator
         foreach ($textsToHighlight as $key => $data) {
             $file = $leaves[$key];
             $pageIndex = $this->getPageIndex($file);
-            $pathImg = FILES_DIR . DIRECTORY_SEPARATOR . $imageType . DIRECTORY_SEPARATOR . ($imageType == 'original' ? $file->filename : $file->getDerivativeFilename());
-            list($width, $height, $type, $attr) = getimagesize($pathImg);
+
+            $imageSize = $this->getImageSize($file, $imageType);
+            $width = $imageSize['width'];
+            $height = $imageSize['height'];
 
             // Get the ratio between original widths and heights and fullsize
             // ones, because highlight is done first on a fullsize image, but
             // data are set for original image.
-            $pathImg = FILES_DIR . DIRECTORY_SEPARATOR . 'original' . DIRECTORY_SEPARATOR . $file->filename;
-            list($originalWidth, $originalHeight, $type, $attr) = getimagesize($pathImg);
+            $imageSize = $this->getImageSize($file, 'original');
+            $originalWidth = $imageSize['width'];
+            $originalHeight = $imageSize['height'];
             $ratio = $height / $originalHeight;
 
             // Text is needed only to get context.

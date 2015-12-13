@@ -21,7 +21,7 @@ Installation
 ------------
 
 - Upload the BookReader plugin folder into your plugins folder on the server;
-- Activate it from the admin → Settings → Plugins page
+- Activate it from the admin dashboad > Settings > Plugins page
 - Click the Configure link to add the following
     - Name of to custom class (default is `BookReader_Creator_Default`)
     - Sorting mode for the viewer (omeka default order or original filename order)
@@ -32,6 +32,9 @@ Installation
 
 If you want to change more options, copy the file `views/public/viewer/show.php`
 in the subdirectory `book-reader/viewer/`of your theme and update it.
+
+Warning: PHP should be installed with the extension "exif" in order to get the
+size of images. This is the case for all major distributions and providers.
 
 The viewer is always available at `http://www.example.com/items/viewer/{item id}`.
 Furthermore, it is automatically embedded in items/show page. This can be

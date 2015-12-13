@@ -103,19 +103,16 @@ class BookReader_Creator_ExtractOCR extends BookReader_Creator
             return;
         }
 
-        $xml_file = false;
-
         set_loop_records('files', $this->_item->getFiles());
         if (has_loop_records('files')) {
             foreach (loop('files') as $file) {
                 if (strtolower($file->getExtension()) == 'xml') {
-                    $xml_file = escapeshellarg(FILES_DIR . DIRECTORY_SEPARATOR . 'original' . DIRECTORY_SEPARATOR . $file->filename);
-                    break;
+                    return true;
                 }
             }
         }
 
-        return (boolean) $xml_file;
+        return false;
     }
 
     /**
@@ -152,7 +149,7 @@ class BookReader_Creator_ExtractOCR extends BookReader_Creator
         // Normalize query because the search occurs inside a normalized text.
         $cleanQuery = $this->_alnumString($query);
         if (strlen($cleanQuery) < $minimumQueryLength) {
-                return $results;
+            return $results;
         }
 
         $queryWords = explode(' ', $cleanQuery);
@@ -164,45 +161,51 @@ class BookReader_Creator_ExtractOCR extends BookReader_Creator
         $list = array();
         set_loop_records('files', $this->_item->getFiles());
         foreach (loop('files') as $file) {
-            if (strtolower(pathinfo($file->original_filename, PATHINFO_EXTENSION)) == 'xml') {
-                $xml_file = FILES_DIR . DIRECTORY_SEPARATOR . 'original' . DIRECTORY_SEPARATOR . $file->filename;
+            if ($file->mime_type == 'application/xml') {
+                $xml_file = $file;
             }
-            elseif ($file->hasThumbnail()) {
-                if (preg_match('/(jpg|jpeg|png|gif)/', $file->filename)) {
-                    $list[$file->filename] = $file->original_filename;
-                }
+            // Only these image extensions can be read by current browsers.
+            elseif ($file->hasThumbnail() && preg_match('/\.(jpg|jpeg|png|gif)$/i', $file->filename)) {
+                $list[] = $file;
             }
         }
 
         $widths = array();
         $heights = array();
-        foreach ($list as $key => $image) {
-            $pathImg = FILES_DIR . DIRECTORY_SEPARATOR . 'fullsize' . DIRECTORY_SEPARATOR . $key;
-            list($width, $height, $type, $attr) = getimagesize($pathImg);
-            $widths[] = $width;
-            $heights[] = $height;
+        foreach ($list as $file) {
+            $imageSize = $this->getImageSize($file, $imageType);
+            $widths[] = $imageSize['width'];
+            $heights[] = $imageSize['height'];
         }
 
         if ($xml_file) {
             $results = array();
-            if (file_exists($xml_file)) {
-                $string = file_get_contents($xml_file);
-                $string = preg_replace('/\s{2,}/ui', ' ', $string);
-                $string = preg_replace('/<\/?b>/ui', '', $string);
-                $string = preg_replace('/<\/?i>/ui', '', $string);
-                $string = str_replace('<!doctype pdf2xml system "pdf2xml.dtd">', '<!DOCTYPE pdf2xml SYSTEM "pdf2xml.dtd">', $string);
-                $xml =  simplexml_load_string($string);
-                if(!$xml) die('{"Error":"Invalid XML!"}');
-                $result = array();
 
+            // To use the local path is discouraged, because it bypasses the
+            // storage, so it's not compatible with Amazon S3, etc.
+            $string = file_get_contents($xml_file->getWebPath('original'));
+            if (empty($string)) {
+                throw new Exception('Error:Cannot get XML file!');
+            }
+
+            $string = preg_replace('/\s{2,}/ui', ' ', $string);
+            $string = preg_replace('/<\/?b>/ui', '', $string);
+            $string = preg_replace('/<\/?i>/ui', '', $string);
+            $string = str_replace('<!doctype pdf2xml system "pdf2xml.dtd">', '<!DOCTYPE pdf2xml SYSTEM "pdf2xml.dtd">', $string);
+            $xml =  simplexml_load_string($string);
+            if (!$xml) {
+                throw new Exception('Error:Invalid XML!');
+            }
+
+            $result = array();
+            try {
                 // We need to store the name of the function to be used
                 // for string length. mb_strlen() is better (especially
                 // for diacrictics) but not available on all systems so
                 // sometimes we need to use the default strlen()
                 $strlen_function = "strlen";
-                if (function_exists('mb_strlen'))
-                {
-                        $strlen_function = "mb_strlen";
+                if (function_exists('mb_strlen')) {
+                    $strlen_function = "mb_strlen";
                 }
 
                 foreach( $xml->page as $page) {
@@ -267,9 +270,8 @@ class BookReader_Creator_ExtractOCR extends BookReader_Creator
                         }
                     }
                 }
-
-            } else {
-                die('{"Error":"PDF to XML conversion failed!"}');
+            } catch (Exception $e) {
+                throw new Exception('Error:PDF to XML conversion failed!');
             }
         }
         return $results;

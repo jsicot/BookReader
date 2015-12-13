@@ -117,12 +117,12 @@ abstract class BookReader_Creator
                 'tiff' => 'Tagged Image File Format',
             );
             // Set the regular expression to match selected/supported formats.
-            $supportedFormatRegEx = '/\.' . implode('|', array_keys($supportedFormats)) . '$/i';
+            $supportedFormatRegex = '/\.(' . implode('|', array_keys($supportedFormats)) . ')$/i';
 
             // Retrieve image files from the item.
             set_loop_records('files', $this->_item->getFiles());
             foreach (loop('files') as $file) {
-                if ($file->hasThumbnail() && preg_match($supportedFormatRegEx, $file->filename)) {
+                if ($file->hasThumbnail() && preg_match($supportedFormatRegex, $file->filename)) {
                     $this->_leaves[] = $file;
                 }
                 else {
@@ -355,8 +355,8 @@ abstract class BookReader_Creator
      *
      * This data can be saved in the base in order to speed the display.
      *
-     * @return array
-     *   Array of width and height of image files of an item.
+     * @param string $imageType
+     * @return array Array of width and height of image files of an item.
      */
     public function getImagesSizes($imageType = 'fullsize')
     {
@@ -368,26 +368,84 @@ abstract class BookReader_Creator
         $heights = array();
         $leaves = $this->getLeaves();
         foreach ($leaves as $file) {
-            // The size of a missing page is calculated by javascript from the
-            // size of the verso of the current page or from the first page.
-            if (empty($file)) {
-                $widths[] = null;
-                $heights[] = null;
-            }
-            else {
-                // Don't use the webpath to avoid the transfer through server.
-                // TODO WARNING: Image type is not the image path, except for
-                // original and fullsize...
-                $pathImg = FILES_DIR . DIRECTORY_SEPARATOR . $imageType . DIRECTORY_SEPARATOR . ($imageType == 'original' ? $file->filename : $file->getDerivativeFilename());
-                list($width, $height, $type, $attr) = getimagesize($pathImg);
-                $widths[] = $width;
-                $heights[] = $height;
-            }
+            $imageSize = $this->getImageSize($file, $imageType);
+            $widths[] = $imageSize['width'];
+            $heights[] = $imageSize['height'];
         }
 
         return array(
             $widths,
             $heights,
+        );
+    }
+
+    /**
+     * Get an array of the width and height of the image file.
+     *
+     * @internal The process uses the saved constraints. It they are changed but
+     * the derivative haven't been rebuilt, the return will be wrong (but
+     * generally without consequences for BookReader).
+     *
+     * @param File $file
+     * @param string $imageType
+     * @return array Associative array of width and height of the image file.
+     * If the file is not an image, the width and the height will be null.
+     */
+    public function getImageSize($file, $imageType = 'fullsize')
+    {
+        static $sizeConstraints = array();
+
+        if (!isset($sizeConstraints[$imageType])) {
+            $sizeConstraints[$imageType] = get_option($imageType . '_constraint');
+        }
+        $sizeConstraint = $sizeConstraints[$imageType];
+
+        // Check if this is an image.
+        if (empty($file) || strpos($file->mime_type, 'image/') !== 0) {
+            $width = null;
+            $height = null;
+        }
+
+        // This is an image.
+        else {
+            $metadata = json_decode($file->metadata, true);
+            if (!isset($metadata['video']['resolution_x'])) {
+                $msg = __('The image #%d ("%s") is not stored correctly.', $file->id, $file->original_filename);
+                _log($msg, Zend_Log::WARN);
+                throw new Exception($msg);
+            }
+
+            $sourceWidth = $metadata['video']['resolution_x'];
+            $sourceHeight = $metadata['video']['resolution_y'];
+
+            // Use the original size when possible.
+            if ($imageType == 'original') {
+                $width = $sourceWidth;
+                $height = $sourceHeight;
+            }
+            // This supposes that the option has not changed before.
+            else {
+                // Source is landscape.
+                if ($sourceWidth > $sourceHeight) {
+                    $width = $sizeConstraint;
+                    $height = round($sourceHeight * $sizeConstraint / $sourceWidth);
+                }
+                // Source is portrait.
+                elseif ($sourceWidth < $sourceHeight) {
+                    $width = round($sourceWidth * $sizeConstraint / $sourceHeight);
+                    $height = $sizeConstraint;
+                }
+                // Source is square.
+                else {
+                    $width = $sizeConstraint;
+                    $height = $sizeConstraint;
+                }
+            }
+        }
+
+        return array(
+            'width' => $width,
+            'height' => $height,
         );
     }
 
@@ -497,13 +555,13 @@ abstract class BookReader_Creator
             // in the iPaper error: "Unable to reach provided URL."
             //$documentUrl = WEB_FILES . '/' . $file->filename;
             //$documentUrl = file_download_uri($file);
-            $sizefile = $this->_formatFileSize($file->size);
+            $filesize = $this->_formatFileSize($file->size);
             $extension = pathinfo($file->original_filename, PATHINFO_EXTENSION);
             //$type = $file->mime_browser;
             $html .= '<li>';
             $html .= '<div style="clear:both; padding:2px;">';
             $html .= '<a href="' . $file->getWebPath() . '" class="download-file">' . $file->original_filename . '</a>';
-            $html .= '&nbsp; (' . $extension . ' / ' . $sizefile . ')';
+            $html .= '&nbsp; (' . $extension . ' / ' . $filesize . ')';
             $html .= '</div>'; // Bug when PHP_EOL is added.
             $html .= '</li>';
         }

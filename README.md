@@ -33,8 +33,11 @@ Installation
 If you want to change more options, copy the file `views/public/viewer/show.php`
 in the subdirectory `book-reader/viewer/`of your theme and update it.
 
-Warning: PHP should be installed with the extension "exif" in order to get the
-size of images. This is the case for all major distributions and providers.
+See below the notes for more info.
+
+
+Usage
+-----
 
 The viewer is always available at `http://www.example.com/items/viewer/{item id}`.
 Furthermore, it is automatically embedded in items/show page. This can be
@@ -48,23 +51,7 @@ according to your needs, you may add this code in the `items/show.php` file of
 your theme or anywhere else, as long as the item is defined (as variable or as
 current record 'item').
 
-* Hook
-    - With all options:
-
-```
-    <?php
-    echo get_specific_plugin_hook_output('BookReader', 'public_items_show', array(
-        'direct' => true,
-        'view' => $this,
-        'item' => $item,
-        'page' => '0',
-        'embed_functions' => false,
-        'mode_page' => 1,
-    ));
-    ?>
-```
-
-* Helper
+* Helper (recommended)
     - With no option:
 
 ```
@@ -82,9 +69,45 @@ current record 'item').
     ?>
 ```
 
+* Hook
+    - With all options:
+
+```
+    <?php
+    echo get_specific_plugin_hook_output('BookReader', 'public_items_show', array(
+        'direct' => true,
+        'view' => $this,
+        'item' => $item,
+        'page' => '0',
+        'embed_functions' => false,
+        'mode_page' => 1,
+    ));
+    ?>
+```
+
 All options are optional. If one is not defined, the parameters set in the
 config page will be used.
 The image number starts from '0' with default functions.
+
+
+Notes
+-----
+
+- A batch edit is provided to sort images before other files (pdf, xml...) that
+are associated to an item (Items > check box items > edit button).
+
+* Warning *
+
+PHP should be installed with the extension "exif" in order to get the size of
+images. This is the case for all major distributions and providers.
+
+If technical metadata are missing for some images, in particular when the
+extension "exif" is not installed or when images are not fully compliant with
+the standards, they should be rebuilt. A notice is added in the error log.
+A form in the batch edit can be used to process them automatically: check the
+items in the "admin/items/browse" view, then click the button "Edit", then the
+checkbox "Rebuild metadata when missing". The viewer will work without these
+metadata, but the display will be slower.
 
 
 Customing

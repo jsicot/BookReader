@@ -106,6 +106,7 @@ class BookReader_Creator_RefnumOCR extends BookReader_Creator
         // digitalized leaves.
         $infos_leaves = array();
         $first = true;
+        $previous_position = null;
         foreach ($leaves as $file) {
             // Get infos of current file.
             $ordre = $file-> getElementTexts('refNum', 'Numéro d’ordre');

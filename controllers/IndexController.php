@@ -150,7 +150,7 @@ class BookReader_IndexController extends Omeka_Controller_AbstractActionControll
 
         $image = file_get_contents($filepath);
 
-        $this->getResponse()->clearBody ();
+        $this->getResponse()->clearBody();
         $this->getResponse()->setHeader('Content-Type', 'image/jpeg');
         $this->getResponse()->setBody($image);
     }

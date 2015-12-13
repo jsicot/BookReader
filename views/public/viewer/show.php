@@ -7,7 +7,8 @@
     }
 
     $title = metadata($item, array('Dublin Core', 'Title'));
-    if ($creator = metadata($item, array('Dublin Core', 'Creator'))) {
+    $creator = metadata($item, array('Dublin Core', 'Creator'));
+    if ($creator) {
         $title .= ' - ' . $creator;
     }
     $title = BookReader::htmlCharacter($title);

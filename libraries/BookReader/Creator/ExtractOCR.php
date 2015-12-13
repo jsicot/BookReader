@@ -56,7 +56,8 @@ class BookReader_Creator_ExtractOCR extends BookReader_Creator
                 $re1 = '.*?'; # Non-greedy match on filler
                 $re2 = '(page)';  # Word 1
                 $re3 = '(\\d+)';  # Integer Number 1
-                if ($c = preg_match_all('/' . $re1 . $re2 . $re3 . '/is', $txt, $matches)) {
+                $c = preg_match_all('/' . $re1 . $re2 . $re3 . '/is', $txt, $matches);
+                if ($c) {
                     $word1 = $matches[1][0];
                     $int1 = $matches[2][0];
                     $int1 = preg_replace( "/^[0]{0,6}/", '', $int1 );

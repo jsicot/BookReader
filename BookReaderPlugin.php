@@ -199,7 +199,7 @@ class BookReaderPlugin extends Omeka_Plugin_AbstractPlugin
      */
     protected function _sortFiles($item, $mix_files_types = false)
     {
-        if ($item->fileCount() == 0) {
+        if ($item->fileCount() < 2) {
             return;
         }
 

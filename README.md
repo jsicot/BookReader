@@ -96,7 +96,7 @@ Notes
 - A batch edit is provided to sort images before other files (pdf, xml...) that
 are associated to an item (Items > check box items > edit button).
 
-* Warning *
+*Warning*
 
 PHP should be installed with the extension "exif" in order to get the size of
 images. This is the case for all major distributions and providers.

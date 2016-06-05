@@ -20,7 +20,8 @@
         <div class='inputs five columns omega'>
             <p class="explanation">
                 <?php echo __('If checked, the viewer will sort images in viewer alphabetically, by original filename.');
-                echo ' ' . __('Note that you can batch reorder files in admin/items/show page. This will avoid to reorder them each time the item is displayed.');
+                echo ' ' . __('Note that you can batch reorder files in admin/items/browse page.');
+                echo ' ' . __('This will avoid to reorder them each time the item is displayed.');
                 echo ' ' . __("In that case, don't forget to uncheck this box."); ?>
             </p>
             <?php echo $this->formCheckbox('bookreader_sorting_mode', true,

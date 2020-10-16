@@ -1,5 +1,5 @@
-<?php
-    if (!$bookreader->itemLeafsCount()) {
+<?php // For data in a spreadsheet.
+    if (empty($tableUrl)) {
         echo '<html><head></head><body>';
         echo __('This item has no viewable files.');
         echo '</body></html>';
@@ -72,14 +72,54 @@
 //
 // Copyright (c) 2008-2009 Internet Archive. Software license AGPL version 3.
 
-    // Create the BookReader object
+// Create the BookReader object via spreadsheet data instead of Omeka database.
+
+function spreadsheetLoaded(json) {
+    imagesArray = [];
+
+    json = json.substring(json.indexOf("(") + 1);
+    json = json.substring(0, json.lastIndexOf(")"));
+    json = JSON.parse(json);
+
+    parts = json["feed"]["entry"];
+
+    for (n in parts) {
+        if (parts[n]["gsx$image"] != undefined) {
+            var image =parts[n]["gsx$image"]["$t"];
+            var height = null;
+            var width = null;
+            var num = null;
+            var label = null;
+            if (parts[n]["gsx$height"] != undefined) {
+                height = parts[n]["gsx$height"]["$t"];
+            }
+            if (parts[n]["gsx$width"] != undefined) {
+                width = parts[n]["gsx$width"]["$t"];
+            }
+            if (parts[n]["gsx$num"] != undefined) {
+                num = parts[n]["gsx$num"]["$t"];
+            }
+            if (parts[n]["gsx$label"] != undefined) {
+                label = parts[n]["gsx$label"]["$t"];
+            }
+            imagesArray.push({
+                "image": image,
+                "height": height,
+                "width": width,
+                "num": num,
+                "label": label
+            });
+        }
+    }
+    var externalArray = [];
+    var htmlstring = "";
+
+    // Read-aloud and search need backend compenents and are not supported in
+    // the demo.
     br = new BookReader();
 
-    br.leafMap = <?php echo json_encode($pageIndexes); ?>;
-    br.pageNums = <?php echo json_encode($pageNumbers); ?>;
-    br.pageLabels = <?php echo json_encode($pageLabels); ?>;
-    br.pageWidths = <?php echo json_encode($imgWidths); ?>;
-    br.pageHeights = <?php echo json_encode($imgHeights); ?>;
+    br.imagesBaseURL = <?php echo json_encode($imgDir); ?>;
+    br.leafMap = [];
     br.server = <?php echo json_encode($serverFullText); ?>;
     br.bookPath = <?php echo json_encode(WEB_ROOT); ?>;
     br.bookId = <?php echo $item->id; ?>;
@@ -89,82 +129,50 @@
     ?>
     br.subPrefix = <?php echo empty($part) ? 0 : $part; ?>;
 
-    br.numLeafs = br.leafMap.length;
+    br.numLeafs = imagesArray.length;
 
     br.ui = <?php echo json_encode($ui); ?>;
     // Book title and the URL used for the book title link
-    br.bookTitle = <?php echo json_encode($title); ?>;
+    br.bookTitle = json["feed"]["title"]["$t"];
     br.bookUrl = <?php echo json_encode(record_url($item)); ?>;
     br.logoURL = <?php echo json_encode(WEB_ROOT); ?>;
     br.siteName = <?php echo json_encode(option('site_title')); ?>;
     // Override the path used to find UI images
     br.imagesBaseURL = <?php echo json_encode($imgDir); ?>;
 
-    // If there is no width, it will be the width of the verso of the current
-    // leaf, else width of first or last page.
+    // Return the width of a given page, else we assume all images are 800
+    // pixels wide.
     br.getPageWidth = function(index) {
-        var width = this.pageWidths[index];
-        if (width == undefined) {
-            if ('rl' != this.pageProgression) {
-                if (this.getPageSide(index) == 'R') {
-                    width = this.pageWidths[index + 1];
-                } else {
-                    width = this.pageWidths[index - 1];
-                }
-            } else {
-                if (this.getPageSide(index) == 'L') {
-                    width = this.pageWidths[index + 1];
-                } else {
-                    width = this.pageWidths[index - 1];
-                }
-            }
-            if (width == undefined) {
-                if (Math.min(Math.max(index, 0), this.numLeafs - 1)) {
-                    width = this.pageWidths[0];
-                } else {
-                    width = this.pageWidths[this.numLeafs - 1];
-                }
-            }
+        if ((imagesArray[index]) && (imagesArray[index].width != undefined)) {
+            return parseInt(imagesArray[index].width);
+        } else {
+            return 800;
         }
-        return width;
     }
 
+    // Return the height of a given page, else we assume all images are 1200
+    // pixels high.
     br.getPageHeight = function(index) {
-        var height = this.pageHeights[index];
-        if (height == undefined) {
-            if ('rl' != this.pageProgression) {
-                if (this.getPageSide(index) == 'R') {
-                    height = this.pageHeights[index + 1];
-                } else {
-                    height = this.pageHeights[index - 1];
-                }
-            }
-            else {
-                if (this.getPageSide(index) == 'L') {
-                    height = this.pageHeights[index + 1];
-                } else {
-                    height = this.pageHeights[index - 1];
-                }
-            }
-            if (height == undefined) {
-                if (Math.min(Math.max(index, 0), this.numLeafs - 1)) {
-                    height = this.pageHeights[0];
-                } else {
-                    height = this.pageHeights[this.numLeafs - 1];
-                }
-            }
+        if ((imagesArray[index]) && (imagesArray[index].height != undefined)) {
+            return parseInt(imagesArray[index].height)
+        } else {
+            return 1200;
         }
-        return height;
     }
 
+    // For a given "accessible page index" return the page number in the book.
+    //
+    // For example, index 5 might correspond to "Page 1" if there is front
+    // matter such as a title page and table of contents.
+    //
     // TODO Bug if page num starts with a "n" (rarely used as page number).
     // This is used only to build the url to a specific page.
     br.getPageNum = function(index) {
-        var pageNum = this.pageNums[index];
-        if (pageNum && pageNum != 'null') {
+        var pageNum = imagesArray[index].num;
+        if (pageNum && pageNum != undefined) {
             return pageNum;
         }
-        var pageLabel = this.pageLabels[index];
+        var pageLabel = imagesArray[index].label;
         if (pageLabel) {
             return pageLabel;
         }
@@ -174,11 +182,11 @@
     }
 
     br.getPageLabel = function(index) {
-        var pageLabel = this.pageLabels[index];
+        var pageLabel = imagesArray[index].label;
         if (pageLabel) {
             return pageLabel;
         }
-        var pageNum = this.pageNums[index];
+        var pageNum = imagesArray[index].num;
         if (pageNum) {
             return <?php echo json_encode(__('Page')); ?> + ' ' + pageNum;
         }
@@ -192,14 +200,14 @@
     // Practically, it does a simple check of the page hash.
     br.getPageNumFromHash = function(pageHash) {
         // Check if this is a page number.
-        for (var index = 0; index < this.pageNums.length; index++) {
-            if (this.pageNums[index] == pageHash) {
+        for (var index = 0; index < br.numLeafs; index++) {
+            if (imagesArray[index].num == pageHash) {
                 return pageHash;
             }
         }
         // Check if this is a page label.
-        for (var index = 0; index < this.pageLabels.length; index++) {
-            if (this.pageLabels[index] == pageHash) {
+        for (var index = 0; index < br.numLeafs; index++) {
+            if (imagesArray[index].label == pageHash) {
                 return pageHash;
             }
         }
@@ -242,12 +250,12 @@
     br.uniquifyPageNums = function() {
         var seen = {};
 
-        for (var i = br.pageNums.length - 1; i--; i >= 0) {
-            var pageNum = br.pageNums[i];
+        for (var i = br.numLeafs - 1; i--; i >= 0) {
+            var pageNum = imagesArray[i].num;
             if ( !seen[pageNum] ) {
                 seen[pageNum] = true;
             } else {
-                br.pageNums[i] = null;
+                imagesArray[i].num = null;
             }
         }
     }
@@ -264,22 +272,24 @@
         // reduce and rotate are ignored in this simple implementation, but we
         // could e.g. look at reduce and load images from a different directory
         // or pass the information to an image server
-        var leafStr = '0000';
-        var imgStr = (index+1).toString();
-        var re = new RegExp("0{"+imgStr.length+"}$");
-        var url = '<?php echo WEB_ROOT; ?>/book-reader/index/image-proxy?image='+leafStr.replace(re, imgStr)+'&id=<?php echo $item->id; ?><?php echo ($part <= 1) ? '' : '&part=' . $part; ?>&scale='+reduce;
+        // var leafStr = '0000';
+        // var imgStr = (index+1).toString();
+        // var re = new RegExp("0{"+imgStr.length+"}$");
+        // var url =
+        // 'http://www.archive.org/download/BookReader/img/page'+leafStr.replace(re,
+        // imgStr) + '.jpg';
+
+        url = imagesArray[index].image;
+
         return url;
     }
 
     // Return which side, left or right, that a given page should be displayed
     // on.
     br.getPageSide = function(index) {
-        var leafNum = this.leafMap[index];
-        if (0 == (leafNum & 0x1)) {
-            // Even leaf number is a right page (zero-based arrays).
+        if (0 == (index & 0x1)) {
             return 'R';
         } else {
-            // Odd leaf number is a left page.
             return 'L';
         }
     }
@@ -288,44 +298,26 @@
     // spread that contains the given index. The return values may be
     // null if there is no facing page or the index is invalid.
     br.getSpreadIndices = function(pindex) {
-        var spreadIndices = [null, null];
-        if (pindex < 0) pindex = 0;
-        if (pindex >= this.numLeafs) pindex = this.numLeafs - 1;
-        if ('rl' != this.pageProgression) {
+        var spreadIndices = [ null, null ];
+        if ('rl' == this.pageProgression) {
+            // Right to Left
+            if (this.getPageSide(pindex) == 'R') {
+                spreadIndices[1] = pindex;
+                spreadIndices[0] = pindex + 1;
+            } else {
+                // Given index was LHS
+                spreadIndices[0] = pindex;
+                spreadIndices[1] = pindex - 1;
+            }
+        } else {
             // Left to right
             if (this.getPageSide(pindex) == 'L') {
                 spreadIndices[0] = pindex;
-                if (pindex + 1 >= this.numLeafs) {
-                    spreadIndices[1] = null;
-                } else {
-                    spreadIndices[1] = pindex + 1;
-                }
+                spreadIndices[1] = pindex + 1;
             } else {
-                // Given index was right hand side.
-                if (pindex - 1 < 0) {
-                    spreadIndices[0] = null;
-                } else {
-                    spreadIndices[0] = pindex - 1;
-                }
+                // Given index was RHS
                 spreadIndices[1] = pindex;
-            }
-        } else {
-            // Right to Left
-            if (this.getPageSide(pindex) == 'R') {
-                if (pindex + 1 >= this.numLeafs) {
-                    spreadIndices[0] = null;
-                } else {
-                    spreadIndices[0] = pindex + 1;
-                }
-                spreadIndices[1] = pindex;
-            } else {
-                // Given index was left hand side.
-                spreadIndices[0] = pindex;
-                if (pindex - 1 < 0) {
-                    spreadIndices[1] = null;
-                } else {
-                    spreadIndices[1] = pindex - 1;
-                }
+                spreadIndices[0] = pindex - 1;
             }
         }
         return spreadIndices;
@@ -382,7 +374,7 @@
         // We could generate a URL hash fragment here but for now we just leave at defaults
         //var url = 'http://' + window.location.host + '/stream/'+this.bookId;
         var bookId = <?php echo $item->id; ?>;
-        var url = '<?php echo absolute_url(array('id' => $item->id), 'bookreader_viewer'); ?>';
+        var url = '<?php echo absolute_url(array('id' => $item->id), 'bookreader_table'); ?>';
         // if (this.subPrefix != this.bookId) { // Only include if needed
         //    url += '/' + this.subPrefix;
         // }
@@ -484,6 +476,7 @@
 
     $('#BRtoolbar').find('.read').hide();
     $('#BRreturn').html($('#BRreturn').text());
+
 <?php
         // Si jamais la recherche n'est pas disponible (pas de fichier XML), on
         // va masquer les éléments permettant de la lancer (SMA 201210)
@@ -492,6 +485,26 @@
     $('#btnSrch').hide();
         <?php endif;
 ?>
+    return;
+}
+
+function loadData() {
+    var dataurl = <?php echo json_encode($tableUrl); ?>;
+    $.ajax({
+        url: dataurl,
+        dataType: 'jsonP',
+        jsonpCallback: "spreadsheetLoaded",
+        success: function(data) {
+            spreadsheetLoaded(data);
+        }
+    });
+}
+
+$(document).ready(function() {
+    // key = window.location.search.split("key=")[0];
+    // console.log(window.location + "; " + key);
+    loadData();
+});
     </script>
 
 <?php

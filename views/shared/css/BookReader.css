@@ -119,14 +119,14 @@ a {
 
 #BRbookcover {
     /* border: 1px solid rgb(68, 25, 17); */
-    /* background-color: #663929; */
-    position: absolute;
-    background-image: url(../images/back_pages.png);
+    /*background-color: #663929;*/
+    background-image: url(../images/back_cover.png);
     -moz-box-shadow: 1px 0 10px #111;
     -webkit-box-shadow: 1px 0 10px #111;
     box-shadow: 1px 0 10px #111;
     /* -moz-border-radius: 6px; */
     /* -webkit-border-radius: 6px; */
+    position: absolute;
 }
 
 .BRpageimage {
@@ -281,7 +281,7 @@ a.logo {
     width: 40px;
     height: 40px;
     margin: 0 5px;
-    background: transparent url(../images/icon_home.png) no-repeat 0 0;
+    background: url(../images/icon_home.png) no-repeat 0 0 transparent;
 }
 a.popOff {
     position: absolute;
@@ -764,11 +764,12 @@ div#BRslider {
 /* XXXmang verify correct use of handle class */
 #BRpager .ui-slider-handle {
     position: absolute;
-    width: 23px;
+    min-width: 23px;
     height: 27px;
     top: 13px;
     margin-left: -12px; /* Center icon */
-    background: url(../images/slider.png);
+    background: url("../images/slider.png") no-repeat scroll 0 0 rgba(0, 0, 0, 0);
+    white-space: nowrap;
     z-index: 103;
 }
 #BRpager a {
@@ -822,7 +823,7 @@ div#pagenum {
     line-height: 19px;
     font-weight: 700;
     padding: 0 5px;
-    width: 80px;
+    min-width: 80px;
     text-align: right;
     background-color: #000;
     font-family: "Lucida Grande", "Arial", sans-serif;
@@ -1067,6 +1068,41 @@ div#BRzoombtn {
 }
 #BRnavCntlTop.BRup,#BRnavCntlTop.BRdn {
     background-position: 8px 4px;
+}
+
+/* Hide print and embed functionality */
+#BRtoolbar .embed,
+.print {
+    display: none;
+}
+#BRtoolbar {
+    -webkit-box-shadow:none !important;
+}
+.BRfloatHead {
+    color: #000;
+}
+#BRembedreturn {
+    /* Center text */
+    font-size: 14px;
+    line-height: 40px;
+    height: 40px;
+    font-family: "Lucida Grande","Arial",sans-serif;
+}
+#BRembedreturn a {
+    font-size: 14px;
+    color: #000;
+    text-decoration: none !important
+}
+#BRtoolbar,
+#ToCmenu,
+#BRnav,
+#ToCbutton,
+#BRnavCntlBtm,
+.BRfloatHead,
+#BRfiller,
+#BRzoomer button,
+.BRnavCntl {
+    background-color: #e2dcc5 !important;
 }
 
 /* Table of Contents */

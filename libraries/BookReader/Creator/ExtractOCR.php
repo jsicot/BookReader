@@ -160,22 +160,26 @@ class BookReader_Creator_ExtractOCR extends BookReader_Creator
         $iResult = 0;
         $list = array();
         set_loop_records('files', $this->_item->getFiles());
-        foreach (loop('files') as $file) {
-            if ($file->mime_type == 'application/xml') {
-                $xml_file = $file;
-            }
-            // Only these image extensions can be read by current browsers.
-            elseif ($file->hasThumbnail() && preg_match('/\.(jpg|jpeg|png|gif)$/i', $file->filename)) {
-                $list[] = $file;
-            }
-        }
+
+		foreach (loop('files') as $file) {
+			//if ($file->mime_type == 'application/xml') {
+			if (strtolower($file->getExtension()) == 'xml') {
+				$xml_file = $file;
+			}
+			elseif ($file->hasThumbnail()) {
+				if (preg_match('/\.(jpg|jpeg|png|gif)$/i', $file->filename)) {
+					 $list[] = $file;
+				}
+			}
+		}
 
         $widths = array();
         $heights = array();
         foreach ($list as $file) {
-            $imageSize = $this->getImageSize($file, $imageType);
-            $widths[] = $imageSize['width'];
-            $heights[] = $imageSize['height'];
+	        $image = $file->getWebPath('fullsize');
+            list($width, $height, $type, $attr) = getimagesize($image);
+            $widths[] = $width;
+            $heights[] = $height;
         }
 
         if ($xml_file) {
@@ -209,6 +213,7 @@ class BookReader_Creator_ExtractOCR extends BookReader_Creator
                 }
 
                 foreach( $xml->page as $page) {
+	             
                     foreach($page->attributes() as $a => $b) {
                         if ($a == 'height') $page_height = (string)$b ;
                         if ($a == 'width')  $page_width = (string)$b ;
@@ -234,7 +239,7 @@ class BookReader_Creator_ExtractOCR extends BookReader_Creator
                                     $word_start_char = stripos($zone_text, $q);
                                     $word_width_char = strlen($q);
 
-                                    $word_left = $zone_left + ( ($word_start_char * $zone_width) / $zone_width_char);
+                                    $word_left = $zone_left + ( (($word_start_char -1) * $zone_width) / $zone_width_char);
                                     $word_right = $word_left + ( ( ( $word_width_char + 2) * $zone_width) / $zone_width_char );
 
                                     $word_left = round($word_left * $widths[$page_number - 1] / $page_width);
@@ -248,7 +253,7 @@ class BookReader_Creator_ExtractOCR extends BookReader_Creator
                                         'l' => $word_left,
                                         'b' => $word_bottom,
                                         't' => $word_top,
-                                        'page' => $page_number,
+                                        'page' => $page_number-1,
                                     );
 
                                     $zone_text = str_ireplace($q, '{{{' . $q . '}}}', $zone_text);
@@ -259,7 +264,7 @@ class BookReader_Creator_ExtractOCR extends BookReader_Creator
                                         'r' => $zone_right,
                                         'b' => $zone_bottom,
                                         'l' => $zone_left,
-                                        'page' => $page_number,
+                                        'page' => $page_number-1,
                                         'boxes' => $boxes,
                                     );
 
